@@ -1,0 +1,4696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MLK: Ultimate Legacy of Justice - Complete Interactive Civil Rights Journey</title>
+  <meta name="description" content="The most comprehensive educational RPG exploring Martin Luther King Jr.'s journey with adaptive learning, accessibility features, mini-games, and historical accuracy">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiTUxLOiBVbHRpbWF0ZSBMZWdhY3kgb2YgSnVzdGljZSIsInNob3J0X25hbWUiOiJNTEsgR2FtZSIsImRlc2NyaXB0aW9uIjoiQ29tcGxldGUgSW50ZXJhY3RpdmUgQ2l2aWwgUmlnaHRzIEVkdWNhdGlvbiIsInN0YXJ0X3VybCI6Ii8iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjNGExYTFhIiwidGhlbWVfY29sb3IiOiIjNGExYTFhIiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCwlM0NzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB3aWR0aD0nMTkyJyBoZWlnaHQ9JzE5MicgZmlsbD0nJTI0ZmZmZmZmJyUzRSUzQ3JlY3Qgd2lkdGg9JzE5MicgaGVpZ2h0PScxOTInIGZpbGw9JyUyMzRhMWExYScvJTNFJTNDdGV4dCB4PScxMCcgeT0nMTAwJyBmb250LXNpemU9JzIwJyBmaWxsPSclMjNmZmZmZmYnJTNFTUxLJTNDL3RleHQlM0UlM0Mvc3ZnJTNFIiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
+  
+  <!-- External Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/4.10.0/tf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      /* Enhanced Color Palette with WCAG AAA Contrast (7:1+) */
+      --primary-brown: #5D2E0A;
+      --warm-orange: #B8510A;
+      --hope-blue: #1E4A6B;
+      --progress-green: #1B5E20;
+      --courage-red: #B71C1C;
+      --wisdom-purple: #4A148C;
+      --background-cream: #FFFEF7;
+      --text-dark: #1A1A1A;
+      --text-light: #FFFFFF;
+      --secondary-text: #424242;
+      --border-color: #757575;
+      --error-red: #D32F2F;
+      --success-green: #388E3C;
+      --warning-orange: #F57C00;
+      --info-blue: #1976D2;
+      
+      /* High Contrast Mode (14:1 ratio) */
+      --accessible-dark: #000000;
+      --accessible-light: #FFFFFF;
+      --accessible-accent: #FF6600;
+      
+      /* UI Variables */
+      --border-radius: 8px;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+      --font-size-base: 16px;
+      --spacing-unit: 8px;
+    }
+
+    /* High Contrast Theme */
+    .theme-high-contrast {
+      --primary-brown: var(--accessible-dark);
+      --warm-orange: var(--accessible-accent);
+      --hope-blue: var(--accessible-dark);
+      --progress-green: var(--accessible-dark);
+      --background-cream: var(--accessible-light);
+      --text-dark: var(--accessible-dark);
+      --text-light: var(--accessible-light);
+      color-scheme: light dark;
+      forced-color-adjust: none;
+    }
+
+    .theme-high-contrast * {
+      border: 2px solid transparent !important;
+    }
+
+    .theme-high-contrast *:focus {
+      border: 3px solid var(--accessible-accent) !important;
+      outline: none !important;
+    }
+
+    /* Cognitive Support Modes */
+    .cognitive-mode-simple {
+      --complexity-threshold: 3;
+    }
+
+    .cognitive-mode-standard {
+      --complexity-threshold: 8;
+    }
+
+    .cognitive-mode-advanced {
+      --complexity-threshold: 15;
+    }
+
+    [data-complexity-level] {
+      display: block;
+    }
+
+    .cognitive-mode-simple [data-complexity-level="4"],
+    .cognitive-mode-simple [data-complexity-level="5"],
+    .cognitive-mode-simple [data-complexity-level="6"],
+    .cognitive-mode-simple [data-complexity-level="7"],
+    .cognitive-mode-simple [data-complexity-level="8"],
+    .cognitive-mode-simple [data-complexity-level="9"],
+    .cognitive-mode-simple [data-complexity-level="10"] {
+      display: none;
+    }
+
+    /* Base Styles with Enhanced Readability */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Source Sans Pro', Arial, sans-serif;
+      background: linear-gradient(135deg, var(--background-cream) 0%, #F5F1E8 100%);
+      color: var(--text-dark);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-size: var(--font-size-base);
+    }
+
+    /* Skip Navigation */
+    .skip-nav {
+      position: absolute;
+      top: -40px;
+      left: 6px;
+      background: var(--primary-brown);
+      color: var(--text-light);
+      padding: calc(var(--spacing-unit) * 2);
+      text-decoration: none;
+      border-radius: var(--border-radius);
+      z-index: 1000;
+      transition: var(--transition);
+      font-weight: 600;
+    }
+
+    .skip-nav:focus {
+      top: 6px;
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, var(--primary-brown) 0%, var(--warm-orange) 100%);
+      color: var(--text-light);
+      padding: calc(var(--spacing-unit) * 2);
+      text-align: center;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    h1 {
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-weight: 700;
+      margin-bottom: calc(var(--spacing-unit) * 1);
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+      color: var(--text-light);
+    }
+
+    .subtitle {
+      font-size: clamp(0.9rem, 2vw, 1.1rem);
+      opacity: 0.95;
+      font-weight: 400;
+      color: var(--text-light);
+    }
+
+    /* Enhanced Stats Panel */
+    .stats-panel {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: calc(var(--spacing-unit) * 2);
+      background: var(--hope-blue);
+      padding: calc(var(--spacing-unit) * 2);
+      margin: calc(var(--spacing-unit) * 2) 0;
+      border-radius: var(--border-radius);
+      color: var(--text-light);
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--spacing-unit) * 1);
+      position: relative;
+    }
+
+    .stat-label {
+      font-weight: 600;
+      min-width: 80px;
+      color: var(--text-light);
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--success-green), #4CAF50);
+      border-radius: 6px;
+      transition: width 0.5s ease;
+      position: relative;
+    }
+
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* Main Layout */
+    .game-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: calc(var(--spacing-unit) * 2);
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: calc(var(--spacing-unit) * 4);
+    }
+
+    @media (min-width: 768px) {
+      .game-container {
+        grid-template-columns: 2fr 1fr;
+      }
+    }
+
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--spacing-unit) * 4);
+    }
+
+    /* Scene Cards with Enhanced Readability */
+    .scene-card {
+      background: var(--background-cream);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: var(--transition);
+    }
+
+    .scene-card.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .scene-header {
+      background: var(--warm-orange);
+      color: var(--text-light);
+      padding: calc(var(--spacing-unit) * 3);
+      text-align: center;
+    }
+
+    .scene-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: calc(var(--spacing-unit) * 1);
+      color: var(--text-light);
+    }
+
+    .scene-location {
+      font-size: 0.9rem;
+      opacity: 0.95;
+      color: var(--text-light);
+    }
+
+    .scene-content {
+      padding: calc(var(--spacing-unit) * 4);
+      background: var(--background-cream);
+    }
+
+    /* Character Portrait */
+    .character-portrait {
+      text-align: center;
+      margin-bottom: calc(var(--spacing-unit) * 4);
+    }
+
+    .character-portrait img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 4px solid var(--hope-blue);
+      box-shadow: var(--shadow);
+      object-fit: cover;
+    }
+
+    .character-name {
+      font-weight: 600;
+      color: var(--primary-brown);
+      margin-top: calc(var(--spacing-unit) * 2);
+    }
+
+    /* White text for specific character names */
+    .character-name[data-name*="Ralph Abernathy"],
+    .character-name[data-name*="Fred Shuttlesworth"],
+    .character-name[data-name*="John Lewis"],
+    .character-name[data-name*="Hosea Williams"],
+    .character-name[data-name*="Coretta Scott King"],
+    .character-name[data-name*="Rosa Parks"] {
+      color: var(--text-light);
+      background: var(--primary-brown);
+      padding: calc(var(--spacing-unit) * 1);
+      border-radius: var(--border-radius);
+    }
+
+    /* Additional Images Gallery for MLK Scene */
+    .additional-images {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: calc(var(--spacing-unit) * 2);
+      margin: calc(var(--spacing-unit) * 3) 0;
+      padding: calc(var(--spacing-unit) * 2);
+      background: #F8F9FA;
+      border-radius: var(--border-radius);
+      border: 2px solid var(--hope-blue);
+    }
+
+    .additional-images img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: var(--border-radius);
+      border: 2px solid var(--primary-brown);
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+
+    .additional-images img:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+
+    .gallery-title {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--primary-brown);
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: calc(var(--spacing-unit) * 2);
+    }
+
+    /* Dialogue with Enhanced Contrast */
+    .dialogue {
+      background: var(--background-cream);
+      border: 2px solid var(--success-green);
+      border-left: 6px solid var(--success-green);
+      padding: calc(var(--spacing-unit) * 3);
+      margin: calc(var(--spacing-unit) * 3) 0;
+      border-radius: var(--border-radius);
+      font-style: italic;
+      position: relative;
+      font-family: 'Crimson Text', serif;
+      color: var(--text-dark);
+    }
+
+    .dialogue::before {
+      content: '"';
+      font-size: 3rem;
+      color: var(--success-green);
+      position: absolute;
+      left: calc(var(--spacing-unit) * 1);
+      top: calc(var(--spacing-unit) * -1);
+      opacity: 0.7;
+    }
+
+    /* Choices with Enhanced Accessibility */
+    .choices-container {
+      margin: calc(var(--spacing-unit) * 4) 0;
+    }
+
+    .choice-btn {
+      display: block;
+      width: 100%;
+      padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 3);
+      margin: calc(var(--spacing-unit) * 1.5) 0;
+      background: var(--hope-blue);
+      color: var(--text-light);
+      border: 2px solid var(--hope-blue);
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: left;
+      min-height: 44px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .choice-btn:hover:not(:disabled) {
+      background: var(--primary-brown);
+      border-color: var(--primary-brown);
+      color: var(--text-light);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    }
+
+    .choice-btn:focus {
+      outline: 3px solid var(--warning-orange);
+      outline-offset: 2px;
+    }
+
+    .choice-btn:disabled {
+      background: #9E9E9E;
+      color: var(--text-light);
+      border-color: #9E9E9E;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .choice-btn.historical {
+      border-left: 4px solid var(--success-green);
+    }
+
+    .choice-btn.nonviolent {
+      border-right: 4px solid var(--info-blue);
+    }
+
+    /* Information Panel with Enhanced Readability */
+    .info-panel {
+      background: var(--background-cream);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      padding: calc(var(--spacing-unit) * 3);
+      height: fit-content;
+      position: sticky;
+      top: 120px;
+      color: var(--text-dark);
+    }
+
+    .info-section {
+      margin-bottom: calc(var(--spacing-unit) * 4);
+    }
+
+    .info-section h3 {
+      color: var(--primary-brown);
+      font-weight: 700;
+      margin-bottom: calc(var(--spacing-unit) * 2);
+      border-bottom: 2px solid var(--warm-orange);
+      padding-bottom: calc(var(--spacing-unit) * 1);
+    }
+
+    .inventory-item, .achievement-item {
+      background: #F8F9FA;
+      color: var(--text-dark);
+      padding: calc(var(--spacing-unit) * 2);
+      margin: calc(var(--spacing-unit) * 1) 0;
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--success-green);
+      border-radius: var(--border-radius);
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .achievement-item {
+      border-left-color: var(--warning-orange);
+    }
+
+    /* Enhanced Display Sections */
+    .quote-display {
+      background: var(--primary-brown);
+      color: var(--text-light);
+      padding: calc(var(--spacing-unit) * 4);
+      border-radius: var(--border-radius);
+      margin: calc(var(--spacing-unit) * 4) 0;
+      text-align: center;
+      font-style: italic;
+      font-size: 1.1rem;
+      opacity: 0;
+      transition: var(--transition);
+      border: 2px solid var(--warm-orange);
+    }
+
+    .quote-display.active {
+      opacity: 1;
+    }
+
+    .historical-context {
+      background: var(--hope-blue);
+      color: var(--text-light);
+      padding: calc(var(--spacing-unit) * 3);
+      border-radius: var(--border-radius);
+      margin: calc(var(--spacing-unit) * 3) 0;
+      opacity: 0;
+      transition: var(--transition);
+      border: 2px solid var(--info-blue);
+    }
+
+    .historical-context.active {
+      opacity: 1;
+    }
+
+    .historical-context h4 {
+      margin-bottom: calc(var(--spacing-unit) * 2);
+      font-weight: 700;
+      color: var(--text-light);
+    }
+
+    .diary-entry {
+      background: linear-gradient(135deg, #FFF9C4, #FFECB3);
+      color: var(--text-dark);
+      border: 2px solid var(--warning-orange);
+      padding: calc(var(--spacing-unit) * 3);
+      border-radius: var(--border-radius);
+      margin: calc(var(--spacing-unit) * 3) 0;
+      font-family: 'Georgia', serif;
+      opacity: 0;
+      transition: var(--transition);
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .diary-entry.active {
+      opacity: 1;
+    }
+
+    .diary-entry::before {
+      content: 'Personal Reflection';
+      display: block;
+      font-weight: 700;
+      color: var(--primary-brown);
+      margin-bottom: calc(var(--spacing-unit) * 2);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Enhanced Controls */
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: calc(var(--spacing-unit) * 2);
+      margin: calc(var(--spacing-unit) * 4) 0;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 4);
+      border: 2px solid transparent;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      min-height: 44px;
+      min-width: 120px;
+    }
+
+    .btn-primary {
+      background: var(--success-green);
+      color: var(--text-light);
+      border-color: var(--success-green);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #2E7D32;
+      border-color: #2E7D32;
+    }
+
+    .btn-secondary {
+      background: var(--warm-orange);
+      color: var(--text-light);
+      border-color: var(--warm-orange);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #E65100;
+      border-color: #E65100;
+    }
+
+    .btn-danger {
+      background: var(--error-red);
+      color: var(--text-light);
+      border-color: var(--error-red);
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background: #C62828;
+      border-color: #C62828;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    }
+
+    .btn:focus {
+      outline: 3px solid var(--warning-orange);
+      outline-offset: 2px;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Enhanced Mini-Games with Perfect Contrast */
+    .mini-game {
+      background: var(--background-cream);
+      border: 2px solid var(--hope-blue);
+      border-radius: var(--border-radius);
+      padding: calc(var(--spacing-unit) * 4);
+      margin: calc(var(--spacing-unit) * 4) 0;
+      display: none;
+      text-align: center;
+    }
+
+    .mini-game.active {
+      display: block;
+      animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .mini-game-title {
+      color: var(--primary-brown);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: calc(var(--spacing-unit) * 2);
+    }
+
+    .mini-game-instructions {
+      color: var(--text-light);
+      font-size: 1rem;
+      margin-bottom: calc(var(--spacing-unit) * 3);
+      padding: calc(var(--spacing-unit) * 2);
+      background: var(--text-dark);
+      border: 2px solid var(--warning-orange);
+      border-radius: var(--border-radius);
+      font-weight: 600;
+    }
+
+    /* Word Search Game - PERFECT CONTRAST */
+    .word-search-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 2px;
+      max-width: 500px;
+      margin: calc(var(--spacing-unit) * 2) auto;
+      padding: calc(var(--spacing-unit) * 2);
+      background: #E0E0E0;
+      border-radius: var(--border-radius);
+    }
+
+    .word-search-cell {
+      width: 35px;
+      height: 35px;
+      border: 2px solid var(--hope-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--background-cream);
+      transition: var(--transition);
+      color: var(--text-dark);
+      font-size: 16px;
+      border-radius: 4px;
+    }
+
+    .word-search-cell:hover {
+      background: var(--warm-orange);
+      color: var(--text-light);
+      transform: scale(1.1);
+    }
+
+    .word-search-cell.found {
+      background: var(--success-green);
+      color: var(--text-light);
+      animation: foundPulse 0.5s ease-out;
+    }
+
+    @keyframes foundPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    .word-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: calc(var(--spacing-unit) * 1);
+      margin: calc(var(--spacing-unit) * 2) 0;
+    }
+
+    .word-item {
+      padding: calc(var(--spacing-unit) * 1);
+      background: var(--background-cream);
+      border: 2px solid var(--hope-blue);
+      border-radius: var(--border-radius);
+      transition: var(--transition);
+      color: var(--text-dark);
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .word-item.found {
+      background: var(--success-green);
+      color: var(--text-light);
+      text-decoration: line-through;
+    }
+
+    /* Matching Game - PERFECT CONTRAST */
+    .matching-game {
+      display: grid;
+      grid-template-columns: 1fr 50px 1fr;
+      gap: calc(var(--spacing-unit) * 2);
+      max-width: 600px;
+      margin: calc(var(--spacing-unit) * 2) auto;
+    }
+
+    .matching-column {
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--spacing-unit) * 1);
+    }
+
+    .matching-item {
+      padding: calc(var(--spacing-unit) * 2);
+      background: var(--background-cream);
+      border: 2px solid var(--hope-blue);
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: center;
+      color: var(--text-dark);
+      font-weight: 700;
+      font-size: 16px;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .matching-item:hover {
+      background: var(--warm-orange);
+      color: var(--text-light);
+    }
+
+    .matching-item.selected {
+      background: var(--hope-blue);
+      color: var(--text-light);
+      border: 3px solid var(--warning-orange);
+    }
+
+    .matching-item.matched {
+      background: var(--success-green);
+      color: var(--text-light);
+      cursor: default;
+    }
+
+    .matching-connector {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: var(--success-green);
+    }
+
+    /* Timeline Game - PERFECT CONTRAST */
+    .timeline-game {
+      max-width: 800px;
+      margin: calc(var(--spacing-unit) * 2) auto;
+    }
+
+    .timeline-events {
+      display: flex;
+      flex-wrap: wrap;
+      gap: calc(var(--spacing-unit) * 2);
+      justify-content: center;
+      margin-bottom: calc(var(--spacing-unit) * 4);
+    }
+
+    .timeline-event {
+      padding: calc(var(--spacing-unit) * 2);
+      background: #FFF9C4;
+      border: 2px solid var(--hope-blue);
+      border-radius: var(--border-radius);
+      cursor: grab;
+      transition: var(--transition);
+      min-width: 200px;
+      text-align: center;
+      color: var(--text-dark);
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .timeline-event:hover {
+      background: var(--warm-orange);
+      color: var(--text-light);
+    }
+
+    .timeline-event.dragging {
+      opacity: 0.5;
+      cursor: grabbing;
+    }
+
+    .timeline-dropzone {
+      min-height: 80px;
+      border: 3px dashed var(--hope-blue);
+      border-radius: var(--border-radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: calc(var(--spacing-unit) * 2) 0;
+      transition: var(--transition);
+      color: var(--text-dark);
+      font-weight: 700;
+      background: #F5F5F5;
+      font-size: 16px;
+    }
+
+    .timeline-dropzone.drag-over {
+      border-color: var(--success-green);
+      background: rgba(27, 94, 32, 0.1);
+    }
+
+    .timeline-dropzone.filled {
+      border-color: var(--success-green);
+      background: var(--success-green);
+      color: var(--text-light);
+    }
+
+    /* Quiz Game - PERFECT CONTRAST */
+    .quiz-question {
+      background: var(--background-cream);
+      padding: calc(var(--spacing-unit) * 4);
+      border-radius: var(--border-radius);
+      margin: calc(var(--spacing-unit) * 2) 0;
+      border: 2px solid var(--hope-blue);
+    }
+
+    .quiz-question h4 {
+      color: var(--primary-brown);
+      margin-bottom: calc(var(--spacing-unit) * 2);
+      font-size: 1.2rem;
+    }
+
+    .quiz-question p {
+      color: var(--text-dark);
+      font-size: 1.1rem;
+      margin-bottom: calc(var(--spacing-unit) * 2);
+    }
+
+    .quiz-options {
+      display: grid;
+      gap: calc(var(--spacing-unit) * 1);
+      margin: calc(var(--spacing-unit) * 2) 0;
+    }
+
+    .quiz-option {
+      padding: calc(var(--spacing-unit) * 2);
+      background: var(--background-cream);
+      border: 2px solid var(--hope-blue);
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: var(--transition);
+      color: var(--text-dark);
+      font-weight: 600;
+      text-align: left;
+      font-size: 16px;
+    }
+
+    .quiz-option:hover {
+      background: var(--warm-orange);
+      color: var(--text-light);
+    }
+
+    .quiz-option.correct {
+      background: var(--success-green);
+      color: var(--text-light);
+      border-color: var(--success-green);
+    }
+
+    .quiz-option.incorrect {
+      background: var(--error-red);
+      color: var(--text-light);
+      border-color: var(--error-red);
+    }
+
+    /* Game Feedback */
+    .game-feedback {
+      margin-top: calc(var(--spacing-unit) * 4);
+      padding: calc(var(--spacing-unit) * 2);
+      border-radius: var(--border-radius);
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .game-feedback.success {
+      background: var(--success-green);
+      color: var(--text-light);
+    }
+
+    .game-feedback.partial {
+      background: var(--warning-orange);
+      color: var(--text-light);
+    }
+
+    .game-feedback.failure {
+      background: var(--error-red);
+      color: var(--text-light);
+    }
+
+    .game-controls {
+      display: flex;
+      justify-content: center;
+      gap: calc(var(--spacing-unit) * 2);
+      margin-top: calc(var(--spacing-unit) * 4);
+      flex-wrap: wrap;
+    }
+
+    .game-btn {
+      padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 3);
+      border: 2px solid transparent;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-weight: 600;
+      transition: var(--transition);
+      min-height: 44px;
+      min-width: 120px;
+    }
+
+    .game-btn.primary {
+      background: var(--hope-blue);
+      color: var(--text-light);
+      border-color: var(--hope-blue);
+    }
+
+    .game-btn.success {
+      background: var(--success-green);
+      color: var(--text-light);
+      border-color: var(--success-green);
+    }
+
+    .game-btn.secondary {
+      background: var(--warm-orange);
+      color: var(--text-light);
+      border-color: var(--warm-orange);
+    }
+
+    .game-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .game-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Accessibility Controls */
+    .accessibility-controls {
+      position: fixed;
+      top: 100px;
+      right: calc(var(--spacing-unit) * 2);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--spacing-unit) * 1);
+    }
+
+    .accessibility-btn {
+      width: 44px;
+      height: 44px;
+      border: 2px solid var(--primary-brown);
+      border-radius: 50%;
+      background: var(--primary-brown);
+      color: var(--text-light);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: var(--transition);
+      font-weight: 600;
+    }
+
+    .accessibility-btn:hover {
+      background: var(--warm-orange);
+      border-color: var(--warm-orange);
+    }
+
+    .accessibility-btn:focus {
+      outline: 3px solid var(--warning-orange);
+      outline-offset: 2px;
+    }
+
+    /* Enhanced Features Panels */
+    .skill-tree-container, .bus-boycott-sim, .analytics-dashboard, 
+    .teacher-dashboard, .collaboration-panel, .references-section {
+      background: var(--background-cream);
+      border: 2px solid var(--hope-blue);
+      border-radius: var(--border-radius);
+      padding: calc(var(--spacing-unit) * 4);
+      margin: calc(var(--spacing-unit) * 4) 0;
+      box-shadow: var(--shadow);
+      display: none;
+    }
+
+    .skill-tree-container.active, .bus-boycott-sim.active, .analytics-dashboard.active,
+    .teacher-dashboard.active, .collaboration-panel.active, .references-section.active {
+      display: block;
+    }
+
+    .skill-tree-container h2, .bus-boycott-sim h2, .analytics-dashboard h2,
+    .teacher-dashboard h2, .collaboration-panel h2, .references-section h2 {
+      color: var(--primary-brown);
+      text-align: center;
+      margin-bottom: calc(var(--spacing-unit) * 4);
+      font-size: 1.8rem;
+    }
+
+    .skill-tree {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: calc(var(--spacing-unit) * 3);
+    }
+
+    .skill-category {
+      background: #F8F9FA;
+      border: 2px solid rgba(30, 74, 107, 0.2);
+      border-radius: var(--border-radius);
+      padding: calc(var(--spacing-unit) * 3);
+    }
+
+    .skill-category h3 {
+      color: var(--hope-blue);
+      margin-bottom: calc(var(--spacing-unit) * 2);
+      text-align: center;
+    }
+
+    .skill-node {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 72px;
+      margin-bottom: calc(var(--spacing-unit) * 2);
+      border-radius: var(--border-radius);
+      background: #ECEFF1;
+      color: var(--secondary-text);
+      border: 2px dashed var(--border-color);
+      transition: var(--transition);
+      font-size: 1.8rem;
+    }
+
+    .skill-node::after {
+      content: attr(data-label);
+      position: absolute;
+      left: 50%;
+      bottom: 8px;
+      transform: translateX(-50%);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .skill-node.locked {
+      opacity: 0.65;
+    }
+
+    .skill-node.unlocked {
+      background: linear-gradient(135deg, rgba(30, 74, 107, 0.12), rgba(184, 81, 10, 0.18));
+      border: 2px solid var(--hope-blue);
+      color: var(--hope-blue);
+      box-shadow: 0 8px 18px rgba(30, 74, 107, 0.14);
+      opacity: 1;
+    }
+
+    .skill-node.mastered {
+      background: linear-gradient(135deg, rgba(27, 94, 32, 0.15), rgba(76, 175, 80, 0.28));
+      border-color: var(--success-green);
+      color: var(--success-green);
+    }
+
+    .skill-node .skill-level {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      min-width: 28px;
+      min-height: 28px;
+      border-radius: 999px;
+      background: var(--primary-brown);
+      color: var(--text-light);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 2px 6px;
+    }
+
+    .skill-node.locked .skill-level {
+      background: var(--border-color);
+    }
+
+    .boycott-log,
+    .teacher-summary,
+    .share-output,
+    .peer-card,
+    .student-card {
+      background: #F8F9FA;
+      border: 2px solid rgba(30, 74, 107, 0.14);
+      border-radius: var(--border-radius);
+      padding: calc(var(--spacing-unit) * 2);
+      color: var(--text-dark);
+    }
+
+    .boycott-log {
+      display: grid;
+      gap: calc(var(--spacing-unit) * 2);
+      margin-top: calc(var(--spacing-unit) * 3);
+    }
+
+    .boycott-event {
+      border-left: 4px solid var(--warm-orange);
+      padding-left: calc(var(--spacing-unit) * 2);
+    }
+
+    .boycott-event-day {
+      color: var(--hope-blue);
+      font-weight: 700;
+      margin-bottom: calc(var(--spacing-unit) * 0.5);
+    }
+
+    .boycott-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: calc(var(--spacing-unit) * 2);
+      margin-top: calc(var(--spacing-unit) * 3);
+    }
+
+    .boycott-action-card {
+      background: #FFF9C4;
+      border: 2px solid var(--warning-orange);
+      border-radius: var(--border-radius);
+      padding: calc(var(--spacing-unit) * 2);
+      text-align: left;
+    }
+
+    .boycott-action-card h3 {
+      color: var(--primary-brown);
+      font-size: 1rem;
+      margin-bottom: calc(var(--spacing-unit) * 1);
+    }
+
+    .boycott-action-card p {
+      margin-bottom: calc(var(--spacing-unit) * 2);
+      font-size: 0.95rem;
+    }
+
+    .teacher-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: calc(var(--spacing-unit) * 2);
+      margin-bottom: calc(var(--spacing-unit) * 3);
+    }
+
+    .teacher-metric {
+      background: var(--background-cream);
+      border-radius: var(--border-radius);
+      border: 1px solid rgba(30, 74, 107, 0.12);
+      padding: calc(var(--spacing-unit) * 2);
+      text-align: center;
+    }
+
+    .teacher-metric strong {
+      display: block;
+      color: var(--hope-blue);
+      font-size: 1.4rem;
+      margin-top: calc(var(--spacing-unit) * 1);
+    }
+
+    .student-grid,
+    .peer-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: calc(var(--spacing-unit) * 2);
+      margin-bottom: calc(var(--spacing-unit) * 3);
+    }
+
+    .student-card h3,
+    .peer-card h3 {
+      color: var(--primary-brown);
+      margin-bottom: calc(var(--spacing-unit) * 1);
+    }
+
+    .student-card p,
+    .peer-card p,
+    .share-output p {
+      margin: calc(var(--spacing-unit) * 0.5) 0;
+    }
+
+    .share-output {
+      margin-top: calc(var(--spacing-unit) * 3);
+    }
+
+    .share-url {
+      width: 100%;
+      margin: calc(var(--spacing-unit) * 2) 0;
+      padding: calc(var(--spacing-unit) * 1.5);
+      border-radius: var(--border-radius);
+      border: 2px solid var(--hope-blue);
+      background: var(--background-cream);
+      color: var(--text-dark);
+      font: inherit;
+    }
+
+    .share-output small {
+      color: var(--secondary-text);
+      display: block;
+      margin-top: calc(var(--spacing-unit) * 1);
+    }
+
+    /* References Section */
+    .reference-category {
+      margin-bottom: calc(var(--spacing-unit) * 4);
+    }
+
+    .reference-category h3 {
+      color: var(--hope-blue);
+      font-size: 1.3rem;
+      margin-bottom: calc(var(--spacing-unit) * 2);
+      border-bottom: 2px solid var(--warm-orange);
+      padding-bottom: calc(var(--spacing-unit) * 1);
+    }
+
+    .reference-links {
+      display: grid;
+      gap: calc(var(--spacing-unit) * 2);
+    }
+
+    .reference-link {
+      background: #F8F9FA;
+      border: 2px solid var(--hope-blue);
+      border-radius: var(--border-radius);
+      padding: calc(var(--spacing-unit) * 2);
+      text-decoration: none;
+      color: var(--text-dark);
+      transition: var(--transition);
+      display: block;
+    }
+
+    .reference-link:hover {
+      background: var(--hope-blue);
+      color: var(--text-light);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .reference-link-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: calc(var(--spacing-unit) * 1);
+    }
+
+    .reference-link-description {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .reference-link:hover .reference-link-title,
+    .reference-link:hover .reference-link-description {
+      color: var(--text-light);
+      opacity: 1;
+    }
+
+    /* Break Reminder System */
+    .break-reminder {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--warning-orange);
+      color: var(--text-light);
+      padding: calc(var(--spacing-unit) * 4);
+      border-radius: var(--border-radius);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      z-index: 1000;
+      text-align: center;
+      min-width: 300px;
+      display: none;
+      border: 2px solid var(--primary-brown);
+    }
+
+    .break-reminder.active {
+      display: block;
+    }
+
+    .break-reminder h2 {
+      color: var(--text-light);
+      margin-bottom: calc(var(--spacing-unit) * 2);
+    }
+
+    /* Loading States */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: var(--success-green);
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Typewriter Effect */
+    .typewriter {
+      overflow: hidden;
+      border-right: 0.15em solid var(--success-green);
+      white-space: nowrap;
+      animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+    }
+
+    @keyframes typing {
+      from { width: 0; }
+      to { width: 100%; }
+    }
+
+    @keyframes blink-caret {
+      from, to { border-color: transparent; }
+      50% { border-color: var(--success-green); }
+    }
+
+    /* Reduced Motion Support */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      
+      .progress-fill::after {
+        animation: none;
+      }
+    }
+
+    /* Dark Mode Support */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --background-cream: #1E1E1E;
+        --text-dark: #E0E0E0;
+        --text-light: #FFFFFF;
+        --border-color: #424242;
+      }
+      
+      body {
+        background: linear-gradient(135deg, #1E1E1E 0%, #121212 100%);
+      }
+      
+      .info-panel, .scene-content, .mini-game {
+        background: #2D2D2D;
+        color: #E0E0E0;
+      }
+
+      .dialogue {
+        background: #2D2D2D;
+        color: #E0E0E0;
+      }
+
+      .word-search-cell, .matching-item, .quiz-option {
+        background: #2D2D2D;
+        color: #E0E0E0;
+      }
+    }
+
+    /* Mobile Optimizations */
+    @media (max-width: 767px) {
+      .game-container {
+        padding: calc(var(--spacing-unit) * 1);
+        gap: calc(var(--spacing-unit) * 2);
+      }
+      
+      .scene-content {
+        padding: calc(var(--spacing-unit) * 3);
+      }
+      
+      .info-panel {
+        position: static;
+        margin-top: calc(var(--spacing-unit) * 4);
+      }
+      
+      .stats-panel {
+        grid-template-columns: 1fr;
+      }
+      
+      .accessibility-controls {
+        position: fixed;
+        bottom: calc(var(--spacing-unit) * 2);
+        right: calc(var(--spacing-unit) * 2);
+        top: auto;
+        flex-direction: row;
+      }
+
+      .word-search-grid {
+        grid-template-columns: repeat(10, 1fr);
+        max-width: 350px;
+      }
+
+      .word-search-cell {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+      }
+    }
+
+    /* Screen Reader Support */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Focus Mode for ADHD Support */
+    .focus-mode {
+      filter: contrast(1.2) brightness(1.1);
+    }
+
+    .focus-mode * {
+      font-size: calc(var(--font-size-base) * 1.1) !important;
+    }
+
+    .focus-mode .mini-game {
+      border-width: 3px;
+      box-shadow: 0 0 20px rgba(30, 74, 107, 0.3);
+    }
+
+    /* Enhanced Focus Management */
+    .scene-card:focus {
+      outline: 3px solid var(--warning-orange);
+      outline-offset: 2px;
+    }
+
+    /* Chart Container for Analytics */
+    .chart-container {
+      height: 300px;
+      margin: calc(var(--spacing-unit) * 2) 0;
+      background: var(--background-cream);
+      border-radius: var(--border-radius);
+      padding: calc(var(--spacing-unit) * 2);
+    }
+
+    /* Ending Screen */
+    .ending-screen {
+      text-align: center;
+      padding: calc(var(--spacing-unit) * 6);
+      background: linear-gradient(135deg, var(--hope-blue), var(--success-green));
+      color: var(--text-light);
+      border-radius: var(--border-radius);
+      margin: calc(var(--spacing-unit) * 4) 0;
+      display: none;
+    }
+
+    .ending-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: calc(var(--spacing-unit) * 2);
+      color: var(--text-light);
+    }
+
+    .ending-description {
+      font-size: 1.2rem;
+      margin-bottom: calc(var(--spacing-unit) * 4);
+      line-height: 1.8;
+      color: var(--text-light);
+    }
+
+    .achievements-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: calc(var(--spacing-unit) * 2);
+      margin: calc(var(--spacing-unit) * 4) 0;
+    }
+
+    .achievement-badge {
+      background: rgba(255, 255, 255, 0.2);
+      padding: calc(var(--spacing-unit) * 2);
+      border-radius: var(--border-radius);
+      text-align: center;
+      color: var(--text-light);
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-nav">Skip to main content</a>
+  
+  <header role="banner">
+    <h1>MLK: Ultimate Legacy of Justice</h1>
+    <p class="subtitle">The Complete Interactive Civil Rights Experience</p>
+    
+    <div class="stats-panel" role="region" aria-label="Character Statistics and Skills">
+      <div class="stat-item">
+        <span class="stat-label">Hope:</span>
+        <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Hope level">
+          <div id="hope-bar" class="progress-fill" style="width: 0%;"></div>
+        </div>
+        <span id="hope-value" aria-live="polite">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Courage:</span>
+        <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Courage level">
+          <div id="courage-bar" class="progress-fill" style="width: 0%;"></div>
+        </div>
+        <span id="courage-value" aria-live="polite">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Wisdom:</span>
+        <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Wisdom level">
+          <div id="wisdom-bar" class="progress-fill" style="width: 0%;"></div>
+        </div>
+        <span id="wisdom-value" aria-live="polite">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Leadership:</span>
+        <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Leadership skill">
+          <div id="leadership-bar" class="progress-fill" style="width: 0%;"></div>
+        </div>
+        <span id="leadership-value" aria-live="polite">0</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Enhanced Accessibility Controls -->
+  <div class="accessibility-controls" role="region" aria-label="Accessibility and Learning Controls">
+    <button class="accessibility-btn" id="text-size-btn" title="Increase text size" aria-label="Increase text size">A+</button>
+    <button class="accessibility-btn" id="high-contrast-btn" title="Toggle high contrast" aria-label="Toggle high contrast mode">◐</button>
+    <button class="accessibility-btn" id="audio-toggle-btn" title="Toggle audio" aria-label="Toggle audio narration">🔊</button>
+    <button class="accessibility-btn" id="cognitive-mode-btn" title="Cognitive support" aria-label="Toggle cognitive support mode">🧠</button>
+    <button class="accessibility-btn" id="break-reminder-btn" title="Break reminders" aria-label="Configure break reminders">⏰</button>
+    <button class="accessibility-btn" id="focus-mode-btn" title="Focus mode" aria-label="Toggle focus mode">🎯</button>
+  </div>
+
+  <!-- Break Reminder Modal -->
+  <div class="break-reminder" id="break-reminder" role="dialog" aria-labelledby="break-title">
+    <h2 id="break-title">Time for a Break!</h2>
+    <p id="break-message">You've been learning for a while. Taking breaks helps with retention!</p>
+    <div style="margin-top: calc(var(--spacing-unit) * 2);">
+      <button class="btn btn-primary" onclick="gameInstance.dismissBreakReminder()">Continue (5 min)</button>
+      <button class="btn btn-secondary" onclick="gameInstance.takeBreak()">Take Break (15 min)</button>
+    </div>
+  </div>
+
+  <main id="main-content" class="game-container" role="main">
+    <div class="main-content">
+      <!-- Skill Tree Display -->
+      <div class="skill-tree-container" id="skill-tree-container" role="region" aria-label="Skill Development Tree">
+        <h2>Civil Rights Leadership Skills</h2>
+        <div class="skill-tree">
+          <div class="skill-category">
+            <h3>Leadership</h3>
+            <div class="skill-node locked" data-skill="organizing" title="Community Organizing">
+              <span>📋</span>
+            </div>
+            <div class="skill-node locked" data-skill="speaking" title="Public Speaking">
+              <span>🎤</span>
+            </div>
+            <div class="skill-node locked" data-skill="strategy" title="Strategic Planning">
+              <span>🎯</span>
+            </div>
+          </div>
+          <div class="skill-category">
+            <h3>Nonviolent Resistance</h3>
+            <div class="skill-node locked" data-skill="nonviolence" title="Nonviolent Philosophy">
+              <span>☮️</span>
+            </div>
+            <div class="skill-node locked" data-skill="boycotts" title="Economic Pressure">
+              <span>💼</span>
+            </div>
+            <div class="skill-node locked" data-skill="marches" title="Peaceful Demonstrations">
+              <span>🚶</span>
+            </div>
+          </div>
+          <div class="skill-category">
+            <h3>Historical Knowledge</h3>
+            <div class="skill-node locked" data-skill="history" title="Civil Rights History">
+              <span>📚</span>
+            </div>
+            <div class="skill-node locked" data-skill="law" title="Legal Understanding">
+              <span>⚖️</span>
+            </div>
+            <div class="skill-node locked" data-skill="coalition" title="Coalition Building">
+              <span>🤝</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bus Boycott Simulation -->
+      <div class="bus-boycott-sim" id="bus-boycott-sim" role="region" aria-label="Montgomery Bus Boycott Simulation">
+        <h2>Montgomery Bus Boycott: Day-by-Day Experience</h2>
+        <div class="boycott-stats">
+          <div class="boycott-stat">
+            <div class="boycott-day-counter" id="boycott-day">1</div>
+            <div>Days of Boycott</div>
+          </div>
+          <div class="boycott-stat">
+            <div id="boycott-participation">0%</div>
+            <div>Community Participation</div>
+          </div>
+          <div class="boycott-stat">
+            <div id="city-revenue-loss">0%</div>
+            <div>City Revenue Impact</div>
+          </div>
+          <div class="boycott-stat">
+            <div id="bus-ridership">25%</div>
+            <div>Bus Ridership</div>
+          </div>
+        </div>
+        <div id="boycott-events"></div>
+        <div id="boycott-choices"></div>
+      </div>
+
+      <!-- Analytics Dashboard -->
+      <div class="analytics-dashboard" id="analytics-dashboard" role="region" aria-label="Learning Analytics">
+        <h2>📊 Your Learning Progress</h2>
+        <div class="chart-container">
+          <canvas id="progress-chart"></canvas>
+        </div>
+        <div class="chart-container">
+          <canvas id="difficulty-adaptation-chart"></canvas>
+        </div>
+        <div class="chart-container">
+          <canvas id="time-spent-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Teacher Dashboard -->
+      <div class="teacher-dashboard" id="teacher-dashboard" role="region" aria-label="Teacher Monitoring Dashboard">
+        <h2>👨‍🏫 Classroom Dashboard</h2>
+        <div class="teacher-summary" id="teacher-summary"></div>
+        <div class="student-grid" id="student-grid">
+          <!-- Students will be populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Collaboration Panel -->
+      <div class="collaboration-panel" id="collaboration-panel" role="region" aria-label="Peer Collaboration">
+        <h2>🤝 Collaborate with Peers</h2>
+        <div class="peer-list" id="peer-list">
+          <!-- Peers will be populated dynamically -->
+        </div>
+        <div class="share-output" id="share-output">
+          <p>Generate a share link after making progress to compare journeys with classmates.</p>
+        </div>
+        <button class="btn btn-primary" onclick="gameInstance.invitePeer()">Invite a Friend</button>
+        <button class="btn btn-secondary" onclick="gameInstance.shareProgress()">Share Progress</button>
+      </div>
+
+      <!-- Main Game Scene -->
+      <section class="scene-card active" id="scene-container" role="region" aria-live="polite" aria-label="Current scene" tabindex="0">
+        <div class="scene-header">
+          <h2 class="scene-title" id="scene-title">Loading your comprehensive journey...</h2>
+          <p class="scene-location" id="scene-location">Preparing ultimate experience</p>
+        </div>
+        
+        <div class="scene-content">
+          <div class="character-portrait">
+            <img id="character-image" src="https://upload.wikimedia.org/wikipedia/commons/0/05/Martin_Luther_King%2C_Jr..jpg" 
+                 alt="Portrait of current character" width="120" height="120">
+            <div class="character-name" id="character-name">Dr. Martin Luther King Jr.</div>
+          </div>
+          
+          <div class="dialogue" id="dialogue-box" role="region" aria-label="Character dialogue">
+            <p id="dialogue-text">Welcome to the most comprehensive interactive journey through the Civil Rights Movement. Your choices will shape history while you learn through engaging activities and adaptive content.</p>
+          </div>
+          
+          <div class="choices-container" role="group" aria-label="Available choices">
+            <div id="choices-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Enhanced Mini-Games Section -->
+      <div class="mini-game" id="mini-game-container" role="region" aria-label="Educational activity">
+        <div id="mini-game-content"></div>
+      </div>
+
+      <!-- Dynamic Content Areas -->
+      <div class="quote-display" id="quote-display" role="region" aria-label="Inspirational quote"></div>
+      <div class="historical-context" id="historical-context" role="region" aria-label="Historical context"></div>
+      <div class="diary-entry" id="diary-entry" role="region" aria-label="Personal reflection"></div>
+
+      <!-- References Section -->
+      <div class="references-section" id="references-section" role="region" aria-label="Additional learning resources">
+        <h2>📚 Learn More: Additional Resources</h2>
+        
+        <div class="reference-category">
+          <h3>Key Historical Figures</h3>
+          <div class="reference-links">
+            <a href="https://en.wikipedia.org/wiki/Martin_Luther_King_Jr." target="_blank" class="reference-link">
+              <div class="reference-link-title">Martin Luther King Jr.</div>
+              <div class="reference-link-description">Comprehensive biography, speeches, and impact on the Civil Rights Movement</div>
+            </a>
+            <a href="https://en.wikipedia.org/wiki/Rosa_Parks" target="_blank" class="reference-link">
+              <div class="reference-link-title">Rosa Parks</div>
+              <div class="reference-link-description">The catalyst of the Montgomery Bus Boycott and her lifetime of activism</div>
+            </a>
+            <a href="https://en.wikipedia.org/wiki/John_Lewis" target="_blank" class="reference-link">
+              <div class="reference-link-title">John Lewis</div>
+              <div class="reference-link-description">Student leader, congressman, and champion of voting rights</div>
+            </a>
+            <a href="https://en.wikipedia.org/wiki/Ella_Baker" target="_blank" class="reference-link">
+              <div class="reference-link-title">Ella Baker</div>
+              <div class="reference-link-description">Grassroots organizer and mentor to young civil rights activists</div>
+            </a>
+          </div>
+        </div>
+
+        <div class="reference-category">
+          <h3>Major Events & Campaigns</h3>
+          <div class="reference-links">
+            <a href="https://en.wikipedia.org/wiki/Montgomery_bus_boycott" target="_blank" class="reference-link">
+              <div class="reference-link-title">Montgomery Bus Boycott</div>
+              <div class="reference-link-description">The 381-day protest that launched the modern Civil Rights Movement</div>
+            </a>
+            <a href="https://en.wikipedia.org/wiki/Birmingham_campaign" target="_blank" class="reference-link">
+              <div class="reference-link-title">Birmingham Campaign</div>
+              <div class="reference-link-description">The dramatic 1963 campaign that brought national attention to civil rights</div>
+            </a>
+            <a href="https://en.wikipedia.org/wiki/March_on_Washington_for_Jobs_and_Freedom" target="_blank" class="reference-link">
+              <div class="reference-link-title">March on Washington</div>
+              <div class="reference-link-description">The historic 1963 march where MLK delivered "I Have a Dream"</div>
+            </a>
+            <a href="https://en.wikipedia.org/wiki/Selma_to_Montgomery_marches" target="_blank" class="reference-link">
+              <div class="reference-link-title">Selma to Montgomery Marches</div>
+              <div class="reference-link-description">The voting rights marches that led to the Voting Rights Act of 1965</div>
+            </a>
+          </div>
+        </div>
+
+        <div class="reference-category">
+          <h3>Organizations & Philosophy</h3>
+          <div class="reference-links">
+            <a href="https://en.wikipedia.org/wiki/Southern_Christian_Leadership_Conference" target="_blank" class="reference-link">
+              <div class="reference-link-title">Southern Christian Leadership Conference (SCLC)</div>
+              <div class="reference-link-description">MLK's organization coordinating civil rights activities across the South</div>
+            </a>
+            <a href="https://en.wikipedia.org/wiki/Nonviolent_resistance" target="_blank" class="reference-link">
+              <div class="reference-link-title">Nonviolent Resistance</div>
+              <div class="reference-link-description">The philosophy and strategy that guided the Civil Rights Movement</div>
+            </a>
+            <a href="https://en.wikipedia.org/wiki/Student_Nonviolent_Coordinating_Committee" target="_blank" class="reference-link">
+              <div class="reference-link-title">Student Nonviolent Coordinating Committee (SNCC)</div>
+              <div class="reference-link-description">Youth organization that powered much of the grassroots activism</div>
+            </a>
+            <a href="https://en.wikipedia.org/wiki/Poor_People%27s_Campaign" target="_blank" class="reference-link">
+              <div class="reference-link-title">Poor People's Campaign</div>
+              <div class="reference-link-description">MLK's final campaign addressing economic inequality</div>
+            </a>
+          </div>
+        </div>
+
+        <div class="reference-category">
+          <h3>Legacy & Impact</h3>
+          <div class="reference-links">
+            <a href="https://en.wikipedia.org/wiki/Civil_Rights_Act_of_1964" target="_blank" class="reference-link">
+              <div class="reference-link-title">Civil Rights Act of 1964</div>
+              <div class="reference-link-description">Landmark legislation outlawing discrimination in public accommodations</div>
+            </a>
+            <a href="https://en.wikipedia.org/wiki/Voting_Rights_Act_of_1965" target="_blank" class="reference-link">
+              <div class="reference-link-title">Voting Rights Act of 1965</div>
+              <div class="reference-link-description">Federal legislation protecting African American voting rights</div>
+            </a>
+            <a href="https://en.wikipedia.org/wiki/I_Have_a_Dream" target="_blank" class="reference-link">
+              <div class="reference-link-title">"I Have a Dream" Speech</div>
+              <div class="reference-link-description">Analysis and impact of MLK's most famous speech</div>
+            </a>
+            <a href="https://en.wikipedia.org/wiki/Martin_Luther_King_Jr._Day" target="_blank" class="reference-link">
+              <div class="reference-link-title">Martin Luther King Jr. Day</div>
+              <div class="reference-link-description">The federal holiday honoring MLK's legacy and continuing impact</div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enhanced Controls -->
+      <div class="controls">
+        <button class="btn btn-primary" id="next-btn" style="display: none;" data-complexity-level="1">Continue Journey</button>
+        <button class="btn btn-secondary" id="save-btn" data-complexity-level="2">Save Progress</button>
+        <button class="btn btn-secondary" id="load-btn" data-complexity-level="2">Load Progress</button>
+        <button class="btn btn-secondary" id="finish-scene-btn" style="display: none;" data-complexity-level="1">Finish Scene</button>
+        <button class="btn btn-secondary" id="analytics-btn" data-complexity-level="5">📊 Analytics</button>
+        <button class="btn btn-secondary" id="skill-tree-btn" data-complexity-level="4">🌳 Skills</button>
+        <button class="btn btn-secondary" id="boycott-sim-btn" data-complexity-level="6">🚌 Bus Boycott</button>
+        <button class="btn btn-secondary" id="collaborate-btn" data-complexity-level="7">🤝 Collaborate</button>
+        <button class="btn btn-secondary" id="teacher-btn" data-complexity-level="8">👨‍🏫 Teacher View</button>
+        <button class="btn btn-secondary" id="references-btn" data-complexity-level="3">📚 Learn More</button>
+        <button class="btn btn-secondary" id="export-btn" data-complexity-level="9">📄 Export Report</button>
+        <button class="btn btn-danger" id="restart-btn" data-complexity-level="3">Restart Game</button>
+      </div>
+
+      <!-- Ending Screen -->
+      <div class="ending-screen" id="ending-screen" role="region" aria-label="Journey conclusion">
+        <h2 class="ending-title">Your Legacy</h2>
+        <p class="ending-description" id="ending-description"></p>
+        <div class="achievements-summary" id="achievements-summary"></div>
+      </div>
+    </div>
+
+    <aside class="info-panel" role="complementary" aria-label="Game information and progress">
+      <div class="info-section">
+        <h3>Inventory</h3>
+        <div id="inventory-list" aria-live="polite">
+          <p>Your comprehensive journey begins with hope, determination, and advanced learning tools.</p>
+        </div>
+      </div>
+      
+      <div class="info-section">
+        <h3>Achievements</h3>
+        <div id="achievements-list" aria-live="polite">
+          <p>🏆 Ultimate achievements will be earned through strategic choices, learning milestones, and historical accuracy.</p>
+        </div>
+      </div>
+      
+      <div class="info-section">
+        <h3>Learning Analytics</h3>
+        <div id="learning-stats">
+          <div>Time Spent: <span id="time-spent">0 min</span></div>
+          <div>Questions Answered: <span id="questions-answered">0</span></div>
+          <div>Accuracy Rate: <span id="accuracy-rate">0%</span></div>
+          <div>Difficulty Level: <span id="current-difficulty">Adaptive</span></div>
+        </div>
+      </div>
+      
+      <div class="info-section">
+        <h3>Enhanced Learning Objectives</h3>
+        <ul>
+          <li>Master strategic nonviolent resistance principles</li>
+          <li>Develop leadership and coalition-building skills</li>
+          <li>Understand complex historical relationships</li>
+          <li>Apply civil rights lessons to modern contexts</li>
+          <li>Build empathy through multiple perspectives</li>
+          <li>Analyze economic and social justice intersections</li>
+          <li>Practice critical thinking through interactive scenarios</li>
+          <li>Engage with multimedia educational content</li>
+        </ul>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    // Ultimate MLK Civil Rights Educational Game - Complete Implementation
+    class UltimateMLKGame {
+      constructor() {
+        // Core Game State
+        this.currentScene = 0;
+        this.stats = { hope: 0, courage: 0, wisdom: 0, leadership: 0 };
+        this.inventory = [];
+        this.achievements = [];
+        this.gameHistory = [];
+        this.skillTree = this.initializeSkillTree();
+        
+        // Enhanced Features State
+        this.isAudioEnabled = true;
+        this.isHighContrast = false;
+        this.textSize = 'normal';
+        this.cognitiveMode = 'standard';
+        this.breakReminderInterval = 30;
+        this.focusMode = false;
+        this.sessionStartTime = Date.now();
+        this.sceneStartTime = Date.now();
+        this.totalTimeSpent = 0;
+        this.questionsAnswered = 0;
+        this.correctAnswers = 0;
+        this.currentDifficulty = 'Guided';
+        
+        // Advanced Analytics
+        this.learningAnalytics = {
+          sessionData: [],
+          responseTimeData: [],
+          difficultyProgression: [],
+          engagementMetrics: []
+        };
+        
+        // Adaptive Learning System
+        this.adaptiveLearning = {
+          model: null,
+          userProfile: {
+            preferredDifficulty: 0.5,
+            learningStyle: 'visual',
+            attentionSpan: 30,
+            comprehensionRate: 0.75
+          }
+        };
+        
+        // Bus Boycott Simulation
+        this.busBoycottSim = {
+          day: 1,
+          participation: 0,
+          cityRevenueLoss: 0,
+          busRidership: 25,
+          events: [],
+          isActive: false
+        };
+        
+        // Collaboration Features
+        this.collaboration = {
+          isTeacherMode: false,
+          connectedPeers: [],
+          sharedSessions: []
+        };
+        
+        // Mini-game state
+        this.currentMiniGame = null;
+        
+        // Initialize Systems
+        this.initializeScenes();
+        this.trackSessionStart();
+        this.initializeEventListeners();
+        this.initializeAccessibility();
+        this.loadSharedProgressFromUrl();
+        this.initializeServiceWorker();
+        this.initializeIndexedDB();
+        this.initializeTensorFlowModel();
+        this.initializeAnalytics();
+        this.initializeBreakReminders();
+        this.learningStatsTimer = setInterval(() => this.updateLearningStats(), 15000);
+        
+        // Load and start
+        this.updateAllDisplays();
+        this.loadScene();
+      }
+
+      // Initialize Enhanced Skill Tree System
+      initializeSkillTree() {
+        return {
+          leadership: {
+            organizing: { level: 0, maxLevel: 5, unlocked: false },
+            speaking: { level: 0, maxLevel: 5, unlocked: false },
+            strategy: { level: 0, maxLevel: 5, unlocked: false }
+          },
+          nonviolence: {
+            nonviolence: { level: 0, maxLevel: 5, unlocked: false },
+            boycotts: { level: 0, maxLevel: 5, unlocked: false },
+            marches: { level: 0, maxLevel: 5, unlocked: false }
+          },
+          knowledge: {
+            history: { level: 0, maxLevel: 5, unlocked: false },
+            law: { level: 0, maxLevel: 5, unlocked: false },
+            coalition: { level: 0, maxLevel: 5, unlocked: false }
+          }
+        };
+      }
+
+      // Enhanced Scene Data with Complete Content
+      initializeScenes() {
+        this.scenes = [
+          {
+            id: 'mlk-introduction',
+            title: "Dr. Martin Luther King Jr. - A Leader's Journey",
+            location: "The Legacy of a Movement - 1929-1968",
+            character: {
+              name: "Dr. Martin Luther King Jr.",
+              image: "https://upload.wikimedia.org/wikipedia/commons/0/05/Martin_Luther_King%2C_Jr..jpg",
+              dialogue: "I have a dream that one day this nation will rise up and live out the true meaning of its creed. Today, you begin a journey to understand the struggle for civil rights, the power of nonviolent resistance, and the ongoing fight for justice and equality."
+            },
+            context: "Welcome to the comprehensive story of the Civil Rights Movement through the eyes of its most prominent leader.",
+            additionalImages: [
+              "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Martin_Luther_King_Jr._NYWTS_6.jpg/300px-Martin_Luther_King_Jr._NYWTS_6.jpg",
+              "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/March_on_Washington_for_Jobs_and_Freedom%2C_Martin_Luther_King%2C_Jr._and_Joachim_Prinz_1963.jpg/300px-March_on_Washington_for_Jobs_and_Freedom%2C_Martin_Luther_King%2C_Jr._and_Joachim_Prinz_1963.jpg",
+              "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Martin_Luther_King_Jr_NYWTS_4.jpg/220px-Martin_Luther_King_Jr_NYWTS_4.jpg"
+            ],
+            miniGame: {
+              type: "word-search",
+              title: "Civil Rights Movement Vocabulary",
+              instructions: "Find words related to the Civil Rights Movement hidden in the grid below. Click on cells to select words.",
+              words: ["DREAM", "JUSTICE", "FREEDOM", "EQUALITY", "PEACE", "RIGHTS", "HOPE", "UNITY"],
+              timeLimit: 180
+            },
+            skillUnlocks: ['organizing', 'speaking'],
+            choices: [
+              {
+                text: "Learn about the philosophical foundations of nonviolent resistance",
+                stats: { hope: 2, courage: 1, wisdom: 3, leadership: 2 },
+                skillPoints: { nonviolence: 3 },
+                quote: "Nonviolence is a powerful and just weapon, which cuts without wounding and ennobles the man who wields it. It is a sword that heals.",
+                item: "Philosophy of Nonviolence",
+                historical: "Dr. King's commitment to nonviolent resistance was inspired by Gandhi's successful use of civil disobedience in India.",
+                isHistorical: true,
+                isNonviolent: true,
+                consequences: "Your understanding of nonviolent philosophy provides a strong foundation for the movement."
+              },
+              {
+                text: "Study the historical context that led to the Civil Rights Movement",
+                stats: { hope: 1, courage: 1, wisdom: 4, leadership: 1 },
+                skillPoints: { history: 3 },
+                quote: "The arc of the moral universe is long, but it bends toward justice.",
+                item: "Historical Context Guide",
+                historical: "Understanding the history of slavery, Reconstruction, and Jim Crow laws was essential for effective civil rights strategy.",
+                isHistorical: true,
+                isNonviolent: true,
+                consequences: "Historical knowledge helps you understand the deep roots of injustice and the need for systematic change."
+              },
+              {
+                text: "Focus on building coalitions and community organizations",
+                stats: { hope: 3, courage: 2, wisdom: 2, leadership: 3 },
+                skillPoints: { coalition: 3, organizing: 2 },
+                quote: "We must learn to live together as brothers or perish together as fools.",
+                item: "Coalition Building Manual",
+                historical: "The Civil Rights Movement's success depended on building broad coalitions across racial, religious, and class lines.",
+                isHistorical: true,
+                isNonviolent: true,
+                consequences: "Your focus on coalition building creates a strong network for sustained action."
+              }
+            ],
+            diaryEntry: "Today I begin to share our story - a story of struggle, sacrifice, and hope. The dream of justice is not mine alone, but belongs to all who believe in the dignity of every human being."
+          },
+          {
+            id: 'montgomery-boycott',
+            title: "The Montgomery Bus Boycott",
+            location: "Montgomery, Alabama - December 1955",
+            character: {
+              name: "Rosa Parks",
+              image: "https://upload.wikimedia.org/wikipedia/commons/c/c4/Rosaparks.jpg",
+              dialogue: "Dr. King, I've been arrested for refusing to give up my seat. The community is looking to you for leadership. How should we respond to this injustice?"
+            },
+            context: "Rosa Parks' arrest sparked a pivotal moment in the Civil Rights Movement. The response would determine the course of the struggle for equality.",
+            miniGame: {
+              type: "word-search",
+              title: "Find Civil Rights Terms",
+              instructions: "Find words related to the Civil Rights Movement hidden in the grid below. Click on cells to select words.",
+              words: ["BOYCOTT", "JUSTICE", "FREEDOM", "EQUALITY", "PROTEST", "RIGHTS", "ROSA", "KING"],
+              timeLimit: 180
+            },
+            skillUnlocks: ['organizing', 'nonviolence'],
+            busBoycottTrigger: true,
+            choices: [
+              {
+                text: "Organize a coordinated bus boycott with the community",
+                stats: { hope: 3, courage: 2, wisdom: 2, leadership: 3 },
+                skillPoints: { organizing: 2, nonviolence: 2 },
+                quote: "We must use the weapon of love. We must have compassion and understanding for those who hate us.",
+                item: "Boycott Petition",
+                historical: "The Montgomery Bus Boycott lasted 381 days and ended bus segregation in Montgomery, demonstrating the power of nonviolent resistance.",
+                isHistorical: true,
+                isNonviolent: true,
+                consequences: "The boycott unified the community and established you as a leader in the Civil Rights Movement."
+              },
+              {
+                text: "Call for immediate protests and demonstrations",
+                stats: { hope: -1, courage: 1, wisdom: -2, leadership: 1 },
+                quote: "Hate cannot drive out hate; only love can do that.",
+                historical: "While protests were important, the strategic approach of economic pressure through boycotts proved more effective.",
+                isHistorical: false,
+                isNonviolent: false,
+                consequences: "The protests created tension but lacked the strategic focus needed for lasting change."
+              },
+              {
+                text: "Seek legal remedies through the courts first",
+                stats: { hope: 1, courage: 0, wisdom: 3, leadership: 1 },
+                skillPoints: { law: 2 },
+                quote: "Injustice anywhere is a threat to justice everywhere.",
+                item: "Legal Brief",
+                historical: "Legal challenges were important but worked best in combination with grassroots organizing.",
+                isHistorical: false,
+                isNonviolent: true,
+                consequences: "Legal action provided a foundation, but community action was needed for real change.",
+                requires: { wisdom: 5 }
+              }
+            ],
+            diaryEntry: "Today marks a turning point. Rosa's courage has given us an opportunity to challenge the system. We must respond with both wisdom and determination."
+          },
+          {
+            id: 'sclc-formation',
+            title: "Founding the Southern Christian Leadership Conference",
+            location: "Atlanta, Georgia - January 1957",
+            character: {
+              name: "Ralph Abernathy",
+              image: "https://upload.wikimedia.org/wikipedia/commons/6/67/Ralph_Abernathy.jpg",
+              dialogue: "The success in Montgomery has inspired communities across the South. We need to coordinate our efforts. What kind of organization should we build?"
+            },
+            context: "The Montgomery victory created momentum for a broader movement. How this energy was channeled would determine the future of civil rights organizing.",
+            miniGame: {
+              type: "matching",
+              title: "Match Civil Rights Leaders with Their Contributions",
+              instructions: "Connect each leader with their major contribution to the Civil Rights Movement.",
+              pairs: [
+                { left: "Rosa Parks", right: "Bus Boycott Catalyst" },
+                { left: "Thurgood Marshall", right: "Legal Strategy" },
+                { left: "Ella Baker", right: "Grassroots Organizing" },
+                { left: "John Lewis", right: "Student Leadership" },
+                { left: "Fannie Lou Hamer", right: "Voting Rights" },
+                { left: "Ralph Abernathy", right: "SCLC Co-founder" }
+              ]
+            },
+            skillUnlocks: ['strategy', 'coalition'],
+            choices: [
+              {
+                text: "Form the SCLC to coordinate nonviolent resistance across the South",
+                stats: { hope: 2, courage: 1, wisdom: 3, leadership: 4 },
+                skillPoints: { strategy: 3, organizing: 2, nonviolence: 2 },
+                quote: "The aftermath of nonviolence is the creation of the beloved community.",
+                item: "SCLC Charter",
+                historical: "The SCLC became the organizational backbone for coordinating civil rights activities across the South, emphasizing nonviolent protest and moral leadership.",
+                isHistorical: true,
+                isNonviolent: true,
+                consequences: "The SCLC provided structure and coordination that amplified local movements across the region."
+              },
+              {
+                text: "Focus on local organizing in individual communities",
+                stats: { hope: 1, courage: 2, wisdom: 1, leadership: 2 },
+                skillPoints: { organizing: 2 },
+                quote: "Every step toward the goal of justice requires sacrifice, suffering, and struggle.",
+                historical: "While local organizing was vital, regional coordination proved necessary for maximum impact.",
+                isHistorical: false,
+                isNonviolent: true,
+                consequences: "Local efforts made progress but lacked the collective power needed for systemic change."
+              },
+              {
+                text: "Partner primarily with existing organizations like the NAACP",
+                stats: { hope: 1, courage: 0, wisdom: 2, leadership: 1 },
+                skillPoints: { coalition: 2 },
+                quote: "We must learn to live together as brothers or perish together as fools.",
+                item: "NAACP Partnership",
+                historical: "Cooperation with established organizations was important, but new structures were also needed for direct action.",
+                isHistorical: false,
+                isNonviolent: true,
+                consequences: "Partnerships strengthened the movement but new leadership structures were still necessary."
+              }
+            ],
+            diaryEntry: "We stand at a crossroads. The question is not whether we will continue the struggle, but how we will organize it most effectively. Unity and strategy must guide us."
+          },
+          {
+            id: 'birmingham-campaign',
+            title: "The Birmingham Campaign",
+            location: "Birmingham, Alabama - April 1963",
+            character: {
+              name: "Fred Shuttlesworth",
+              image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Fred_Shuttlesworth.jpg/220px-Fred_Shuttlesworth.jpg",
+              dialogue: "Birmingham is the most segregated city in America, but that makes it the perfect place to make our stand. The whole nation will be watching. What's our strategy?"
+            },
+            context: "Birmingham's harsh segregation and violent response to protests would capture national attention and test the movement's commitment to nonviolence.",
+            miniGame: {
+              type: "quiz",
+              title: "Civil Rights Knowledge Quiz",
+              instructions: "Test your knowledge about the Civil Rights Movement and nonviolent resistance.",
+              questions: [
+                {
+                  question: "What was the main strategy of the Civil Rights Movement?",
+                  options: ["Violent resistance", "Nonviolent protest", "Political lobbying only", "Economic warfare"],
+                  correct: 1,
+                  explanation: "Nonviolent protest was the cornerstone of the Civil Rights Movement's philosophy and strategy."
+                },
+                {
+                  question: "How long did the Montgomery Bus Boycott last?",
+                  options: ["6 months", "1 year", "381 days", "2 years"],
+                  correct: 2,
+                  explanation: "The Montgomery Bus Boycott lasted exactly 381 days, from December 5, 1955 to December 20, 1956."
+                },
+                {
+                  question: "What does SCLC stand for?",
+                  options: ["Southern Civil Leadership Council", "Southern Christian Leadership Conference", "Student Civil Leadership Committee", "Southern Christian Liberty Coalition"],
+                  correct: 1,
+                  explanation: "SCLC stands for Southern Christian Leadership Conference, founded in 1957."
+                }
+              ]
+            },
+            skillUnlocks: ['speaking', 'marches'],
+            choices: [
+              {
+                text: "Launch coordinated nonviolent marches and sit-ins",
+                stats: { hope: 2, courage: 3, wisdom: 2, leadership: 3 },
+                skillPoints: { marches: 3, speaking: 2, nonviolence: 2 },
+                quote: "The time is always right to do what is right.",
+                item: "Protest Sign",
+                historical: "The Birmingham Campaign, including the Children's Crusade, brought national attention to civil rights and led to the Civil Rights Act of 1964.",
+                isHistorical: true,
+                isNonviolent: true,
+                consequences: "The dramatic images from Birmingham shocked the nation and built support for civil rights legislation."
+              },
+              {
+                text: "Negotiate privately with business leaders first",
+                stats: { hope: 1, courage: 0, wisdom: 2, leadership: 1 },
+                skillPoints: { coalition: 2 },
+                quote: "Justice too long delayed is justice denied.",
+                historical: "While negotiations were attempted, the dramatic public campaign proved necessary to create pressure for change.",
+                isHistorical: false,
+                isNonviolent: true,
+                consequences: "Private negotiations made some progress but lacked the public pressure needed for significant change.",
+                requires: { item: "Boycott Petition" }
+              },
+              {
+                text: "Organize armed self-defense for protesters",
+                stats: { hope: -2, courage: 1, wisdom: -2, leadership: -1 },
+                quote: "Darkness cannot drive out darkness; only light can do that.",
+                historical: "The movement's commitment to nonviolence was crucial to maintaining moral authority and public support.",
+                isHistorical: false,
+                isNonviolent: false,
+                consequences: "Violence would have undermined the moral authority that was central to the movement's power."
+              }
+            ],
+            diaryEntry: "Birmingham will test everything we believe about nonviolence. We must be prepared to suffer without retaliating, to love in the face of hate."
+          },
+          {
+            id: 'march-on-washington',
+            title: "The March on Washington for Jobs and Freedom",
+            location: "Washington, D.C. - August 28, 1963",
+            character: {
+              name: "John Lewis",
+              image: "https://upload.wikimedia.org/wikipedia/commons/3/33/John_Lewis_official_biopic.jpg",
+              dialogue: "A quarter million people have gathered at the Lincoln Memorial. The whole world is listening. What message should your speech convey to the nation?"
+            },
+            context: "The March on Washington represented the culmination of the movement's efforts to date and an opportunity to articulate a vision for America's future.",
+            miniGame: {
+              type: "timeline",
+              title: "Order the Civil Rights Events",
+              instructions: "Drag and drop the events to arrange them in chronological order from earliest to latest.",
+              events: [
+                { text: "Brown vs. Board of Education", year: 1954, order: 1 },
+                { text: "Montgomery Bus Boycott begins", year: 1955, order: 2 },
+                { text: "Little Rock Nine", year: 1957, order: 3 },
+                { text: "Sit-ins begin in Greensboro", year: 1960, order: 4 },
+                { text: "Freedom Rides", year: 1961, order: 5 },
+                { text: "March on Washington", year: 1963, order: 6 }
+              ]
+            },
+            skillUnlocks: ['speaking', 'coalition'],
+            choices: [
+              {
+                text: "Focus on the dream of unity and racial equality",
+                stats: { hope: 4, courage: 1, wisdom: 3, leadership: 4 },
+                skillPoints: { speaking: 4, coalition: 2 },
+                quote: "I have a dream that my four little children will one day live in a nation where they will not be judged by the color of their skin.",
+                item: "Dream Speech Draft",
+                historical: "King's 'I Have a Dream' speech became one of the most powerful and enduring statements of the civil rights vision.",
+                isHistorical: true,
+                isNonviolent: true,
+                consequences: "The speech inspired millions and became a defining moment that crystallized the movement's moral vision."
+              },
+              {
+                text: "Demand immediate federal action on civil rights",
+                stats: { hope: 1, courage: 2, wisdom: 0, leadership: 2 },
+                quote: "We cannot walk alone. And as we walk, we must make the pledge that we shall always march ahead.",
+                historical: "While urgency was important, the inspirational message proved more powerful in building long-term support.",
+                isHistorical: false,
+                isNonviolent: true,
+                consequences: "Demands for action were important but the visionary message had greater lasting impact."
+              },
+              {
+                text: "Criticize the federal government's slow response",
+                stats: { hope: 0, courage: 2, wisdom: -1, leadership: 1 },
+                quote: "We must forever conduct our struggle on the high plane of dignity and discipline.",
+                historical: "Criticism had its place, but the positive vision proved more effective at this moment.",
+                isHistorical: false,
+                isNonviolent: true,
+                consequences: "Criticism drew attention to problems but missed the opportunity to inspire with vision.",
+                requires: { courage: 5 }
+              }
+            ],
+            diaryEntry: "This moment feels like the mountaintop. We have gathered the nation's conscience. Now we must speak not just to their minds, but to their hearts."
+          },
+          {
+            id: 'selma-march',
+            title: "The Selma to Montgomery Marches",
+            location: "Selma, Alabama - March 1965",
+            character: {
+              name: "Hosea Williams",
+              image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Hosea_Williams.jpg/220px-Hosea_Williams.jpg",
+              dialogue: "Voting rights are being denied across the South. The bridge ahead is dangerous - state troopers are waiting. But we must act. What's your decision?"
+            },
+            context: "The struggle for voting rights reached a crucial moment at the Edmund Pettus Bridge, where peaceful marchers would face violent opposition.",
+            miniGame: {
+              type: "word-search",
+              title: "Voting Rights Vocabulary",
+              instructions: "Find terms related to voting rights and democracy in the puzzle.",
+              words: ["VOTE", "BALLOT", "DEMOCRACY", "SUFFRAGE", "SELMA", "BRIDGE", "MARCH", "FREEDOM"],
+              timeLimit: 120
+            },
+            skillUnlocks: ['marches', 'history'],
+            choices: [
+              {
+                text: "March peacefully across the bridge despite the danger",
+                stats: { hope: 2, courage: 4, wisdom: 2, leadership: 3 },
+                skillPoints: { marches: 4, nonviolence: 3 },
+                quote: "Our lives begin to end the day we become silent about things that matter.",
+                item: "Voting Rights Plan",
+                historical: "'Bloody Sunday' and the subsequent marches led directly to the Voting Rights Act of 1965, one of the movement's greatest legislative victories.",
+                isHistorical: true,
+                isNonviolent: true,
+                consequences: "The courage shown at Selma shocked the nation and created unstoppable momentum for voting rights legislation."
+              },
+              {
+                text: "Postpone the march to better prepare for violence",
+                stats: { hope: 0, courage: -1, wisdom: 1, leadership: 0 },
+                quote: "The ultimate measure of a man is not where he stands in moments of comfort, but where he stands at times of challenge.",
+                historical: "While preparation was wise, the moment required action that only immediate courage could provide.",
+                isHistorical: false,
+                isNonviolent: true,
+                consequences: "Delays allowed opposition to organize and reduced the impact of the moment."
+              },
+              {
+                text: "Prepare armed protection for the marchers",
+                stats: { hope: -2, courage: 1, wisdom: -2, leadership: -1 },
+                quote: "Nonviolence is a powerful and just weapon, which cuts without wounding and ennobles the man who wields it.",
+                historical: "The power of Selma came from the contrast between peaceful marchers and violent opponents.",
+                isHistorical: false,
+                isNonviolent: false,
+                consequences: "Armed protection would have changed the narrative and reduced sympathy for the marchers.",
+                requires: { courage: 7 }
+              }
+            ],
+            diaryEntry: "We approach the bridge knowing we may face violence, but also knowing that our suffering may redeem the soul of America."
+          },
+          {
+            id: 'poor-peoples-campaign',
+            title: "The Poor People's Campaign",
+            location: "Washington, D.C. - Spring 1968",
+            character: {
+              name: "Coretta Scott King",
+              image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Coretta_Scott_King_%281964%29.jpg/220px-Coretta_Scott_King_%281964%29.jpg",
+              dialogue: "Martin, your final campaign must address poverty and economic injustice. This goes beyond civil rights to human rights. How do we build this multiracial coalition?"
+            },
+            context: "The Poor People's Campaign represented King's evolution toward addressing economic inequality as inseparable from racial justice, but would be his final campaign before his assassination.",
+            miniGame: {
+              type: "matching",
+              title: "Match Social Justice Concepts",
+              instructions: "Connect each concept with its definition or impact.",
+              pairs: [
+                { left: "Economic Justice", right: "Fair wages and opportunities for all" },
+                { left: "Beloved Community", right: "MLK's vision of integrated society" },
+                { left: "Triple Evils", right: "Racism, Poverty, and War" },
+                { left: "Nonviolent Resistance", right: "Peaceful protest for change" },
+                { left: "Civil Disobedience", right: "Breaking unjust laws peacefully" },
+                { left: "Resurrection City", right: "Poor People's Campaign encampment" }
+              ]
+            },
+            skillUnlocks: ['coalition', 'law'],
+            choices: [
+              {
+                text: "Organize a multiracial coalition for economic justice",
+                stats: { hope: 3, courage: 2, wisdom: 3, leadership: 4 },
+                skillPoints: { coalition: 4, organizing: 3 },
+                quote: "True compassion is more than flinging a coin to a beggar; it understands that an edifice which produces beggars needs restructuring.",
+                item: "🏆 Campaign Blueprint",
+                historical: "The Poor People's Campaign, though King was assassinated before its completion, represented his final evolution toward addressing systemic economic inequality.",
+                isHistorical: true,
+                isNonviolent: true,
+                consequences: "The campaign expanded the movement's vision but faced enormous challenges in building multiracial economic solidarity."
+              },
+              {
+                text: "Focus primarily on legislative solutions for poverty",
+                stats: { hope: 1, courage: 0, wisdom: 2, leadership: 1 },
+                skillPoints: { law: 3 },
+                quote: "Legislation and heart change go hand in hand; one is not effective without the other.",
+                item: "🏆 Legislative Package",
+                historical: "Legislative work was important but required the pressure of organized constituencies to be effective.",
+                isHistorical: false,
+                isNonviolent: true,
+                consequences: "Legislative focus achieved some policy changes but lacked the grassroots power needed for transformation."
+              },
+              {
+                text: "Concentrate on Black economic empowerment first",
+                stats: { hope: 2, courage: 1, wisdom: 1, leadership: 2 },
+                skillPoints: { organizing: 2 },
+                quote: "We are tied together in the single garment of destiny, caught in an inescapable network of mutuality.",
+                historical: "While Black economic advancement was crucial, King recognized that poverty crossed racial lines and required broader coalition building.",
+                isHistorical: false,
+                isNonviolent: true,
+                consequences: "Racial focus was important but missed the opportunity to build the broader coalition needed for economic change."
+              }
+            ],
+            diaryEntry: "This may be our most difficult campaign yet. We seek not just civil rights, but human rights - the right to economic dignity for all people. The mountain is high, but we must climb."
+          }
+        ];
+      }
+
+      // Initialize Enhanced Event Listeners
+      initializeEventListeners() {
+        // Core game controls
+        document.getElementById('next-btn').addEventListener('click', () => this.nextScene());
+        document.getElementById('save-btn').addEventListener('click', () => this.saveGame());
+        document.getElementById('load-btn').addEventListener('click', () => this.loadGame());
+        document.getElementById('restart-btn').addEventListener('click', () => this.restartGame());
+        document.getElementById('finish-scene-btn').addEventListener('click', () => this.finishCurrentScene());
+
+        // Enhanced feature controls
+        document.getElementById('analytics-btn').addEventListener('click', () => this.toggleAnalytics());
+        document.getElementById('skill-tree-btn').addEventListener('click', () => this.toggleSkillTree());
+        document.getElementById('boycott-sim-btn').addEventListener('click', () => this.toggleBoycottSimulation());
+        document.getElementById('collaborate-btn').addEventListener('click', () => this.toggleCollaboration());
+        document.getElementById('teacher-btn').addEventListener('click', () => this.toggleTeacherDashboard());
+        document.getElementById('references-btn').addEventListener('click', () => this.toggleReferences());
+        document.getElementById('export-btn').addEventListener('click', () => this.exportReport());
+
+        // Accessibility controls
+        document.getElementById('text-size-btn').addEventListener('click', () => this.toggleTextSize());
+        document.getElementById('high-contrast-btn').addEventListener('click', () => this.toggleHighContrast());
+        document.getElementById('audio-toggle-btn').addEventListener('click', () => this.toggleAudio());
+        document.getElementById('cognitive-mode-btn').addEventListener('click', () => this.toggleCognitiveMode());
+        document.getElementById('break-reminder-btn').addEventListener('click', () => this.configureBreakReminders());
+        document.getElementById('focus-mode-btn').addEventListener('click', () => this.toggleFocusMode());
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => this.handleKeyboardNavigation(e));
+
+        // Page visibility for break tracking
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) {
+            this.trackAnalyticsEvent('tab_hidden', { timestamp: Date.now() });
+          } else {
+            this.trackAnalyticsEvent('tab_visible', { timestamp: Date.now() });
+          }
+        });
+      }
+
+      // Initialize Service Worker for Offline Functionality
+      async initializeServiceWorker() {
+        if (!('serviceWorker' in navigator) || !window.isSecureContext) {
+          return;
+        }
+
+        try {
+          await navigator.serviceWorker.register('./mlk-sw.js', { scope: './' });
+          this.trackAnalyticsEvent('service_worker_registered', { status: 'success' });
+        } catch (error) {
+          console.error('Service Worker registration failed:', error);
+          this.trackAnalyticsEvent('service_worker_registered', { status: 'failed', error: error.message });
+        }
+      }
+
+      // Initialize IndexedDB for Advanced Data Storage
+      async initializeIndexedDB() {
+        return new Promise((resolve, reject) => {
+          const request = indexedDB.open('MLKUltimateEducationalGameDB', 1);
+          
+          request.onerror = () => reject(request.error);
+          request.onsuccess = () => {
+            this.db = request.result;
+            resolve();
+          };
+          
+          request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            
+            if (!db.objectStoreNames.contains('analytics')) {
+              const analyticsStore = db.createObjectStore('analytics', { 
+                keyPath: 'id', 
+                autoIncrement: true 
+              });
+              analyticsStore.createIndex('timestamp', 'timestamp');
+              analyticsStore.createIndex('type', 'type');
+            }
+            
+            if (!db.objectStoreNames.contains('sessions')) {
+              const sessionsStore = db.createObjectStore('sessions', { 
+                keyPath: 'id', 
+                autoIncrement: true 
+              });
+              sessionsStore.createIndex('timestamp', 'timestamp');
+            }
+          };
+        });
+      }
+
+      idbAdd(storeName, value) {
+        if (!this.db) {
+          return Promise.resolve(null);
+        }
+
+        return new Promise((resolve, reject) => {
+          const transaction = this.db.transaction([storeName], 'readwrite');
+          const request = transaction.objectStore(storeName).add(value);
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+        });
+      }
+
+      idbGetAll(storeName) {
+        if (!this.db) {
+          return Promise.resolve([]);
+        }
+
+        return new Promise((resolve, reject) => {
+          const transaction = this.db.transaction([storeName], 'readonly');
+          const request = transaction.objectStore(storeName).getAll();
+          request.onsuccess = () => resolve(request.result || []);
+          request.onerror = () => reject(request.error);
+        });
+      }
+
+      // Initialize TensorFlow.js Adaptive Learning Model
+      async initializeTensorFlowModel() {
+        try {
+          if (typeof tf !== 'undefined') {
+            await tf.setBackend('cpu');
+            await tf.ready();
+            this.adaptiveLearning.model = tf.sequential({
+              layers: [
+                tf.layers.dense({
+                  inputShape: [6],
+                  units: 16,
+                  activation: 'relu'
+                }),
+                tf.layers.dropout({ rate: 0.2 }),
+                tf.layers.dense({
+                  units: 8,
+                  activation: 'relu'
+                }),
+                tf.layers.dense({
+                  units: 3,
+                  activation: 'softmax'
+                })
+              ]
+            });
+            
+            this.adaptiveLearning.model.compile({
+              optimizer: 'adam',
+              loss: 'categoricalCrossentropy',
+              metrics: ['accuracy']
+            });
+            
+            console.log('TensorFlow.js model initialized successfully');
+            this.trackAnalyticsEvent('tensorflow_model_initialized', { status: 'success' });
+          }
+        } catch (error) {
+          console.error('TensorFlow.js initialization failed:', error);
+          this.trackAnalyticsEvent('tensorflow_model_initialized', { status: 'failed', error: error.message });
+        }
+      }
+
+      // Initialize Analytics Dashboard
+      initializeAnalytics() {
+        this.progressChart = null;
+        this.difficultyChart = null;
+        this.timeChart = null;
+      }
+
+      getTotalTimeSpentMs() {
+        return this.totalTimeSpent + (Date.now() - this.sessionStartTime);
+      }
+
+      calculateCurrentDifficulty() {
+        const accuracy = this.questionsAnswered > 0
+          ? (this.correctAnswers / this.questionsAnswered) * 100
+          : 0;
+        const totalStats = Object.values(this.stats).reduce((sum, value) => sum + value, 0);
+
+        if (accuracy >= 80 && totalStats >= 36) {
+          return 'Advanced';
+        }
+        if (accuracy >= 50 || totalStats >= 18 || this.currentScene >= 2) {
+          return 'Balanced';
+        }
+        return 'Guided';
+      }
+
+      renderStatPanels() {
+        Object.entries(this.stats).forEach(([stat, value]) => {
+          const bar = document.getElementById(`${stat}-bar`);
+          const valueLabel = document.getElementById(`${stat}-value`);
+          const progressBar = bar?.parentElement;
+
+          if (!bar || !valueLabel || !progressBar) {
+            return;
+          }
+
+          bar.style.width = `${value}%`;
+          valueLabel.textContent = value;
+          progressBar.setAttribute('aria-valuenow', value);
+        });
+      }
+
+      buildSharePayload() {
+        return {
+          stats: this.stats,
+          achievements: this.achievements,
+          currentScene: this.currentScene,
+          currentSceneTitle: this.scenes[this.currentScene]?.title || 'Journey Complete',
+          timeSpent: this.getTotalTimeSpentMs(),
+          sharedAt: new Date().toISOString()
+        };
+      }
+
+      buildShareUrl() {
+        const url = new URL(window.location.href);
+        url.searchParams.set('shared', btoa(JSON.stringify(this.buildSharePayload())));
+        return url.toString();
+      }
+
+      loadSharedProgressFromUrl() {
+        try {
+          const params = new URLSearchParams(window.location.search);
+          const shared = params.get('shared');
+          if (!shared) {
+            return;
+          }
+
+          const payload = JSON.parse(atob(shared));
+          this.collaboration.sharedSessions.push({
+            name: 'Shared Journey',
+            payload,
+            importedAt: Date.now()
+          });
+        } catch (error) {
+          console.error('Failed to parse shared progress:', error);
+        }
+      }
+
+      buildImageFallbackDataUri(label) {
+        const initials = label
+          .split(/\s+/)
+          .filter(Boolean)
+          .slice(0, 2)
+          .map(part => part[0].toUpperCase())
+          .join('') || 'MLK';
+
+        return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+            <defs>
+              <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0%" stop-color="#5D2E0A"/>
+                <stop offset="100%" stop-color="#1E4A6B"/>
+              </linearGradient>
+            </defs>
+            <rect width="240" height="240" rx="24" fill="url(#bg)"/>
+            <circle cx="120" cy="92" r="42" fill="#FFFEF7" opacity="0.2"/>
+            <path d="M48 198c14-36 47-58 72-58s58 22 72 58" fill="#FFFEF7" opacity="0.2"/>
+            <text x="120" y="136" text-anchor="middle" font-family="Arial, sans-serif" font-size="54" font-weight="700" fill="#FFFFFF">${initials}</text>
+          </svg>
+        `)}`;
+      }
+
+      attachImageFallback(image, label) {
+        if (!image) {
+          return;
+        }
+
+        image.referrerPolicy = 'no-referrer';
+        image.addEventListener('error', () => {
+          image.src = this.buildImageFallbackDataUri(label);
+        }, { once: true });
+      }
+
+      // Track Analytics Events
+      trackAnalyticsEvent(eventType, data) {
+        const event = {
+          type: eventType,
+          timestamp: Date.now(),
+          sessionId: this.sessionId,
+          data: data
+        };
+        
+        this.learningAnalytics.sessionData.push(event);
+        
+        if (this.db) {
+          try {
+            const transaction = this.db.transaction(['analytics'], 'readwrite');
+            transaction.objectStore('analytics').add(event);
+          } catch (error) {
+            console.error('Failed to store analytics event:', error);
+          }
+        }
+      }
+
+      // Initialize Break Reminder System
+      initializeBreakReminders() {
+        this.breakReminderTimer = setInterval(() => {
+          if (!this.focusMode && this.breakReminderInterval > 0) {
+            this.showBreakReminder();
+          }
+        }, this.breakReminderInterval * 60000);
+      }
+
+      // Initialize Accessibility Features
+      initializeAccessibility() {
+        this.announceToScreenReader('Ultimate MLK Legacy of Justice game loaded with comprehensive accessibility features');
+        this.setupFocusManagement();
+        this.checkUserPreferences();
+      }
+
+      setupFocusManagement() {
+        const sceneContainer = document.getElementById('scene-container');
+        if (sceneContainer) {
+          sceneContainer.setAttribute('tabindex', '0');
+        }
+      }
+
+      checkUserPreferences() {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.body.style.setProperty('--transition', 'none');
+        }
+
+        if (window.matchMedia('(prefers-contrast: high)').matches) {
+          this.toggleHighContrast();
+        }
+
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.body.classList.add('dark-mode');
+        }
+      }
+
+      announceToScreenReader(message) {
+        const announcement = document.createElement('div');
+        announcement.setAttribute('aria-live', 'polite');
+        announcement.setAttribute('aria-atomic', 'true');
+        announcement.className = 'sr-only';
+        announcement.textContent = message;
+        document.body.appendChild(announcement);
+        setTimeout(() => document.body.removeChild(announcement), 1000);
+      }
+
+      // Enhanced Accessibility Controls
+      toggleTextSize() {
+        const sizes = ['normal', 'large', 'larger'];
+        const currentIndex = sizes.indexOf(this.textSize);
+        this.textSize = sizes[(currentIndex + 1) % sizes.length];
+        
+        const sizeMap = { normal: '16px', large: '20px', larger: '24px' };
+        document.documentElement.style.fontSize = sizeMap[this.textSize];
+        
+        this.announceToScreenReader(`Text size changed to ${this.textSize}`);
+        this.trackAnalyticsEvent('text_size_changed', { size: this.textSize });
+      }
+
+      toggleHighContrast() {
+        this.isHighContrast = !this.isHighContrast;
+        document.body.classList.toggle('theme-high-contrast', this.isHighContrast);
+        this.announceToScreenReader(`High contrast mode ${this.isHighContrast ? 'enabled' : 'disabled'}`);
+        this.trackAnalyticsEvent('high_contrast_toggled', { enabled: this.isHighContrast });
+      }
+
+      toggleAudio() {
+        this.isAudioEnabled = !this.isAudioEnabled;
+        const button = document.getElementById('audio-toggle-btn');
+        button.textContent = this.isAudioEnabled ? '🔊' : '🔇';
+        button.setAttribute('aria-label', `${this.isAudioEnabled ? 'Disable' : 'Enable'} audio narration`);
+        this.announceToScreenReader(`Audio ${this.isAudioEnabled ? 'enabled' : 'disabled'}`);
+        this.trackAnalyticsEvent('audio_toggled', { enabled: this.isAudioEnabled });
+      }
+
+      toggleCognitiveMode() {
+        const modes = ['simple', 'standard', 'advanced'];
+        const currentIndex = modes.indexOf(this.cognitiveMode);
+        this.cognitiveMode = modes[(currentIndex + 1) % modes.length];
+        
+        document.body.className = document.body.className.replace(/cognitive-mode-\w+/, '');
+        document.body.classList.add(`cognitive-mode-${this.cognitiveMode}`);
+        
+        this.announceToScreenReader(`Cognitive support mode changed to ${this.cognitiveMode}`);
+        this.trackAnalyticsEvent('cognitive_mode_changed', { mode: this.cognitiveMode });
+      }
+
+      configureBreakReminders() {
+        const intervals = [0, 15, 30, 45, 60];
+        const currentIndex = intervals.indexOf(this.breakReminderInterval);
+        this.breakReminderInterval = intervals[(currentIndex + 1) % intervals.length];
+        
+        if (this.breakReminderTimer) {
+          clearInterval(this.breakReminderTimer);
+        }
+        
+        if (this.breakReminderInterval > 0) {
+          this.initializeBreakReminders();
+          this.announceToScreenReader(`Break reminders set to every ${this.breakReminderInterval} minutes`);
+        } else {
+          this.announceToScreenReader('Break reminders disabled');
+        }
+        
+        this.trackAnalyticsEvent('break_reminder_configured', { interval: this.breakReminderInterval });
+      }
+
+      toggleFocusMode() {
+        this.focusMode = !this.focusMode;
+        document.body.classList.toggle('focus-mode', this.focusMode);
+        
+        if (this.focusMode) {
+          document.body.style.setProperty('--font-size-base', '18px');
+          document.querySelectorAll('[data-complexity-level]').forEach(el => {
+            const level = parseInt(el.dataset.complexityLevel);
+            el.style.display = level <= 3 ? 'block' : 'none';
+          });
+        } else {
+          document.body.style.setProperty('--font-size-base', '16px');
+          document.querySelectorAll('[data-complexity-level]').forEach(el => {
+            el.style.display = 'block';
+          });
+        }
+        
+        this.announceToScreenReader(`Focus mode ${this.focusMode ? 'enabled' : 'disabled'}`);
+        this.trackAnalyticsEvent('focus_mode_toggled', { enabled: this.focusMode });
+      }
+
+      // Break Reminder System
+      showBreakReminder() {
+        const sessionTime = Math.round((Date.now() - this.sessionStartTime) / 60000);
+        document.getElementById('break-message').textContent = 
+          `You've been learning for ${sessionTime} minutes. Taking breaks helps with retention and focus!`;
+        
+        document.getElementById('break-reminder').classList.add('active');
+        this.announceToScreenReader('Break reminder: Time to take a rest!');
+        this.trackAnalyticsEvent('break_reminder_shown', { sessionTime });
+      }
+
+      dismissBreakReminder() {
+        document.getElementById('break-reminder').classList.remove('active');
+        this.trackAnalyticsEvent('break_reminder_dismissed', {});
+      }
+
+      takeBreak() {
+        document.getElementById('break-reminder').classList.remove('active');
+        this.trackAnalyticsEvent('break_taken', {});
+        this.announceToScreenReader('Enjoy your break! The game will be here when you return.');
+      }
+
+      // Enhanced Feature Toggles
+      toggleReferences() {
+        const referencesSection = document.getElementById('references-section');
+        const isActive = referencesSection.classList.contains('active');
+        
+        if (isActive) {
+          referencesSection.classList.remove('active');
+          this.announceToScreenReader('References section closed');
+        } else {
+          referencesSection.classList.add('active');
+          referencesSection.scrollIntoView({ behavior: 'smooth' });
+          this.announceToScreenReader('References section opened with additional learning resources');
+        }
+        
+        this.trackAnalyticsEvent('references_toggled', { opened: !isActive });
+      }
+
+      toggleSkillTree() {
+        const container = document.getElementById('skill-tree-container');
+        const isActive = container.classList.contains('active');
+        
+        if (isActive) {
+          container.classList.remove('active');
+        } else {
+          container.classList.add('active');
+          this.updateSkillTreeDisplay();
+          container.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        this.announceToScreenReader(`Skill tree ${isActive ? 'closed' : 'opened'}`);
+        this.trackAnalyticsEvent('skill_tree_toggled', { opened: !isActive });
+      }
+
+      toggleAnalytics() {
+        const dashboard = document.getElementById('analytics-dashboard');
+        const isActive = dashboard.classList.contains('active');
+        
+        if (isActive) {
+          dashboard.classList.remove('active');
+        } else {
+          dashboard.classList.add('active');
+          this.updateAnalyticsDashboard();
+          dashboard.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        this.announceToScreenReader(`Analytics dashboard ${isActive ? 'closed' : 'opened'}`);
+        this.trackAnalyticsEvent('analytics_dashboard_toggled', { opened: !isActive });
+      }
+
+      toggleBoycottSimulation() {
+        const container = document.getElementById('bus-boycott-sim');
+        const isActive = container.classList.contains('active');
+        
+        if (isActive) {
+          container.classList.remove('active');
+          this.busBoycottSim.isActive = false;
+        } else {
+          container.classList.add('active');
+          this.busBoycottSim.isActive = true;
+          if (!this.busBoycottSim.events?.length) {
+            this.initializeBoycottSimulation();
+          } else {
+            this.updateBoycottDisplay();
+          }
+          container.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        this.announceToScreenReader(`Bus boycott simulation ${isActive ? 'closed' : 'started'}`);
+        this.trackAnalyticsEvent('boycott_simulation_toggled', { active: !isActive });
+      }
+
+      toggleCollaboration() {
+        const panel = document.getElementById('collaboration-panel');
+        const isActive = panel.classList.contains('active');
+        
+        if (isActive) {
+          panel.classList.remove('active');
+        } else {
+          panel.classList.add('active');
+          this.updateCollaborationPanel();
+          panel.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        this.announceToScreenReader(`Collaboration panel ${isActive ? 'closed' : 'opened'}`);
+        this.trackAnalyticsEvent('collaboration_toggled', { active: !isActive });
+      }
+
+      toggleTeacherDashboard() {
+        const dashboard = document.getElementById('teacher-dashboard');
+        const isActive = dashboard.classList.contains('active');
+        
+        if (isActive) {
+          dashboard.classList.remove('active');
+          this.collaboration.isTeacherMode = false;
+        } else {
+          dashboard.classList.add('active');
+          this.collaboration.isTeacherMode = true;
+          this.updateTeacherDashboard();
+          dashboard.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        this.announceToScreenReader(`Teacher dashboard ${isActive ? 'closed' : 'opened'}`);
+        this.trackAnalyticsEvent('teacher_dashboard_toggled', { active: !isActive });
+      }
+
+      updateSkillTreeDisplay() {
+        document.querySelectorAll('.skill-node').forEach(node => {
+          const skillName = node.dataset.skill;
+          const skill = this.findSkillByName(skillName);
+          const level = skill?.level || 0;
+          const maxLevel = skill?.maxLevel || 5;
+          const isUnlocked = Boolean(skill?.unlocked);
+          const isMastered = isUnlocked && level >= maxLevel;
+
+          node.classList.toggle('locked', !isUnlocked);
+          node.classList.toggle('unlocked', isUnlocked);
+          node.classList.toggle('mastered', isMastered);
+          node.dataset.label = `${level}/${maxLevel}`;
+          node.setAttribute(
+            'aria-label',
+            `${skillName} skill ${isUnlocked ? 'unlocked' : 'locked'} at level ${level} of ${maxLevel}`
+          );
+
+          let badge = node.querySelector('.skill-level');
+          if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'skill-level';
+            node.appendChild(badge);
+          }
+          badge.textContent = level;
+        });
+      }
+
+      updateAnalyticsDashboard() {
+        if (typeof Chart === 'undefined') {
+          return;
+        }
+
+        this.createProgressChart();
+        this.createDifficultyChart();
+        this.createTimeChart();
+      }
+
+      createProgressChart() {
+        try {
+          const ctx = document.getElementById('progress-chart');
+          if (ctx && typeof Chart !== 'undefined') {
+            if (this.progressChart) {
+              this.progressChart.destroy();
+            }
+            
+            this.progressChart = new Chart(ctx, {
+              type: 'radar',
+              data: {
+                labels: ['Hope', 'Courage', 'Wisdom', 'Leadership'],
+                datasets: [{
+                  label: 'Current Progress',
+                  data: [this.stats.hope, this.stats.courage, this.stats.wisdom, this.stats.leadership],
+                  fill: true,
+                  backgroundColor: 'rgba(30, 74, 107, 0.2)',
+                  borderColor: 'rgba(30, 74, 107, 1)',
+                  pointBackgroundColor: 'rgba(30, 74, 107, 1)',
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  r: {
+                    beginAtZero: true,
+                    max: 100
+                  }
+                }
+              }
+            });
+          }
+        } catch (error) {
+          console.error('Failed to create progress chart:', error);
+        }
+      }
+
+      createDifficultyChart() {
+        try {
+          const ctx = document.getElementById('difficulty-adaptation-chart');
+          if (!ctx || typeof Chart === 'undefined') {
+            return;
+          }
+
+          const progression = this.learningAnalytics.difficultyProgression;
+          const labels = progression.length
+            ? progression.map(point => point.label)
+            : ['Now'];
+          const data = progression.length
+            ? progression.map(point => point.level)
+            : [this.currentDifficulty === 'Advanced' ? 3 : this.currentDifficulty === 'Balanced' ? 2 : 1];
+
+          if (this.difficultyChart) {
+            this.difficultyChart.destroy();
+          }
+
+          this.difficultyChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels,
+              datasets: [{
+                label: 'Recommended Support Level',
+                data,
+                tension: 0.3,
+                fill: true,
+                backgroundColor: 'rgba(184, 81, 10, 0.15)',
+                borderColor: 'rgba(184, 81, 10, 1)',
+                pointBackgroundColor: 'rgba(184, 81, 10, 1)'
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  min: 1,
+                  max: 3,
+                  ticks: {
+                    callback(value) {
+                      return ['','Guided', 'Balanced', 'Advanced'][value] || value;
+                    }
+                  }
+                }
+              }
+            }
+          });
+        } catch (error) {
+          console.error('Failed to create difficulty chart:', error);
+        }
+      }
+
+      createTimeChart() {
+        try {
+          const ctx = document.getElementById('time-spent-chart');
+          if (!ctx || typeof Chart === 'undefined') {
+            return;
+          }
+
+          const sceneEvents = this.learningAnalytics.sessionData.filter(event => event.type === 'scene_completed');
+          const labels = sceneEvents.length
+            ? sceneEvents.map((_, index) => `Scene ${index + 1}`)
+            : [`Scene ${this.currentScene + 1}`];
+          const data = sceneEvents.length
+            ? sceneEvents.map(event => Number(((event.data?.timeSpent || 0) / 60000).toFixed(1)))
+            : [Number(((Date.now() - this.sceneStartTime) / 60000).toFixed(1))];
+
+          if (this.timeChart) {
+            this.timeChart.destroy();
+          }
+
+          this.timeChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels,
+              datasets: [{
+                label: 'Minutes Spent',
+                data,
+                backgroundColor: 'rgba(27, 94, 32, 0.7)',
+                borderColor: 'rgba(27, 94, 32, 1)',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          });
+        } catch (error) {
+          console.error('Failed to create time chart:', error);
+        }
+      }
+
+      initializeBoycottSimulation() {
+        this.busBoycottSim = {
+          day: this.busBoycottSim.day || 1,
+          participation: this.busBoycottSim.participation || 90,
+          cityRevenueLoss: this.busBoycottSim.cityRevenueLoss || 5,
+          busRidership: this.busBoycottSim.busRidership || 25,
+          events: this.busBoycottSim.events?.length ? this.busBoycottSim.events : [{
+            day: 1,
+            text: 'The community launches a disciplined boycott after Rosa Parks is arrested.'
+          }],
+          isActive: true
+        };
+        this.updateBoycottDisplay();
+      }
+
+      advanceBoycottSimulation(actionKey) {
+        const actions = {
+          churches: {
+            title: 'Mobilize Churches',
+            participation: 4,
+            cityRevenueLoss: 3,
+            busRidership: -3,
+            text: 'Church networks coordinate carpools and mass meetings, keeping morale high.'
+          },
+          carpool: {
+            title: 'Expand Carpools',
+            participation: 5,
+            cityRevenueLoss: 4,
+            busRidership: -4,
+            text: 'Volunteer drivers and dispatchers expand transportation alternatives across the city.'
+          },
+          negotiations: {
+            title: 'Pressure City Leaders',
+            participation: 2,
+            cityRevenueLoss: 5,
+            busRidership: -2,
+            text: 'Organized economic pressure forces officials and business leaders back to the negotiating table.'
+          }
+        };
+
+        const action = actions[actionKey];
+        if (!action || this.busBoycottSim.day >= 381) {
+          return;
+        }
+
+        this.busBoycottSim.day = Math.min(this.busBoycottSim.day + 30, 381);
+        this.busBoycottSim.participation = Math.min(this.busBoycottSim.participation + action.participation, 99);
+        this.busBoycottSim.cityRevenueLoss = Math.min(this.busBoycottSim.cityRevenueLoss + action.cityRevenueLoss, 85);
+        this.busBoycottSim.busRidership = Math.max(this.busBoycottSim.busRidership + action.busRidership, 8);
+        this.busBoycottSim.events.push({
+          day: this.busBoycottSim.day,
+          text: action.text
+        });
+
+        if (this.busBoycottSim.day === 381) {
+          this.busBoycottSim.events.push({
+            day: 381,
+            text: 'After 381 days, the Supreme Court ruling ends bus segregation in Montgomery.'
+          });
+        }
+
+        this.updateBoycottDisplay();
+        this.trackAnalyticsEvent('boycott_simulation_advanced', {
+          action: action.title,
+          day: this.busBoycottSim.day
+        });
+      }
+
+      updateBoycottDisplay() {
+        document.getElementById('boycott-day').textContent = this.busBoycottSim.day;
+        document.getElementById('boycott-participation').textContent = `${this.busBoycottSim.participation}%`;
+        document.getElementById('city-revenue-loss').textContent = `${Math.round(this.busBoycottSim.cityRevenueLoss)}%`;
+        document.getElementById('bus-ridership').textContent = `${this.busBoycottSim.busRidership}%`;
+
+        document.getElementById('boycott-events').innerHTML = `
+          <div class="boycott-log">
+            ${this.busBoycottSim.events.slice(-4).map(event => `
+              <div class="boycott-event">
+                <div class="boycott-event-day">Day ${event.day}</div>
+                <div>${event.text}</div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+
+        const simulationComplete = this.busBoycottSim.day >= 381;
+        document.getElementById('boycott-choices').innerHTML = simulationComplete
+          ? `
+            <div class="game-feedback success">
+              The boycott endures for 381 days and helps end bus segregation in Montgomery.
+            </div>
+          `
+          : `
+            <div class="boycott-actions">
+              <div class="boycott-action-card">
+                <h3>Mobilize Churches</h3>
+                <p>Strengthen turnout through weekly mass meetings and spiritual support.</p>
+                <button class="btn btn-secondary" onclick="gameInstance.advanceBoycottSimulation('churches')">Take Action</button>
+              </div>
+              <div class="boycott-action-card">
+                <h3>Expand Carpools</h3>
+                <p>Keep the community moving with coordinated rides and volunteer drivers.</p>
+                <button class="btn btn-secondary" onclick="gameInstance.advanceBoycottSimulation('carpool')">Take Action</button>
+              </div>
+              <div class="boycott-action-card">
+                <h3>Pressure City Leaders</h3>
+                <p>Combine legal pressure, discipline, and public visibility to force negotiations.</p>
+                <button class="btn btn-secondary" onclick="gameInstance.advanceBoycottSimulation('negotiations')">Take Action</button>
+              </div>
+            </div>
+          `;
+      }
+
+      updateCollaborationPanel() {
+        const peerList = document.getElementById('peer-list');
+        const shareOutput = document.getElementById('share-output');
+        const latestSession = this.collaboration.sharedSessions.at(-1) || null;
+        const latestShared = latestSession?.payload || null;
+
+        if (this.collaboration.connectedPeers.length === 0 && this.collaboration.sharedSessions.length === 0) {
+          peerList.innerHTML = `
+            <div class="peer-card">
+              <h3>No peers connected yet</h3>
+              <p>Invite classmates or share your current journey to start collaborating.</p>
+            </div>
+          `;
+        } else {
+          const peerCards = this.collaboration.connectedPeers.map(peer => `
+            <div class="peer-card">
+              <h3>${peer.name}</h3>
+              <p>Status: ${peer.status}</p>
+              <p>Joined: ${new Date(peer.timestamp).toLocaleDateString()}</p>
+            </div>
+          `);
+          const sharedCards = this.collaboration.sharedSessions.map(session => `
+            <div class="peer-card">
+              <h3>${session.name}</h3>
+              <p>Scene: ${(session.payload?.currentScene || 0) + 1}</p>
+              <p>Achievements: ${(session.payload?.achievements || []).length}</p>
+            </div>
+          `);
+          peerList.innerHTML = [...peerCards, ...sharedCards].join('');
+        }
+
+        if (latestShared) {
+          const shareUrl = latestSession?.shareUrl || this.buildShareUrl();
+          shareOutput.innerHTML = `
+            <p><strong>Latest shared scene:</strong> ${latestShared.currentSceneTitle}</p>
+            <input class="share-url" type="text" id="share-url-field" readonly value="${shareUrl}">
+            <button class="btn btn-primary" id="copy-share-btn">Copy Share Link</button>
+            <small>Anyone opening this link can preview the shared progress summary on their collaboration panel.</small>
+          `;
+
+          document.getElementById('copy-share-btn').addEventListener('click', async () => {
+            const field = document.getElementById('share-url-field');
+            field.select();
+            try {
+              await navigator.clipboard.writeText(field.value);
+              this.announceToScreenReader('Share link copied to clipboard');
+            } catch (error) {
+              document.execCommand('copy');
+              this.announceToScreenReader('Share link selected for copying');
+            }
+          });
+        } else {
+          shareOutput.innerHTML = `
+            <p>Generate a share link after making progress to compare journeys with classmates.</p>
+          `;
+        }
+      }
+
+      updateTeacherDashboard() {
+        const studentGrid = document.getElementById('student-grid');
+        const teacherSummary = document.getElementById('teacher-summary');
+        const learners = [{
+          name: 'Current Learner',
+          stats: this.stats,
+          achievements: this.achievements.length,
+          accuracy: this.questionsAnswered > 0 ? Math.round((this.correctAnswers / this.questionsAnswered) * 100) : 0,
+          scene: this.currentScene + 1
+        }, ...this.collaboration.sharedSessions.map(session => ({
+          name: session.name,
+          stats: session.payload?.stats || { hope: 0, courage: 0, wisdom: 0, leadership: 0 },
+          achievements: session.payload?.achievements?.length || 0,
+          accuracy: 0,
+          scene: (session.payload?.currentScene || 0) + 1
+        }))];
+
+        const averages = learners.reduce((accumulator, learner) => {
+          accumulator.achievements += learner.achievements;
+          accumulator.scene += learner.scene;
+          return accumulator;
+        }, { achievements: 0, scene: 0 });
+
+        teacherSummary.innerHTML = `
+          <div class="teacher-metric">Learners<strong>${learners.length}</strong></div>
+          <div class="teacher-metric">Avg. Scene<strong>${(averages.scene / learners.length).toFixed(1)}</strong></div>
+          <div class="teacher-metric">Avg. Achievements<strong>${(averages.achievements / learners.length).toFixed(1)}</strong></div>
+          <div class="teacher-metric">Current Difficulty<strong>${this.currentDifficulty}</strong></div>
+        `;
+
+        studentGrid.innerHTML = learners.map(learner => {
+          const total = Object.values(learner.stats).reduce((sum, value) => sum + value, 0);
+          return `
+            <div class="student-card">
+              <h3>${learner.name}</h3>
+              <p>Scene ${learner.scene}</p>
+              <p>Total Leadership Score: ${total}</p>
+              <p>Achievements: ${learner.achievements}</p>
+              <p>Accuracy: ${learner.accuracy}%</p>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Export Report Generation
+      async exportReport() {
+        try {
+          if (typeof jsPDF !== 'undefined') {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(20);
+            doc.text('MLK: Ultimate Legacy of Justice - Learning Report', 20, 30);
+            
+            doc.setFontSize(12);
+            doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 50);
+            doc.text(`Total Time Spent: ${Math.round(this.getTotalTimeSpentMs() / 60000)} minutes`, 20, 60);
+            
+            doc.text('Character Development:', 20, 80);
+            doc.text(`Hope: ${this.stats.hope}/100`, 30, 90);
+            doc.text(`Courage: ${this.stats.courage}/100`, 30, 100);
+            doc.text(`Wisdom: ${this.stats.wisdom}/100`, 30, 110);
+            doc.text(`Leadership: ${this.stats.leadership}/100`, 30, 120);
+            
+            doc.text('Achievements Earned:', 20, 140);
+            this.achievements.forEach((achievement, index) => {
+              doc.text(`• ${achievement}`, 30, 150 + (index * 10));
+            });
+            
+            doc.save('mlk-ultimate-learning-report.pdf');
+            
+            this.announceToScreenReader('Learning report exported as PDF');
+            this.trackAnalyticsEvent('report_exported', { format: 'pdf' });
+          }
+        } catch (error) {
+          console.error('Report export failed:', error);
+          this.announceToScreenReader('Report export failed');
+        }
+      }
+
+      // Session tracking
+      trackSessionStart() {
+        this.sessionId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString();
+        this.trackAnalyticsEvent('session_started', {
+          timestamp: this.sessionStartTime,
+          userAgent: navigator.userAgent
+        });
+      }
+
+      // Enhanced Scene Loading
+      async loadScene() {
+        if (this.currentScene >= this.scenes.length) {
+          this.showEnding();
+          return;
+        }
+
+        const scene = this.scenes[this.currentScene];
+        this.sceneStartTime = Date.now();
+        this.clearDisplays();
+        
+        document.getElementById('scene-title').textContent = scene.title;
+        document.getElementById('scene-location').textContent = scene.location;
+        const characterImage = document.getElementById('character-image');
+        characterImage.alt = `Portrait of ${scene.character.name}`;
+        this.attachImageFallback(characterImage, scene.character.name);
+        characterImage.src = scene.character.image;
+        
+        const characterNameElement = document.getElementById('character-name');
+        characterNameElement.textContent = scene.character.name;
+        characterNameElement.setAttribute('data-name', scene.character.name);
+        
+        // Handle additional images for MLK introduction scene
+        const sceneContent = document.querySelector('.scene-content');
+        const existingGallery = sceneContent.querySelector('.additional-images');
+        if (existingGallery) {
+          existingGallery.remove();
+        }
+        
+        if (scene.additionalImages && scene.additionalImages.length > 0) {
+          const gallery = document.createElement('div');
+          gallery.className = 'additional-images';
+          gallery.innerHTML = `
+            <div class="gallery-title">Historical Images of Dr. Martin Luther King Jr.</div>
+            ${scene.additionalImages.map((imgSrc, index) => `
+              <img src="${imgSrc}" alt="Historical image ${index + 1} of Dr. Martin Luther King Jr." loading="lazy" data-gallery-label="MLK ${index + 1}">
+            `).join('')}
+          `;
+          
+          const dialogueBox = document.getElementById('dialogue-box');
+          dialogueBox.parentNode.insertBefore(gallery, dialogueBox.nextSibling);
+
+          gallery.querySelectorAll('img').forEach(image => {
+            this.attachImageFallback(image, image.dataset.galleryLabel || 'MLK');
+          });
+        }
+
+        await this.typeText(document.getElementById('dialogue-text'), scene.character.dialogue);
+        
+        document.getElementById('finish-scene-btn').style.display = 'inline-block';
+        
+        if (scene.miniGame) {
+          setTimeout(() => {
+            this.showMiniGame(scene.miniGame);
+          }, 1000);
+        } else {
+          setTimeout(() => {
+            this.loadChoices(scene.choices);
+          }, 1000);
+        }
+        
+        if (scene.skillUnlocks) {
+          scene.skillUnlocks.forEach(skillName => {
+            const skill = this.findSkillByName(skillName);
+            if (skill) skill.unlocked = true;
+          });
+          this.updateSkillTreeDisplay();
+        }
+        
+        if (scene.busBoycottTrigger && !this.busBoycottSim.isActive) {
+          setTimeout(() => this.toggleBoycottSimulation(), 2000);
+        }
+        
+        this.trackAnalyticsEvent('scene_loaded', {
+          sceneId: scene.id,
+          sceneIndex: this.currentScene,
+          timestamp: this.sceneStartTime
+        });
+        
+        this.announceToScreenReader(`New scene: ${scene.title}. ${scene.character.name} is speaking.`);
+        document.getElementById('scene-container').focus();
+      }
+
+      findSkillByName(skillName) {
+        const aliases = {
+          philosophy: 'nonviolence'
+        };
+        const normalizedName = aliases[skillName] || skillName;
+
+        for (const category of Object.values(this.skillTree)) {
+          if (category[normalizedName]) {
+            return category[normalizedName];
+          }
+        }
+        return null;
+      }
+
+      // Enhanced Mini-Game System with Perfect Contrast
+      async showMiniGame(miniGame) {
+        const container = document.getElementById('mini-game-container');
+        const content = document.getElementById('mini-game-content');
+        
+        container.classList.add('active');
+        
+        switch (miniGame.type) {
+          case 'word-search':
+            this.createWordSearchGame(content, miniGame);
+            break;
+          case 'matching':
+            this.createMatchingGame(content, miniGame);
+            break;
+          case 'timeline':
+            this.createTimelineGame(content, miniGame);
+            break;
+          case 'quiz':
+            this.createQuizGame(content, miniGame);
+            break;
+        }
+        
+        this.announceToScreenReader(`Educational activity: ${miniGame.title}. ${miniGame.instructions}`);
+        this.trackAnalyticsEvent('mini_game_started', { type: miniGame.type });
+      }
+
+      // Enhanced Word Search with Perfect Contrast
+      createWordSearchGame(container, gameData) {
+        const gridSize = 12;
+        const letters = Array(gridSize).fill().map(() => Array(gridSize).fill(''));
+        const placedWords = [];
+        
+        // Place words strategically
+        const words = gameData.words || ["BOYCOTT", "JUSTICE", "FREEDOM", "EQUALITY", "PROTEST", "RIGHTS", "ROSA", "KING"];
+        
+        // BOYCOTT (horizontal, row 1)
+        const boycott = words[0] || "BOYCOTT";
+        for (let i = 0; i < boycott.length; i++) {
+          letters[1][i + 2] = boycott[i];
+        }
+        placedWords.push({ word: boycott, row: 1, col: 2, length: boycott.length, direction: 'horizontal' });
+        
+        // JUSTICE (horizontal, row 3)
+        const justice = words[1] || "JUSTICE";
+        for (let i = 0; i < justice.length; i++) {
+          letters[3][i + 1] = justice[i];
+        }
+        placedWords.push({ word: justice, row: 3, col: 1, length: justice.length, direction: 'horizontal' });
+        
+        // FREEDOM (horizontal, row 5)
+        const freedom = words[2] || "FREEDOM";
+        for (let i = 0; i < freedom.length; i++) {
+          letters[5][i + 3] = freedom[i];
+        }
+        placedWords.push({ word: freedom, row: 5, col: 3, length: freedom.length, direction: 'horizontal' });
+        
+        // EQUALITY (horizontal, row 7)
+        const equality = words[3] || "EQUALITY";
+        for (let i = 0; i < equality.length; i++) {
+          letters[7][i + 1] = equality[i];
+        }
+        placedWords.push({ word: equality, row: 7, col: 1, length: equality.length, direction: 'horizontal' });
+        
+        // Place remaining words
+        if (words.length > 4) {
+          const protest = words[4] || "PROTEST";
+          for (let i = 0; i < protest.length; i++) {
+            if (i + 2 < gridSize) letters[i + 2][10] = protest[i];
+          }
+          placedWords.push({ word: protest, row: 2, col: 10, length: protest.length, direction: 'vertical' });
+        }
+        
+        if (words.length > 5) {
+          const rights = words[5] || "RIGHTS";
+          for (let i = 0; i < rights.length; i++) {
+            if (i + 4 < gridSize) letters[9][i + 4] = rights[i];
+          }
+          placedWords.push({ word: rights, row: 9, col: 4, length: rights.length, direction: 'horizontal' });
+        }
+        
+        if (words.length > 6) {
+          const rosa = words[6] || "ROSA";
+          for (let i = 0; i < rosa.length; i++) {
+            if (i + 1 < gridSize) letters[i + 1][0] = rosa[i];
+          }
+          placedWords.push({ word: rosa, row: 1, col: 0, length: rosa.length, direction: 'vertical' });
+        }
+        
+        if (words.length > 7) {
+          const king = words[7] || "KING";
+          for (let i = 0; i < king.length; i++) {
+            if (i + 6 < gridSize) letters[11][i + 6] = king[i];
+          }
+          placedWords.push({ word: king, row: 11, col: 6, length: king.length, direction: 'horizontal' });
+        }
+
+        // Fill remaining with random letters
+        for (let row = 0; row < gridSize; row++) {
+          for (let col = 0; col < gridSize; col++) {
+            if (letters[row][col] === '') {
+              letters[row][col] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+            }
+          }
+        }
+
+        container.innerHTML = `
+          <h3 class="mini-game-title">${gameData.title}</h3>
+          <div class="mini-game-instructions">${gameData.instructions}</div>
+          <div class="word-search-grid" id="word-grid"></div>
+          <div class="word-list" id="word-list"></div>
+          <div id="word-search-feedback" class="game-feedback" style="display: none;"></div>
+          <div class="game-controls">
+            <button class="game-btn primary" onclick="gameInstance.skipMiniGame()">Skip Activity</button>
+            <button class="game-btn success" id="complete-word-search" style="display: none;" onclick="gameInstance.completeMiniGame()">Continue</button>
+          </div>
+        `;
+
+        const grid = document.getElementById('word-grid');
+        let foundWords = [];
+
+        for (let row = 0; row < gridSize; row++) {
+          for (let col = 0; col < gridSize; col++) {
+            const cell = document.createElement('div');
+            cell.className = 'word-search-cell';
+            cell.textContent = letters[row][col];
+            cell.dataset.row = row;
+            cell.dataset.col = col;
+            cell.addEventListener('click', () => this.handleWordSearchClick(cell, placedWords, foundWords, words));
+            grid.appendChild(cell);
+          }
+        }
+
+        const wordList = document.getElementById('word-list');
+        words.forEach(word => {
+          const wordItem = document.createElement('div');
+          wordItem.className = 'word-item';
+          wordItem.textContent = word;
+          wordItem.dataset.word = word;
+          wordList.appendChild(wordItem);
+        });
+
+        this.currentMiniGame = { 
+          type: 'word-search', 
+          placedWords, 
+          foundWords, 
+          totalWords: words.length,
+          letters: letters
+        };
+      }
+
+      handleWordSearchClick(cell, placedWords, foundWords, allWords) {
+        const row = parseInt(cell.dataset.row);
+        const col = parseInt(cell.dataset.col);
+
+        placedWords.forEach(placedWord => {
+          if (!foundWords.includes(placedWord.word)) {
+            let isPartOfWord = false;
+            
+            if (placedWord.direction === 'horizontal') {
+              isPartOfWord = row === placedWord.row && 
+                           col >= placedWord.col && 
+                           col < placedWord.col + placedWord.length;
+            } else if (placedWord.direction === 'vertical') {
+              isPartOfWord = col === placedWord.col && 
+                           row >= placedWord.row && 
+                           row < placedWord.row + placedWord.length;
+            }
+            
+            if (isPartOfWord) {
+              foundWords.push(placedWord.word);
+              this.currentMiniGame.foundWords = foundWords;
+              
+              // Highlight all cells of this word
+              if (placedWord.direction === 'horizontal') {
+                for (let i = 0; i < placedWord.length; i++) {
+                  const cellElement = document.querySelector(`[data-row="${placedWord.row}"][data-col="${placedWord.col + i}"]`);
+                  if (cellElement) cellElement.classList.add('found');
+                }
+              } else if (placedWord.direction === 'vertical') {
+                for (let i = 0; i < placedWord.length; i++) {
+                  const cellElement = document.querySelector(`[data-row="${placedWord.row + i}"][data-col="${placedWord.col}"]`);
+                  if (cellElement) cellElement.classList.add('found');
+                }
+              }
+              
+              // Mark word in list
+              const wordElement = document.querySelector(`[data-word="${placedWord.word}"]`);
+              if (wordElement) wordElement.classList.add('found');
+              
+              this.announceToScreenReader(`Found word: ${placedWord.word}`);
+              
+              const feedback = document.getElementById('word-search-feedback');
+              feedback.textContent = `Great! You found "${placedWord.word}"`;
+              feedback.className = 'game-feedback success';
+              feedback.style.display = 'block';
+              
+              if (foundWords.length === this.currentMiniGame.totalWords) {
+                setTimeout(() => {
+                  feedback.textContent = 'Excellent! All words found! 🎉';
+                  document.getElementById('complete-word-search').style.display = 'inline-block';
+                  this.announceToScreenReader('Congratulations! All words found. You can now continue.');
+                }, 500);
+              } else {
+                setTimeout(() => {
+                  feedback.style.display = 'none';
+                }, 2000);
+              }
+            }
+          }
+        });
+      }
+
+      // Enhanced Matching Game with Perfect Contrast
+      createMatchingGame(container, gameData) {
+        const shuffledLeft = [...gameData.pairs.map(p => p.left)].sort(() => Math.random() - 0.5);
+        const shuffledRight = [...gameData.pairs.map(p => p.right)].sort(() => Math.random() - 0.5);
+        
+        container.innerHTML = `
+          <h3 class="mini-game-title">${gameData.title}</h3>
+          <div class="mini-game-instructions">${gameData.instructions}</div>
+          <div class="matching-game">
+            <div class="matching-column" id="left-column"></div>
+            <div class="matching-connector">⟷</div>
+            <div class="matching-column" id="right-column"></div>
+          </div>
+          <div class="game-controls">
+            <button class="game-btn primary" onclick="gameInstance.skipMiniGame()">Skip Activity</button>
+            <button class="game-btn success" id="complete-matching" style="display: none;" onclick="gameInstance.completeMiniGame()">Continue</button>
+          </div>
+        `;
+
+        const leftColumn = document.getElementById('left-column');
+        const rightColumn = document.getElementById('right-column');
+        let selectedLeft = null;
+        let selectedRight = null;
+        let matches = [];
+
+        shuffledLeft.forEach(item => {
+          const element = document.createElement('div');
+          element.className = 'matching-item';
+          element.textContent = item;
+          element.dataset.item = item;
+          element.addEventListener('click', () => this.handleMatchingClick(element, 'left'));
+          leftColumn.appendChild(element);
+        });
+
+        shuffledRight.forEach(item => {
+          const element = document.createElement('div');
+          element.className = 'matching-item';
+          element.textContent = item;
+          element.dataset.item = item;
+          element.addEventListener('click', () => this.handleMatchingClick(element, 'right'));
+          rightColumn.appendChild(element);
+        });
+
+        this.currentMiniGame = { 
+          type: 'matching', 
+          pairs: gameData.pairs, 
+          matches,
+          selectedLeft, 
+          selectedRight,
+          totalPairs: gameData.pairs.length 
+        };
+      }
+
+      handleMatchingClick(element, side) {
+        if (element.classList.contains('matched')) return;
+
+        document.querySelectorAll('.matching-item.selected').forEach(el => el.classList.remove('selected'));
+
+        if (side === 'left') {
+          this.currentMiniGame.selectedLeft = element;
+          element.classList.add('selected');
+        } else {
+          this.currentMiniGame.selectedRight = element;
+          element.classList.add('selected');
+        }
+
+        if (this.currentMiniGame.selectedLeft && this.currentMiniGame.selectedRight) {
+          const leftItem = this.currentMiniGame.selectedLeft.dataset.item;
+          const rightItem = this.currentMiniGame.selectedRight.dataset.item;
+          
+          const correctPair = this.currentMiniGame.pairs.find(p => p.left === leftItem && p.right === rightItem);
+          
+          if (correctPair) {
+            this.currentMiniGame.selectedLeft.classList.add('matched');
+            this.currentMiniGame.selectedRight.classList.add('matched');
+            this.currentMiniGame.matches.push(correctPair);
+            this.announceToScreenReader(`Correct match: ${leftItem} with ${rightItem}`);
+            
+            if (this.currentMiniGame.matches.length === this.currentMiniGame.totalPairs) {
+              document.getElementById('complete-matching').style.display = 'inline-block';
+              this.announceToScreenReader('All matches complete! You can now continue.');
+            }
+          } else {
+            this.announceToScreenReader('Incorrect match. Try again.');
+            setTimeout(() => {
+              this.currentMiniGame.selectedLeft.classList.remove('selected');
+              this.currentMiniGame.selectedRight.classList.remove('selected');
+            }, 1000);
+          }
+          
+          this.currentMiniGame.selectedLeft = null;
+          this.currentMiniGame.selectedRight = null;
+        }
+      }
+
+      // Enhanced Timeline Game with Perfect Contrast
+      createTimelineGame(container, gameData) {
+        const shuffledEvents = [...gameData.events].sort(() => Math.random() - 0.5);
+        
+        container.innerHTML = `
+          <h3 class="mini-game-title">${gameData.title}</h3>
+          <div class="mini-game-instructions">${gameData.instructions}</div>
+          <div class="timeline-game">
+            <div class="timeline-events" id="timeline-events"></div>
+            <div id="timeline-dropzones"></div>
+          </div>
+          <div class="game-controls">
+            <button class="game-btn primary" onclick="gameInstance.skipMiniGame()">Skip Activity</button>
+            <button class="game-btn success" id="complete-timeline" style="display: none;" onclick="gameInstance.completeMiniGame()">Continue</button>
+          </div>
+        `;
+
+        const eventsContainer = document.getElementById('timeline-events');
+        const dropzonesContainer = document.getElementById('timeline-dropzones');
+
+        shuffledEvents.forEach(event => {
+          const element = document.createElement('div');
+          element.className = 'timeline-event';
+          element.textContent = event.text;
+          element.draggable = true;
+          element.dataset.order = event.order;
+          element.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', event.order);
+            element.classList.add('dragging');
+          });
+          element.addEventListener('dragend', () => element.classList.remove('dragging'));
+          eventsContainer.appendChild(element);
+        });
+
+        for (let i = 1; i <= gameData.events.length; i++) {
+          const dropzone = document.createElement('div');
+          dropzone.className = 'timeline-dropzone';
+          dropzone.textContent = `Position ${i}`;
+          dropzone.dataset.position = i;
+          dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('drag-over');
+          });
+          dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+          dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const order = e.dataTransfer.getData('text/plain');
+            this.handleTimelineDrop(dropzone, order, gameData.events);
+          });
+          dropzonesContainer.appendChild(dropzone);
+        }
+
+        this.currentMiniGame = { type: 'timeline', events: gameData.events, placed: [] };
+      }
+
+      handleTimelineDrop(dropzone, order, events) {
+        dropzone.classList.remove('drag-over');
+        
+        if (dropzone.classList.contains('filled')) return;
+
+        const position = parseInt(dropzone.dataset.position);
+        const eventOrder = parseInt(order);
+        const event = events.find(e => e.order === eventOrder);
+        
+        if (event) {
+          dropzone.classList.add('filled');
+          dropzone.textContent = event.text;
+          dropzone.dataset.order = eventOrder;
+          
+          document.querySelector(`[data-order="${order}"]`).style.display = 'none';
+          
+          this.currentMiniGame.placed.push({ position, order: eventOrder });
+          
+          if (this.currentMiniGame.placed.length === events.length) {
+            this.checkTimelineCompletion();
+          }
+        }
+      }
+
+      checkTimelineCompletion() {
+        const correct = this.currentMiniGame.placed.every(item => item.position === item.order);
+        
+        if (correct) {
+          document.getElementById('complete-timeline').style.display = 'inline-block';
+          this.announceToScreenReader('Timeline completed correctly! You can now continue.');
+        } else {
+          this.announceToScreenReader('Some events are in the wrong order. Try rearranging them.');
+        }
+      }
+
+      // Enhanced Quiz Game with Perfect Contrast
+      createQuizGame(container, gameData) {
+        let currentQuestion = 0;
+        let correctAnswers = 0;
+        
+        container.innerHTML = `
+          <h3 class="mini-game-title">${gameData.title}</h3>
+          <div class="mini-game-instructions">${gameData.instructions}</div>
+          <div id="quiz-content"></div>
+          <div class="game-controls">
+            <button class="game-btn primary" onclick="gameInstance.skipMiniGame()">Skip Activity</button>
+            <button class="game-btn success" id="complete-quiz" style="display: none;" onclick="gameInstance.completeMiniGame()">Continue</button>
+          </div>
+        `;
+
+        this.currentMiniGame = { 
+          type: 'quiz', 
+          questions: gameData.questions,
+          currentQuestion: 0,
+          correctAnswers: 0
+        };
+
+        this.showQuizQuestion();
+      }
+
+      showQuizQuestion() {
+        const quizContent = document.getElementById('quiz-content');
+        const question = this.currentMiniGame.questions[this.currentMiniGame.currentQuestion];
+        
+        quizContent.innerHTML = `
+          <div class="quiz-question">
+            <h4>Question ${this.currentMiniGame.currentQuestion + 1} of ${this.currentMiniGame.questions.length}</h4>
+            <p>${question.question}</p>
+            <div class="quiz-options" id="quiz-options"></div>
+            <div id="quiz-explanation" style="display: none;"></div>
+          </div>
+        `;
+
+        const optionsContainer = document.getElementById('quiz-options');
+        question.options.forEach((option, index) => {
+          const optionElement = document.createElement('div');
+          optionElement.className = 'quiz-option';
+          optionElement.textContent = option;
+          optionElement.addEventListener('click', () => this.handleQuizAnswer(index, question));
+          optionsContainer.appendChild(optionElement);
+        });
+      }
+
+      handleQuizAnswer(selectedIndex, question) {
+        const options = document.querySelectorAll('.quiz-option');
+        const explanation = document.getElementById('quiz-explanation');
+        
+        options.forEach((option, index) => {
+          option.style.pointerEvents = 'none';
+          if (index === question.correct) {
+            option.classList.add('correct');
+          } else if (index === selectedIndex && index !== question.correct) {
+            option.classList.add('incorrect');
+          }
+        });
+
+        if (selectedIndex === question.correct) {
+          this.currentMiniGame.correctAnswers++;
+          this.announceToScreenReader('Correct answer!');
+        } else {
+          this.announceToScreenReader('Incorrect answer.');
+        }
+
+        explanation.innerHTML = `<p><strong>Explanation:</strong> ${question.explanation}</p>`;
+        explanation.style.display = 'block';
+
+        setTimeout(() => {
+          this.currentMiniGame.currentQuestion++;
+          if (this.currentMiniGame.currentQuestion < this.currentMiniGame.questions.length) {
+            this.showQuizQuestion();
+          } else {
+            this.completeQuiz();
+          }
+        }, 3000);
+      }
+
+      completeQuiz() {
+        const quizContent = document.getElementById('quiz-content');
+        const score = this.currentMiniGame.correctAnswers;
+        const total = this.currentMiniGame.questions.length;
+        const percentage = Math.round((score / total) * 100);
+        
+        let feedbackClass = 'success';
+        let feedbackText = 'Excellent work!';
+        
+        if (percentage < 60) {
+          feedbackClass = 'failure';
+          feedbackText = 'Keep learning!';
+        } else if (percentage < 80) {
+          feedbackClass = 'partial';
+          feedbackText = 'Good job!';
+        }
+
+        quizContent.innerHTML = `
+          <div class="game-feedback ${feedbackClass}">
+            <h4>Quiz Complete!</h4>
+            <p>You scored ${score} out of ${total} (${percentage}%)</p>
+            <p>${feedbackText}</p>
+          </div>
+        `;
+
+        document.getElementById('complete-quiz').style.display = 'inline-block';
+        this.announceToScreenReader(`Quiz completed. You scored ${score} out of ${total}.`);
+      }
+
+      skipMiniGame() {
+        this.announceToScreenReader('Activity skipped. Loading choices.');
+        this.completeMiniGame();
+      }
+
+      completeMiniGame() {
+        document.getElementById('mini-game-container').classList.remove('active');
+        const scene = this.scenes[this.currentScene];
+        
+        // Award completion bonus
+        this.stats.wisdom += 1;
+        this.updateStats({});
+        
+        setTimeout(() => {
+          this.loadChoices(scene.choices);
+        }, 300);
+        
+        this.trackAnalyticsEvent('mini_game_completed', {
+          type: this.currentMiniGame?.type || 'unknown'
+        });
+      }
+
+      // Enhanced Choice System
+      loadChoices(choices) {
+        const choicesList = document.getElementById('choices-list');
+        choicesList.innerHTML = '';
+
+        choices.forEach((choice, index) => {
+          const button = document.createElement('button');
+          button.className = 'choice-btn';
+          button.textContent = choice.text;
+          button.setAttribute('role', 'button');
+          button.setAttribute('aria-describedby', `choice-${index}-description`);
+          
+          if (choice.isHistorical) {
+            button.classList.add('historical');
+            button.title = 'This choice reflects historical actions';
+          }
+          if (choice.isNonviolent) {
+            button.classList.add('nonviolent');
+            button.title = 'This choice follows nonviolent principles';
+          }
+
+          const isLocked = this.isChoiceLocked(choice);
+          button.disabled = isLocked;
+          
+          if (isLocked) {
+            button.title = 'Requirements not met for this choice';
+            button.setAttribute('aria-label', `${choice.text} (Requirements not met)`);
+          }
+
+          button.addEventListener('click', () => this.makeChoice(index));
+          choicesList.appendChild(button);
+        });
+
+        const firstAvailableChoice = choicesList.querySelector('button:not(:disabled)');
+        if (firstAvailableChoice) {
+          setTimeout(() => firstAvailableChoice.focus(), 100);
+        }
+      }
+
+      isChoiceLocked(choice) {
+        if (!choice.requires) return false;
+        
+        if (choice.requires.wisdom && this.stats.wisdom < choice.requires.wisdom) return true;
+        if (choice.requires.courage && this.stats.courage < choice.requires.courage) return true;
+        if (choice.requires.hope && this.stats.hope < choice.requires.hope) return true;
+        if (choice.requires.leadership && this.stats.leadership < choice.requires.leadership) return true;
+        if (choice.requires.item && !this.inventory.includes(choice.requires.item)) return true;
+        
+        return false;
+      }
+
+      async makeChoice(choiceIndex) {
+        const scene = this.scenes[this.currentScene];
+        const choice = scene.choices[choiceIndex];
+        const responseTime = Date.now() - this.sceneStartTime;
+        
+        this.trackAnalyticsEvent('choice_made', {
+          sceneId: scene.id,
+          choiceIndex,
+          choiceText: choice.text,
+          isHistorical: choice.isHistorical,
+          isNonviolent: choice.isNonviolent,
+          responseTime
+        });
+        
+        this.gameHistory.push({
+          scene: this.currentScene,
+          choice: choiceIndex,
+          isHistorical: choice.isHistorical,
+          isNonviolent: choice.isNonviolent,
+          timestamp: Date.now()
+        });
+
+        if (choice.stats) {
+          this.updateStats(choice.stats);
+        }
+
+        if (choice.skillPoints) {
+          this.updateSkillPoints(choice.skillPoints);
+        }
+
+        if (choice.item && !this.inventory.includes(choice.item)) {
+          this.inventory.push(choice.item);
+          this.updateInventory();
+          this.announceToScreenReader(`Item acquired: ${choice.item}`);
+        }
+
+        document.getElementById('choices-list').innerHTML = '';
+
+        if (choice.quote) {
+          await this.showQuote(choice.quote);
+        }
+
+        if (choice.historical) {
+          await this.showHistoricalContext(choice.historical);
+        }
+
+        if (scene.diaryEntry) {
+          await this.showDiaryEntry(scene.diaryEntry);
+        }
+
+        this.checkAchievements();
+
+        document.getElementById('next-btn').style.display = 'inline-block';
+        document.getElementById('next-btn').focus();
+        
+        this.questionsAnswered++;
+        if (choice.isHistorical) {
+          this.correctAnswers++;
+        }
+
+        this.learningAnalytics.responseTimeData.push({
+          label: `Scene ${this.currentScene + 1}`,
+          value: responseTime
+        });
+        this.currentDifficulty = this.calculateCurrentDifficulty();
+        this.learningAnalytics.difficultyProgression.push({
+          label: `Choice ${this.learningAnalytics.difficultyProgression.length + 1}`,
+          level: this.currentDifficulty === 'Advanced' ? 3 : this.currentDifficulty === 'Balanced' ? 2 : 1
+        });
+        this.updateLearningStats();
+      }
+
+      updateSkillPoints(skillPoints) {
+        Object.entries(skillPoints).forEach(([skillName, points]) => {
+          const skill = this.findSkillByName(skillName);
+          if (skill) {
+            if (!skill.unlocked) {
+              skill.unlocked = true;
+              this.announceToScreenReader(`${skillName} skill unlocked!`);
+            }
+            skill.level = Math.min(skill.level + points, skill.maxLevel);
+          }
+        });
+        
+        this.updateSkillTreeDisplay();
+        this.trackAnalyticsEvent('skill_points_updated', skillPoints);
+      }
+
+      async showQuote(quote) {
+        const quoteDisplay = document.getElementById('quote-display');
+        quoteDisplay.innerHTML = `<p>"${quote}"</p><cite>— Dr. Martin Luther King Jr.</cite>`;
+        quoteDisplay.classList.add('active');
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      async showHistoricalContext(context) {
+        const historicalContext = document.getElementById('historical-context');
+        historicalContext.innerHTML = `<h4>Historical Context</h4><p>${context}</p>`;
+        historicalContext.classList.add('active');
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      async showDiaryEntry(entry) {
+        const diaryEntry = document.getElementById('diary-entry');
+        await this.typeText(diaryEntry, entry, 20);
+        diaryEntry.classList.add('active');
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      async typeText(element, text, speed = 30) {
+        element.textContent = '';
+        element.classList.add('typewriter');
+        
+        for (let i = 0; i < text.length; i++) {
+          element.textContent += text.charAt(i);
+          await new Promise(resolve => setTimeout(resolve, speed));
+        }
+        
+        element.classList.remove('typewriter');
+      }
+
+      clearDisplays() {
+        const elementsToHide = [
+          'quote-display', 'historical-context', 'diary-entry', 
+          'mini-game-container', 'skill-tree-container', 
+          'bus-boycott-sim', 'analytics-dashboard',
+          'teacher-dashboard', 'collaboration-panel', 'references-section'
+        ];
+        
+        elementsToHide.forEach(elementId => {
+          const element = document.getElementById(elementId);
+          if (element) {
+            element.classList.remove('active');
+          }
+        });
+        
+        const choicesContainer = document.getElementById('choices-list');
+        if (choicesContainer) {
+          choicesContainer.innerHTML = '';
+        }
+
+        // Remove additional images gallery
+        const existingGallery = document.querySelector('.additional-images');
+        if (existingGallery) {
+          existingGallery.remove();
+        }
+      }
+
+      // Enhanced Stats System
+      updateStats(changes) {
+        Object.entries(changes).forEach(([stat, change]) => {
+          if (change === 0) return;
+          
+          const oldValue = this.stats[stat];
+          this.stats[stat] = Math.max(0, Math.min(100, this.stats[stat] + change));
+          
+          const bar = document.getElementById(`${stat}-bar`);
+          const value = document.getElementById(`${stat}-value`);
+          const progressBar = bar.parentElement;
+          
+          const startWidth = parseFloat(bar.style.width) || 0;
+          const endWidth = this.stats[stat];
+          const startTime = Date.now();
+          const duration = 500;
+          
+          const animate = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const currentWidth = startWidth + (endWidth - startWidth) * progress;
+            
+            bar.style.width = `${currentWidth}%`;
+            value.textContent = Math.round(currentWidth);
+            progressBar.setAttribute('aria-valuenow', Math.round(currentWidth));
+            
+            if (progress < 1) {
+              requestAnimationFrame(animate);
+            }
+          };
+          
+          animate();
+          
+          if (Math.abs(change) >= 3) {
+            this.announceToScreenReader(`${stat} ${change > 0 ? 'increased' : 'decreased'} by ${Math.abs(change)} to ${this.stats[stat]}`);
+          }
+          
+          this.trackAnalyticsEvent('stat_changed', {
+            stat,
+            oldValue,
+            newValue: this.stats[stat],
+            change
+          });
+        });
+      }
+
+      updateInventory() {
+        const inventoryList = document.getElementById('inventory-list');
+        if (this.inventory.length === 0) {
+          inventoryList.innerHTML = '<p>Your comprehensive journey begins with hope, determination, and advanced learning tools.</p>';
+        } else {
+          inventoryList.innerHTML = this.inventory.map(item => 
+            `<div class="inventory-item" role="listitem">${item}</div>`
+          ).join('');
+        }
+      }
+
+      updateAchievements() {
+        const achievementsList = document.getElementById('achievements-list');
+        if (this.achievements.length === 0) {
+          achievementsList.innerHTML = '<p>🏆 Ultimate achievements will be earned through strategic choices, learning milestones, and historical accuracy.</p>';
+        } else {
+          achievementsList.innerHTML = this.achievements.map(achievement => 
+            `<div class="achievement-item" role="listitem">🏆 ${achievement}</div>`
+          ).join('');
+        }
+      }
+
+      checkAchievements() {
+        const newAchievements = [];
+
+        // Stat-based achievements
+        if (this.stats.hope >= 30 && !this.achievements.includes('Beacon of Hope')) {
+          newAchievements.push('Beacon of Hope');
+        }
+        if (this.stats.courage >= 30 && !this.achievements.includes('Fearless Leader')) {
+          newAchievements.push('Fearless Leader');
+        }
+        if (this.stats.wisdom >= 30 && !this.achievements.includes('Strategic Mind')) {
+          newAchievements.push('Strategic Mind');
+        }
+        if (this.stats.leadership >= 20 && !this.achievements.includes('Natural Leader')) {
+          newAchievements.push('Natural Leader');
+        }
+
+        // Behavioral achievements
+        const historicalChoices = this.gameHistory.filter(choice => choice.isHistorical).length;
+        const nonviolentChoices = this.gameHistory.filter(choice => choice.isNonviolent).length;
+
+        if (historicalChoices >= 4 && !this.achievements.includes('Historical Scholar')) {
+          newAchievements.push('Historical Scholar');
+        }
+        if (nonviolentChoices === this.gameHistory.length && this.gameHistory.length >= 4 && 
+            !this.achievements.includes('Committed Peacemaker')) {
+          newAchievements.push('Committed Peacemaker');
+        }
+
+        // Collection achievements
+        if (this.inventory.length >= 3 && !this.achievements.includes('Resourceful Organizer')) {
+          newAchievements.push('Resourceful Organizer');
+        }
+
+        // Special achievements
+        if (this.currentScene >= 3 && !this.achievements.includes('Dream Speaker')) {
+          newAchievements.push('Dream Speaker');
+        }
+        if (this.currentScene >= 4 && !this.achievements.includes('Voting Rights Champion')) {
+          newAchievements.push('Voting Rights Champion');
+        }
+        if (this.currentScene >= 5 && !this.achievements.includes('Economic Justice Advocate')) {
+          newAchievements.push('Economic Justice Advocate');
+        }
+
+        newAchievements.forEach(achievement => {
+          this.achievements.push(achievement);
+          this.announceToScreenReader(`Achievement unlocked: ${achievement}`);
+          this.trackAnalyticsEvent('achievement_unlocked', { achievement });
+        });
+
+        if (newAchievements.length > 0) {
+          this.updateAchievements();
+        }
+      }
+
+      // Navigation and Control Methods
+      finishCurrentScene() {
+        if (this.currentScene < this.scenes.length - 1) {
+          this.nextScene();
+        } else {
+          this.showEnding();
+        }
+      }
+
+      nextScene() {
+        this.trackAnalyticsEvent('scene_completed', {
+          sceneIndex: this.currentScene,
+          timeSpent: Date.now() - this.sceneStartTime || 0
+        });
+        
+        this.currentScene++;
+        this.clearDisplays();
+        document.getElementById('next-btn').style.display = 'none';
+        document.getElementById('finish-scene-btn').style.display = 'none';
+        
+        setTimeout(() => {
+          this.loadScene();
+        }, 300);
+      }
+
+      // Enhanced Ending System
+      showEnding() {
+        const total = this.stats.hope + this.stats.courage + this.stats.wisdom + this.stats.leadership;
+        let endingTitle, endingDescription;
+
+        if (total >= 80 && this.achievements.includes('Committed Peacemaker')) {
+          endingTitle = "Legendary Civil Rights Leader";
+          endingDescription = "Your strategic wisdom, unwavering commitment to nonviolence, and exceptional leadership have created a lasting legacy. You embody the highest ideals of the Civil Rights Movement and Dr. King's vision of the beloved community.";
+        } else if (total >= 60 && this.achievements.length >= 6) {
+          endingTitle = "Inspiring Movement Leader";
+          endingDescription = "Through thoughtful strategy and persistent action, you have advanced the cause of justice and equality. Your journey reflects the complexity and courage required for meaningful social change.";
+        } else if (total >= 40) {
+          endingTitle = "Dedicated Civil Rights Activist";
+          endingDescription = "You have made important contributions to the struggle for equality and justice. Your commitment and learning provide a foundation for continued growth and impact in the movement.";
+        } else {
+          endingTitle = "Emerging Leader";
+          endingDescription = "Every great leader begins with learning and growth. Your experience has provided valuable insights into the complexity of social change and the importance of strategic thinking in pursuing justice.";
+        }
+
+        const endingScreen = document.getElementById('ending-screen');
+        document.getElementById('ending-description').textContent = endingDescription;
+        endingScreen.querySelector('.ending-title').textContent = endingTitle;
+        endingScreen.style.display = 'block';
+
+        const achievementsSummary = document.getElementById('achievements-summary');
+        achievementsSummary.innerHTML = this.achievements.map(achievement => 
+          `<div class="achievement-badge">🏆<br>${achievement}</div>`
+        ).join('');
+
+        document.querySelector('.main-content').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+        document.getElementById('finish-scene-btn').style.display = 'none';
+        document.getElementById('save-btn').style.display = 'none';
+        document.getElementById('load-btn').style.display = 'none';
+        document.getElementById('restart-btn').style.display = 'inline-block';
+
+        this.announceToScreenReader(`Journey complete. You achieved the rank of ${endingTitle}. ${this.achievements.length} achievements earned.`);
+        
+        this.trackAnalyticsEvent('game_completed', {
+          endingTitle,
+          totalStats: total,
+          achievements: this.achievements.length,
+          timeSpent: this.getTotalTimeSpentMs()
+        });
+        
+        setTimeout(() => document.getElementById('restart-btn').focus(), 1000);
+      }
+
+      // Enhanced Save/Load System
+      async saveGame() {
+        const gameState = {
+          currentScene: this.currentScene,
+          stats: { ...this.stats },
+          inventory: [...this.inventory],
+          achievements: [...this.achievements],
+          gameHistory: [...this.gameHistory],
+          skillTree: JSON.parse(JSON.stringify(this.skillTree)),
+          learningAnalytics: this.learningAnalytics,
+          busBoycottSim: this.busBoycottSim,
+          collaboration: this.collaboration,
+          currentDifficulty: this.currentDifficulty,
+          totalTimeSpent: this.getTotalTimeSpentMs(),
+          questionsAnswered: this.questionsAnswered,
+          correctAnswers: this.correctAnswers,
+          timestamp: new Date().toISOString()
+        };
+
+        try {
+          await this.idbAdd('sessions', gameState);
+          
+          localStorage.setItem('mlk_ultimate_save', JSON.stringify(gameState));
+          
+          this.announceToScreenReader('Ultimate game progress saved successfully');
+          this.trackAnalyticsEvent('game_saved', { method: 'indexeddb_and_localstorage' });
+          
+          const saveBtn = document.getElementById('save-btn');
+          const originalText = saveBtn.textContent;
+          saveBtn.textContent = 'Saved!';
+          saveBtn.style.background = 'var(--success-green)';
+          setTimeout(() => {
+            saveBtn.textContent = originalText;
+            saveBtn.style.background = '';
+          }, 2000);
+        } catch (error) {
+          console.error('Save failed:', error);
+          this.announceToScreenReader('Save failed - please try again');
+          this.trackAnalyticsEvent('save_failed', { error: error.message });
+        }
+      }
+
+      async loadGame() {
+        try {
+          let gameState = null;
+          const sessions = await this.idbGetAll('sessions');
+          if (sessions.length > 0) {
+            gameState = sessions[sessions.length - 1];
+          }
+
+          if (!gameState) {
+            const saved = localStorage.getItem('mlk_ultimate_save');
+            if (saved) {
+              gameState = JSON.parse(saved);
+            } else {
+              this.announceToScreenReader('No saved game found');
+              return;
+            }
+          }
+
+          this.applyGameState(gameState);
+        } catch (error) {
+          console.error('Load failed:', error);
+          this.announceToScreenReader('Load failed - save file may be corrupted');
+          this.trackAnalyticsEvent('load_failed', { error: error.message });
+        }
+      }
+
+      applyGameState(gameState) {
+        this.currentScene = gameState.currentScene || 0;
+        this.stats = gameState.stats || { hope: 0, courage: 0, wisdom: 0, leadership: 0 };
+        this.inventory = gameState.inventory || [];
+        this.achievements = gameState.achievements || [];
+        this.gameHistory = gameState.gameHistory || [];
+        this.skillTree = gameState.skillTree || this.initializeSkillTree();
+        this.totalTimeSpent = gameState.totalTimeSpent || 0;
+        this.questionsAnswered = gameState.questionsAnswered || 0;
+        this.correctAnswers = gameState.correctAnswers || 0;
+        
+        if (gameState.learningAnalytics) {
+          this.learningAnalytics = gameState.learningAnalytics;
+        }
+        
+        if (gameState.busBoycottSim) {
+          this.busBoycottSim = gameState.busBoycottSim;
+        }
+
+        if (gameState.collaboration) {
+          this.collaboration = gameState.collaboration;
+        }
+
+        if (gameState.currentDifficulty) {
+          this.currentDifficulty = gameState.currentDifficulty;
+        }
+
+        this.sessionStartTime = Date.now();
+
+        this.updateAllDisplays();
+
+        if (this.currentScene < this.scenes.length) {
+          this.loadScene();
+          document.querySelector('.main-content').style.display = 'block';
+          document.getElementById('ending-screen').style.display = 'none';
+          document.getElementById('next-btn').style.display = 'none';
+          document.getElementById('finish-scene-btn').style.display = 'none';
+          document.getElementById('save-btn').style.display = 'inline-block';
+          document.getElementById('load-btn').style.display = 'inline-block';
+          document.getElementById('restart-btn').style.display = 'inline-block';
+        } else {
+          this.showEnding();
+        }
+
+        this.announceToScreenReader(`Game loaded from ${new Date(gameState.timestamp).toLocaleDateString()}`);
+        this.trackAnalyticsEvent('game_loaded', { 
+          sceneIndex: this.currentScene,
+          totalStats: Object.values(this.stats).reduce((a, b) => a + b, 0)
+        });
+      }
+
+      restartGame() {
+        if (confirm('Are you sure you want to restart your journey? All progress will be lost.')) {
+          this.currentScene = 0;
+          this.stats = { hope: 0, courage: 0, wisdom: 0, leadership: 0 };
+          this.inventory = [];
+          this.achievements = [];
+          this.gameHistory = [];
+          this.skillTree = this.initializeSkillTree();
+          this.collaboration.isTeacherMode = false;
+          this.totalTimeSpent = 0;
+          this.sessionStartTime = Date.now();
+          this.questionsAnswered = 0;
+          this.correctAnswers = 0;
+          this.currentDifficulty = 'Guided';
+
+          this.updateAllDisplays();
+
+          document.querySelector('.main-content').style.display = 'block';
+          document.getElementById('ending-screen').style.display = 'none';
+          document.getElementById('next-btn').style.display = 'none';
+          document.getElementById('finish-scene-btn').style.display = 'none';
+          document.getElementById('save-btn').style.display = 'inline-block';
+          document.getElementById('load-btn').style.display = 'inline-block';
+          document.getElementById('restart-btn').style.display = 'inline-block';
+
+          this.clearDisplays();
+          this.loadScene();
+          this.announceToScreenReader('Game restarted. Beginning new comprehensive journey through the Civil Rights Movement.');
+          this.trackAnalyticsEvent('game_restarted', {});
+        }
+      }
+
+      updateAllDisplays() {
+        this.renderStatPanels();
+        this.updateInventory();
+        this.updateAchievements();
+        this.updateSkillTreeDisplay();
+        this.updateLearningStats();
+
+        if (document.getElementById('analytics-dashboard').classList.contains('active')) {
+          this.updateAnalyticsDashboard();
+        }
+        if (document.getElementById('bus-boycott-sim').classList.contains('active')) {
+          this.updateBoycottDisplay();
+        }
+        if (document.getElementById('collaboration-panel').classList.contains('active')) {
+          this.updateCollaborationPanel();
+        }
+        if (document.getElementById('teacher-dashboard').classList.contains('active')) {
+          this.updateTeacherDashboard();
+        }
+      }
+
+      updateLearningStats() {
+        const totalTimeSpent = this.getTotalTimeSpentMs();
+        const sessionTime = Math.round(totalTimeSpent / 60000);
+        this.currentDifficulty = this.calculateCurrentDifficulty();
+
+        document.getElementById('time-spent').textContent = `${sessionTime} min`;
+        document.getElementById('questions-answered').textContent = this.questionsAnswered;
+        
+        const accuracy = this.questionsAnswered > 0 ? 
+          Math.round((this.correctAnswers / this.questionsAnswered) * 100) : 0;
+        document.getElementById('accuracy-rate').textContent = `${accuracy}%`;
+        document.getElementById('current-difficulty').textContent = this.currentDifficulty;
+      }
+
+      // Enhanced Keyboard Navigation
+      handleKeyboardNavigation(e) {
+        if (e.key === 's' || e.key === 'S') {
+          if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+            document.getElementById('main-content').focus();
+            e.preventDefault();
+          }
+        }
+
+        if (e.ctrlKey && e.key === 's') {
+          e.preventDefault();
+          this.saveGame();
+        }
+
+        if (e.ctrlKey && e.key === 'l') {
+          e.preventDefault();
+          this.loadGame();
+        }
+
+        if (e.ctrlKey && e.key === 'a') {
+          e.preventDefault();
+          this.toggleAnalytics();
+        }
+      }
+
+      // Collaboration stub methods
+      invitePeer() {
+        const peerName = prompt('Enter your friend\'s name to invite them:')?.trim();
+        if (peerName) {
+          this.collaboration.connectedPeers.push({
+            name: peerName,
+            status: 'invited',
+            timestamp: Date.now()
+          });
+          
+          this.announceToScreenReader(`Invitation sent to ${peerName}`);
+          this.trackAnalyticsEvent('peer_invited', { peerName });
+          this.updateCollaborationPanel();
+        }
+      }
+
+      shareProgress() {
+        const payload = this.buildSharePayload();
+        const shareUrl = this.buildShareUrl();
+        this.collaboration.sharedSessions.push({
+          name: 'Shared Journey',
+          payload,
+          shareUrl,
+          importedAt: Date.now()
+        });
+        this.updateCollaborationPanel();
+        this.announceToScreenReader('Share link ready');
+        this.trackAnalyticsEvent('progress_shared', { method: 'share_link' });
+      }
+    }
+
+    // Global game instance
+    let gameInstance;
+
+    // Initialize the ultimate game
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        try {
+          gameInstance = new UltimateMLKGame();
+          console.log('Ultimate MLK Game initialized successfully');
+        } catch (error) {
+          console.error('Error initializing ultimate game:', error);
+          setTimeout(() => {
+            try {
+              gameInstance = new UltimateMLKGame();
+            } catch (e) {
+              console.error('Fallback initialization failed:', e);
+            }
+          }, 1000);
+        }
+      }, 100);
+    });
+
+    // PWA Installation Support
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      
+      const installButton = document.createElement('button');
+      installButton.textContent = '📱 Install App';
+      installButton.className = 'btn btn-primary';
+      installButton.style.position = 'fixed';
+      installButton.style.bottom = '20px';
+      installButton.style.right = '20px';
+      installButton.style.zIndex = '1000';
+      
+      installButton.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          console.log(`PWA install prompt outcome: ${outcome}`);
+          deferredPrompt = null;
+          installButton.remove();
+        }
+      });
+      
+      document.body.appendChild(installButton);
+    });
+  </script>
+</body>
+</html>

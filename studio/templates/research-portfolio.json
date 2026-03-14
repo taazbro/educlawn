@@ -1,0 +1,87 @@
+{
+  "id": "research-portfolio",
+  "label": "Research Portfolio",
+  "description": "A cited local research portfolio for essays, panels, and document interpretation.",
+  "project_type": "research_portfolio",
+  "category": "research",
+  "supports_simulation": false,
+  "layout_direction": "editorial_columns",
+  "export_targets": [
+    "static_site",
+    "pdf_report",
+    "project_bundle"
+  ],
+  "starter_prompts": [
+    "What claim is the portfolio defending?",
+    "Which documents matter most?",
+    "Who is the intended reviewer?"
+  ],
+  "theme_tokens": {
+    "accent": "#23527a",
+    "ink": "#1f1b16",
+    "paper": "#f7f2e8",
+    "font_display": "Iowan Old Style",
+    "font_body": "Georgia",
+    "motion_style": "subtle reveal"
+  },
+  "sections": [
+    {
+      "section_id": "claim",
+      "title": "Research Claim",
+      "objective": "State the argument or inquiry."
+    },
+    {
+      "section_id": "source-matrix",
+      "title": "Source Matrix",
+      "objective": "Compare and classify sources."
+    },
+    {
+      "section_id": "analysis",
+      "title": "Analysis",
+      "objective": "Interpret evidence and connect themes."
+    },
+    {
+      "section_id": "bibliography",
+      "title": "Annotated Bibliography",
+      "objective": "Track citations and takeaways."
+    }
+  ],
+  "workflow": [
+    {
+      "stage_id": "ingest",
+      "label": "Ingest",
+      "description": "Extract and index uploaded sources.",
+      "enabled": true
+    },
+    {
+      "stage_id": "retrieve",
+      "label": "Retrieve",
+      "description": "Rank evidence for the project goals.",
+      "enabled": true
+    },
+    {
+      "stage_id": "cite",
+      "label": "Cite",
+      "description": "Attach provenance to sections.",
+      "enabled": true
+    },
+    {
+      "stage_id": "plan",
+      "label": "Plan",
+      "description": "Build the project graph and outline.",
+      "enabled": true
+    },
+    {
+      "stage_id": "design",
+      "label": "Design",
+      "description": "Apply theme and presentation tokens.",
+      "enabled": true
+    },
+    {
+      "stage_id": "export",
+      "label": "Export",
+      "description": "Generate local project bundles.",
+      "enabled": true
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "id": "museum-exhibit-site",
+  "label": "Museum Exhibit Site",
+  "description": "A local exhibit builder for captions, object labels, timelines, and curator notes.",
+  "project_type": "museum_exhibit_site",
+  "category": "museum",
+  "supports_simulation": false,
+  "layout_direction": "gallery_grid",
+  "export_targets": [
+    "static_site",
+    "pdf_report",
+    "project_bundle"
+  ],
+  "starter_prompts": [
+    "Which objects or sources anchor the exhibit?",
+    "What story should each gallery room tell?",
+    "How should visitors move through it?"
+  ],
+  "theme_tokens": {
+    "accent": "#47674f",
+    "ink": "#1d201b",
+    "paper": "#f2eee3",
+    "font_display": "Baskerville",
+    "font_body": "Spectral",
+    "motion_style": "gallery fade"
+  },
+  "sections": [
+    {
+      "section_id": "curator-note",
+      "title": "Curator Note",
+      "objective": "Frame the exhibit thesis."
+    },
+    {
+      "section_id": "gallery",
+      "title": "Gallery",
+      "objective": "Present sources as artifacts with captions."
+    },
+    {
+      "section_id": "timeline",
+      "title": "Timeline",
+      "objective": "Show chronology and movement across rooms."
+    },
+    {
+      "section_id": "visitor-guide",
+      "title": "Visitor Guide",
+      "objective": "Support interpretation and reflection."
+    }
+  ],
+  "workflow": [
+    {
+      "stage_id": "ingest",
+      "label": "Ingest",
+      "description": "Extract and index uploaded sources.",
+      "enabled": true
+    },
+    {
+      "stage_id": "retrieve",
+      "label": "Retrieve",
+      "description": "Rank evidence for the project goals.",
+      "enabled": true
+    },
+    {
+      "stage_id": "cite",
+      "label": "Cite",
+      "description": "Attach provenance to sections.",
+      "enabled": true
+    },
+    {
+      "stage_id": "plan",
+      "label": "Plan",
+      "description": "Build the project graph and outline.",
+      "enabled": true
+    },
+    {
+      "stage_id": "design",
+      "label": "Design",
+      "description": "Apply theme and presentation tokens.",
+      "enabled": true
+    },
+    {
+      "stage_id": "export",
+      "label": "Export",
+      "description": "Generate local project bundles.",
+      "enabled": true
+    }
+  ]
+}

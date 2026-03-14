@@ -1,0 +1,87 @@
+{
+  "id": "reading-intervention-path",
+  "label": "Reading Intervention Path",
+  "description": "A scaffolded literacy support project with reading-level adaptation, evidence checks, and teacher review.",
+  "project_type": "reading_intervention",
+  "category": "literacy",
+  "supports_simulation": false,
+  "layout_direction": "support_track",
+  "export_targets": [
+    "static_site",
+    "pdf_report",
+    "project_bundle"
+  ],
+  "starter_prompts": [
+    "Which reading skill needs support?",
+    "What evidence will students annotate?",
+    "How should teacher scaffolds appear?"
+  ],
+  "theme_tokens": {
+    "accent": "#47609b",
+    "ink": "#1a2238",
+    "paper": "#f2f5fb",
+    "font_display": "Century Schoolbook",
+    "font_body": "Atkinson Hyperlegible",
+    "motion_style": "guided steps"
+  },
+  "sections": [
+    {
+      "section_id": "focus",
+      "title": "Skill Focus",
+      "objective": "Define the reading target and support need."
+    },
+    {
+      "section_id": "text-set",
+      "title": "Text Set",
+      "objective": "Organize leveled materials and annotations."
+    },
+    {
+      "section_id": "practice",
+      "title": "Practice Sequence",
+      "objective": "Guide scaffolded reading moves and checks."
+    },
+    {
+      "section_id": "reflection",
+      "title": "Growth Reflection",
+      "objective": "Track student progress and teacher notes."
+    }
+  ],
+  "workflow": [
+    {
+      "stage_id": "ingest",
+      "label": "Ingest",
+      "description": "Extract and index uploaded sources.",
+      "enabled": true
+    },
+    {
+      "stage_id": "retrieve",
+      "label": "Retrieve",
+      "description": "Rank evidence for the project goals.",
+      "enabled": true
+    },
+    {
+      "stage_id": "cite",
+      "label": "Cite",
+      "description": "Attach provenance to sections.",
+      "enabled": true
+    },
+    {
+      "stage_id": "plan",
+      "label": "Plan",
+      "description": "Build the project graph and outline.",
+      "enabled": true
+    },
+    {
+      "stage_id": "design",
+      "label": "Design",
+      "description": "Apply theme and presentation tokens.",
+      "enabled": true
+    },
+    {
+      "stage_id": "export",
+      "label": "Export",
+      "description": "Generate local project bundles.",
+      "enabled": true
+    }
+  ]
+}

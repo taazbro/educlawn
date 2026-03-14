@@ -1,0 +1,105 @@
+version: "1.0"
+product:
+  name: EduClaw
+  source_shape: OpenClaw
+  source_import_path: /Users/tanjim/Downloads/openclaw
+  license_reference: MIT
+school:
+  name: Roosevelt High
+  classroom_title: Civics 2A
+  teacher_name: Ms. Rivera
+  subject: Civics
+  grade_band: Grades 9-10
+  classroom_id: classroom-example
+  assignment_id: assignment-example
+gateway:
+  mode: local-first
+  bind: 127.0.0.1
+  pairing_policy: required
+  session_isolation: classroom-role-thread
+  allowed_channels:
+    - webchat
+    - googlechat
+    - msteams
+    - slack
+    - discord
+  blocked_features:
+    - phone-control
+    - voice-call
+    - talk-voice
+    - browser-control
+    - public-dm-automation
+    - silent-external-send
+roles:
+  teacher:
+    agents:
+      - lesson-planner
+      - rubric-designer
+      - feedback-coach
+      - classroom-analyst
+    tools:
+      - classroom_read
+      - assignment_read
+      - teacher_feedback
+      - approval_queue
+      - audit_review
+  student:
+    agents:
+      - project-coach
+      - research-coach
+      - citation-tutor
+      - revision-tutor
+      - study-planner
+    tools:
+      - approved_evidence_search
+      - citation_map
+      - project_compile
+      - local_export
+  shared:
+    agents:
+      - approval-guard
+      - audit-reporter
+      - evidence-librarian
+    tools:
+      - approval_queue
+      - audit_review
+      - classroom_read
+tools:
+  allow:
+    - classroom_read
+    - assignment_read
+    - approved_evidence_search
+    - project_compile
+    - citation_map
+    - teacher_feedback
+    - approval_queue
+    - audit_review
+    - local_export
+  deny:
+    - shell
+    - exec
+    - spawn
+    - sessions_spawn
+    - sessions_send
+    - gateway
+    - cron
+    - browser_navigation
+    - public_publish
+    - external_messaging
+    - fs_delete
+    - fs_move
+skills:
+  source_count: 0
+  enabled_skill_packs:
+    - summarize
+    - canvas
+    - nano-pdf
+    - session-logs
+templates:
+  primary_template_id: research-portfolio
+  registry:
+    - lesson-module
+    - research-portfolio
+    - mlk-legacy-lab
+    - science-fair-lab
+    - debate-prep-kit

@@ -1,45 +1,31 @@
-# MLK Legacy Intelligence Backend
+# Civic Project Studio Backend
 
-FastAPI service for:
+FastAPI service for two parallel product layers:
 
-- ingesting learner profiles and telemetry
-- engineering cohort features through SQLAlchemy + pandas
-- training narrative-path and engagement-risk models
-- serving analytics dashboards, local agents, admin auth, workflow orchestration, mission planning, and recommendation APIs
+- the existing MLK intelligence platform with analytics, temporal learner modeling, experimentation, graph context, and benchmark workflows
+- the new generic project studio engine for document ingestion, provenance, graph compilation, local agents, and export
 
-Local agents included:
+## Studio Capabilities
 
-- `mentor`
-- `strategist`
-- `historian`
-- `planner`
-- `operations` (admin-only briefing)
+- project creation from typed manifests
+- local document extraction for text, HTML, PDF, and optional image OCR through `tesseract`
+- per-project vector search using TF-IDF + SVD embeddings
+- knowledge-graph compilation from uploaded sources
+- agent artifact generation for research, planning, writing, citation, design, QA, teacher review, and export
+- static site, React scaffold, PDF, and zipped bundle export
+- optional local-LLM refinement via an Ollama-compatible endpoint
 
-Advanced local-agent features:
+## Existing MLK Intelligence Capabilities
 
-- persistent agent memory stored in the database
-- local hybrid retrieval with offline embeddings and vector search
-- temporal learner modeling across persisted sessions
-- local knowledge graph context for scene and theme reasoning
-- experiment-policy assignment and metrics
-- mission plan persistence with checkpoints and fallback branches
-- benchmark reporting and event-pipeline logging
-- scheduled benchmark evaluation jobs in the workflow orchestrator
-- learner memory endpoint at `/api/v1/agents/memory/{learner_id}`
+- learner warehouse snapshots
+- recommendation and engagement-risk models
+- local mentor, strategist, historian, planner, and operations agents
+- temporal learner modeling
+- experimentation policy assignment and metrics
+- benchmark reporting and scheduled evaluation jobs
+- admin workflow orchestration
 
-Advanced API surfaces:
-
-- `POST /api/v1/planner/run`
-- `GET /api/v1/planner/latest/{learner_id}`
-- `GET /api/v1/temporal/learner/{learner_id}`
-- `GET /api/v1/graph/context`
-- `POST /api/v1/experiments/recommend`
-- `GET /api/v1/admin/pipeline/events`
-- `GET /api/v1/admin/experiments/metrics`
-- `POST /api/v1/admin/benchmarks/run`
-- `GET /api/v1/admin/benchmarks/latest`
-
-Run locally:
+## Run Locally
 
 ```bash
 cd backend
@@ -47,9 +33,24 @@ uv sync
 uv run uvicorn app.main:app --reload
 ```
 
-Environment variables:
+## Core Studio Endpoints
 
-- `MLK_DATABASE_URL` for PostgreSQL or alternate SQLite targets
+- `GET /api/v1/studio/overview`
+- `GET /api/v1/studio/templates`
+- `GET /api/v1/studio/agents/catalog`
+- `GET /api/v1/studio/projects`
+- `POST /api/v1/studio/projects`
+- `POST /api/v1/studio/projects/{slug}/documents`
+- `POST /api/v1/studio/projects/{slug}/search`
+- `GET /api/v1/studio/projects/{slug}/graph`
+- `POST /api/v1/studio/projects/{slug}/compile`
+- `GET /api/v1/studio/projects/{slug}/artifacts`
+- `GET /api/v1/studio/projects/{slug}/download/{export_type}`
+
+## Important Environment Variables
+
+- `MLK_DATABASE_URL`
+- `MLK_DB_PATH`
 - `MLK_ADMIN_USERNAME`
 - `MLK_ADMIN_PASSWORD`
 - `MLK_AUTH_SECRET`
@@ -57,3 +58,10 @@ Environment variables:
 - `MLK_ETL_INTERVAL_SECONDS`
 - `MLK_RETRAIN_INTERVAL_SECONDS`
 - `MLK_BENCHMARK_INTERVAL_SECONDS`
+- `MLK_STUDIO_ROOT`
+- `MLK_STUDIO_TEMPLATE_DIR`
+- `MLK_COMMUNITY_ROOT`
+- `MLK_LOCAL_LLM_MODEL`
+- `MLK_LOCAL_LLM_BASE_URL`
+- `MLK_EAGER_MODEL_TRAINING`
+- `MLK_MODEL_CACHE_DIR`

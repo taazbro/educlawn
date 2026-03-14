@@ -1,0 +1,88 @@
+{
+  "id": "documentary-story",
+  "label": "Documentary Story Project",
+  "description": "A documentary-style story with acts, scenes, evidence captions, and a printable brief.",
+  "project_type": "documentary_story",
+  "category": "storytelling",
+  "supports_simulation": false,
+  "layout_direction": "scene_scroll",
+  "export_targets": [
+    "static_site",
+    "react_app",
+    "pdf_report",
+    "project_bundle"
+  ],
+  "starter_prompts": [
+    "What is the opening scene?",
+    "Which voices carry the story?",
+    "How should evidence appear on screen?"
+  ],
+  "theme_tokens": {
+    "accent": "#304b41",
+    "ink": "#151515",
+    "paper": "#f1ede7",
+    "font_display": "Cormorant Garamond",
+    "font_body": "Libre Baskerville",
+    "motion_style": "cinematic panels"
+  },
+  "sections": [
+    {
+      "section_id": "opening",
+      "title": "Opening Scene",
+      "objective": "Introduce stakes and voice."
+    },
+    {
+      "section_id": "acts",
+      "title": "Acts",
+      "objective": "Sequence the story into evidence-backed beats."
+    },
+    {
+      "section_id": "voices",
+      "title": "Voices and Sources",
+      "objective": "Show perspectives and citations."
+    },
+    {
+      "section_id": "closing",
+      "title": "Closing Reflection",
+      "objective": "Resolve the narrative and extend meaning."
+    }
+  ],
+  "workflow": [
+    {
+      "stage_id": "ingest",
+      "label": "Ingest",
+      "description": "Extract and index uploaded sources.",
+      "enabled": true
+    },
+    {
+      "stage_id": "retrieve",
+      "label": "Retrieve",
+      "description": "Rank evidence for the project goals.",
+      "enabled": true
+    },
+    {
+      "stage_id": "cite",
+      "label": "Cite",
+      "description": "Attach provenance to sections.",
+      "enabled": true
+    },
+    {
+      "stage_id": "plan",
+      "label": "Plan",
+      "description": "Build the project graph and outline.",
+      "enabled": true
+    },
+    {
+      "stage_id": "design",
+      "label": "Design",
+      "description": "Apply theme and presentation tokens.",
+      "enabled": true
+    },
+    {
+      "stage_id": "export",
+      "label": "Export",
+      "description": "Generate local project bundles.",
+      "enabled": true
+    }
+  ]
+}

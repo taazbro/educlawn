@@ -1,0 +1,11 @@
+{
+  "id": "standards-mapper",
+  "label": "Standards Mapper Pack",
+  "version": "0.1.0",
+  "description": "Adds curriculum-alignment metadata and standards-aware rubric extensions.",
+  "capabilities": [
+    "rubrics",
+    "teacher_review",
+    "metadata"
+  ]
+}

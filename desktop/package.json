@@ -1,0 +1,171 @@
+{
+  "name": "civic-project-studio-desktop",
+  "private": true,
+  "version": "0.3.0",
+  "description": "Electron desktop shell for Civic Project Studio.",
+  "author": "taazbro",
+  "main": "main.mjs",
+  "type": "module",
+  "scripts": {
+    "prepare:assets": "node ./scripts/prepare-assets.mjs",
+    "build:ui": "npm --prefix ../frontend run build:desktop",
+    "build:backend": "node ./scripts/build-backend.mjs",
+    "dev": "npm run prepare:assets && npm run build:ui && node ./scripts/run-electron.mjs",
+    "pack": "npm run prepare:assets && npm run build:ui && npm run build:backend && node ./scripts/run-builder.mjs --dir",
+    "dist": "npm run prepare:assets && npm run build:ui && npm run build:backend && node ./scripts/run-builder.mjs",
+    "dist:mac": "npm run prepare:assets && npm run build:ui && npm run build:backend && node ./scripts/run-builder.mjs --mac dmg zip",
+    "dist:win": "npm run prepare:assets && npm run build:ui && npm run build:backend && node ./scripts/run-builder.mjs --win nsis portable",
+    "dist:linux": "npm run prepare:assets && npm run build:ui && npm run build:backend && node ./scripts/run-builder.mjs --linux AppImage deb"
+  },
+  "dependencies": {
+    "electron-updater": "^6.6.2"
+  },
+  "devDependencies": {
+    "electron": "^37.3.1",
+    "electron-builder": "^26.0.12",
+    "png-to-ico": "^2.1.8",
+    "sharp": "^0.34.4"
+  },
+  "build": {
+    "appId": "com.taazbro.civicprojectstudio",
+    "productName": "Civic Project Studio",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.mjs",
+      "preload.mjs",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "backend-dist/**"
+    ],
+    "extraResources": [
+      {
+        "from": "../backend/dist",
+        "to": "backend-dist"
+      },
+      {
+        "from": "../frontend/dist",
+        "to": "frontend_dist"
+      },
+      {
+        "from": "../studio",
+        "to": "studio"
+      },
+      {
+        "from": "../community",
+        "to": "community"
+      },
+      {
+        "from": "../Legacy_of_Justice.html",
+        "to": "Legacy_of_Justice.html"
+      },
+      {
+        "from": "../desktop/RELEASE_NOTES.md",
+        "to": "RELEASE_NOTES.md"
+      },
+      {
+        "from": "../desktop/bootstrap",
+        "to": "desktop-bootstrap"
+      }
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "taazbro",
+        "repo": "Martin_luther_king",
+        "releaseType": "release"
+      }
+    ],
+    "protocols": [
+      {
+        "name": "EduClaw Link",
+        "schemes": [
+          "educlaw"
+        ]
+      }
+    ],
+    "fileAssociations": [
+      {
+        "ext": "cpsbundle",
+        "name": "Civic Project Studio Bundle",
+        "description": "EduClaw/Civic Project Studio local project bundle",
+        "role": "Editor"
+      }
+    ],
+    "mac": {
+      "icon": "icon.icns",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.inherit.plist",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.education"
+    },
+    "dmg": {
+      "writeUpdateInfo": true,
+      "contents": [
+        {
+          "x": 140,
+          "y": 220
+        },
+        {
+          "x": 420,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "win": {
+      "icon": "icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true
+    },
+    "linux": {
+      "icon": "build",
+      "category": "Education",
+      "mimeTypes": [
+        "application/x-cpsbundle",
+        "x-scheme-handler/educlaw"
+      ],
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "desktop": {
+        "entry": {
+          "StartupWMClass": "Civic Project Studio",
+          "MimeType": "application/x-cpsbundle;x-scheme-handler/educlaw;"
+        }
+      }
+    }
+  }
+}

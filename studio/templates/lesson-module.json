@@ -1,0 +1,87 @@
+{
+  "id": "lesson-module",
+  "label": "Lesson Module",
+  "description": "A teacher-ready lesson module with objectives, evidence, activities, and review prompts.",
+  "project_type": "lesson_module",
+  "category": "education",
+  "supports_simulation": false,
+  "layout_direction": "lesson_stack",
+  "export_targets": [
+    "static_site",
+    "pdf_report",
+    "project_bundle"
+  ],
+  "starter_prompts": [
+    "What standard or skill does this lesson target?",
+    "How should students interact with the evidence?",
+    "What assessment closes the lesson?"
+  ],
+  "theme_tokens": {
+    "accent": "#6f4f9b",
+    "ink": "#1c1730",
+    "paper": "#f5effb",
+    "font_display": "Book Antiqua",
+    "font_body": "Atkinson Hyperlegible",
+    "motion_style": "minimal"
+  },
+  "sections": [
+    {
+      "section_id": "objectives",
+      "title": "Objectives",
+      "objective": "Define the learning target and skills."
+    },
+    {
+      "section_id": "materials",
+      "title": "Materials",
+      "objective": "List evidence, tools, and setup."
+    },
+    {
+      "section_id": "activities",
+      "title": "Activities",
+      "objective": "Describe the lesson sequence."
+    },
+    {
+      "section_id": "assessment",
+      "title": "Assessment",
+      "objective": "Explain how understanding is checked."
+    }
+  ],
+  "workflow": [
+    {
+      "stage_id": "ingest",
+      "label": "Ingest",
+      "description": "Extract and index uploaded sources.",
+      "enabled": true
+    },
+    {
+      "stage_id": "retrieve",
+      "label": "Retrieve",
+      "description": "Rank evidence for the project goals.",
+      "enabled": true
+    },
+    {
+      "stage_id": "cite",
+      "label": "Cite",
+      "description": "Attach provenance to sections.",
+      "enabled": true
+    },
+    {
+      "stage_id": "plan",
+      "label": "Plan",
+      "description": "Build the project graph and outline.",
+      "enabled": true
+    },
+    {
+      "stage_id": "design",
+      "label": "Design",
+      "description": "Apply theme and presentation tokens.",
+      "enabled": true
+    },
+    {
+      "stage_id": "export",
+      "label": "Export",
+      "description": "Generate local project bundles.",
+      "enabled": true
+    }
+  ]
+}

@@ -13,6 +13,16 @@ dist/
 # Local data artifacts
 backend/data_artifacts/*.sqlite3
 backend/data_artifacts/*.db
+backend/data_artifacts/model_cache/
+backend/build/
+backend/dist/
+backend/*.spec
+desktop/bootstrap/
+desktop/build/icon.icns
+desktop/build/icon.png
+desktop/build/icon.iconset/
+desktop/release/
+studio_workspace/
 
 # Logs
 *.log

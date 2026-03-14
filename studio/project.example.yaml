@@ -1,0 +1,17 @@
+version: "1.0"
+title: Neighborhood Memory Archive
+summary: A local-first civic project assembled from uploaded documents and community evidence.
+topic: Neighborhood memory, public history, and local civic action
+audience: Middle and high school students
+template_id: documentary-story
+local_mode: no-llm
+goals:
+  - Explain the issue
+  - Curate source evidence
+  - Build an interactive local project
+rubric:
+  - Evidence Quality
+  - Clarity
+  - Audience Fit
+  - Design
+  - Revision Quality

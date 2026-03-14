@@ -1,0 +1,87 @@
+{
+  "id": "science-fair-lab",
+  "label": "Science Fair Lab",
+  "description": "A local science fair builder for hypotheses, methods, data visuals, and evidence-backed conclusions.",
+  "project_type": "science_fair_project",
+  "category": "science",
+  "supports_simulation": false,
+  "layout_direction": "lab_notebook",
+  "export_targets": [
+    "static_site",
+    "pdf_report",
+    "project_bundle"
+  ],
+  "starter_prompts": [
+    "What question is being tested?",
+    "Which evidence proves the result?",
+    "How should students present the method?"
+  ],
+  "theme_tokens": {
+    "accent": "#2e6e62",
+    "ink": "#162029",
+    "paper": "#eef6f2",
+    "font_display": "Avenir Next",
+    "font_body": "IBM Plex Sans",
+    "motion_style": "measured reveal"
+  },
+  "sections": [
+    {
+      "section_id": "question",
+      "title": "Research Question",
+      "objective": "State the problem and hypothesis."
+    },
+    {
+      "section_id": "method",
+      "title": "Method",
+      "objective": "Explain procedure, controls, and materials."
+    },
+    {
+      "section_id": "results",
+      "title": "Results",
+      "objective": "Show findings, tables, and evidence."
+    },
+    {
+      "section_id": "conclusion",
+      "title": "Conclusion",
+      "objective": "Interpret the results and next steps."
+    }
+  ],
+  "workflow": [
+    {
+      "stage_id": "ingest",
+      "label": "Ingest",
+      "description": "Extract and index uploaded sources.",
+      "enabled": true
+    },
+    {
+      "stage_id": "retrieve",
+      "label": "Retrieve",
+      "description": "Rank evidence for the project goals.",
+      "enabled": true
+    },
+    {
+      "stage_id": "cite",
+      "label": "Cite",
+      "description": "Attach provenance to sections.",
+      "enabled": true
+    },
+    {
+      "stage_id": "plan",
+      "label": "Plan",
+      "description": "Build the project graph and outline.",
+      "enabled": true
+    },
+    {
+      "stage_id": "design",
+      "label": "Design",
+      "description": "Apply theme and presentation tokens.",
+      "enabled": true
+    },
+    {
+      "stage_id": "export",
+      "label": "Export",
+      "description": "Generate local project bundles.",
+      "enabled": true
+    }
+  ]
+}

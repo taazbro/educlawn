@@ -1,0 +1,88 @@
+{
+  "id": "civic-campaign-simulator",
+  "label": "Civic Campaign Simulator",
+  "description": "A branching local simulator for strategy, public messaging, and tradeoff analysis.",
+  "project_type": "civic_campaign_simulator",
+  "category": "simulation",
+  "supports_simulation": true,
+  "layout_direction": "decision_map",
+  "export_targets": [
+    "static_site",
+    "react_app",
+    "pdf_report",
+    "project_bundle"
+  ],
+  "starter_prompts": [
+    "What civic problem are students navigating?",
+    "Which decisions should branch?",
+    "What evidence should constrain choices?"
+  ],
+  "theme_tokens": {
+    "accent": "#8f321f",
+    "ink": "#1e3547",
+    "paper": "#f6ede1",
+    "font_display": "Palatino",
+    "font_body": "Source Sans 3",
+    "motion_style": "branch transitions"
+  },
+  "sections": [
+    {
+      "section_id": "brief",
+      "title": "Challenge Brief",
+      "objective": "Introduce the decision environment."
+    },
+    {
+      "section_id": "stakeholders",
+      "title": "Stakeholders",
+      "objective": "Map competing interests and constraints."
+    },
+    {
+      "section_id": "branches",
+      "title": "Decision Branches",
+      "objective": "Turn evidence into branching choices."
+    },
+    {
+      "section_id": "debrief",
+      "title": "Debrief",
+      "objective": "Explain outcomes and learning signals."
+    }
+  ],
+  "workflow": [
+    {
+      "stage_id": "ingest",
+      "label": "Ingest",
+      "description": "Extract and index uploaded sources.",
+      "enabled": true
+    },
+    {
+      "stage_id": "retrieve",
+      "label": "Retrieve",
+      "description": "Rank evidence for the project goals.",
+      "enabled": true
+    },
+    {
+      "stage_id": "cite",
+      "label": "Cite",
+      "description": "Attach provenance to sections.",
+      "enabled": true
+    },
+    {
+      "stage_id": "plan",
+      "label": "Plan",
+      "description": "Build the project graph and outline.",
+      "enabled": true
+    },
+    {
+      "stage_id": "design",
+      "label": "Design",
+      "description": "Apply theme and presentation tokens.",
+      "enabled": true
+    },
+    {
+      "stage_id": "export",
+      "label": "Export",
+      "description": "Generate local project bundles.",
+      "enabled": true
+    }
+  ]
+}

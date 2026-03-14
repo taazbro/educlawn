@@ -1,0 +1,87 @@
+{
+  "id": "debate-prep-kit",
+  "label": "Debate Prep Kit",
+  "description": "A structured debate builder for claims, rebuttals, evidence cards, and speaking notes.",
+  "project_type": "debate_preparation",
+  "category": "civics",
+  "supports_simulation": true,
+  "layout_direction": "argument_map",
+  "export_targets": [
+    "static_site",
+    "pdf_report",
+    "project_bundle"
+  ],
+  "starter_prompts": [
+    "What resolution is being debated?",
+    "Which evidence supports each side?",
+    "How should rebuttals be organized?"
+  ],
+  "theme_tokens": {
+    "accent": "#7b3a24",
+    "ink": "#1d1f23",
+    "paper": "#f8f1ea",
+    "font_display": "Plantin",
+    "font_body": "Merriweather Sans",
+    "motion_style": "argument cascade"
+  },
+  "sections": [
+    {
+      "section_id": "resolution",
+      "title": "Resolution",
+      "objective": "Frame the debate question and position."
+    },
+    {
+      "section_id": "case",
+      "title": "Case Construction",
+      "objective": "Build claims and supporting evidence."
+    },
+    {
+      "section_id": "rebuttal",
+      "title": "Rebuttal Bank",
+      "objective": "Prepare responses to opposing arguments."
+    },
+    {
+      "section_id": "delivery",
+      "title": "Speaking Notes",
+      "objective": "Convert evidence into usable speaking points."
+    }
+  ],
+  "workflow": [
+    {
+      "stage_id": "ingest",
+      "label": "Ingest",
+      "description": "Extract and index uploaded sources.",
+      "enabled": true
+    },
+    {
+      "stage_id": "retrieve",
+      "label": "Retrieve",
+      "description": "Rank evidence for the project goals.",
+      "enabled": true
+    },
+    {
+      "stage_id": "cite",
+      "label": "Cite",
+      "description": "Attach provenance to sections.",
+      "enabled": true
+    },
+    {
+      "stage_id": "plan",
+      "label": "Plan",
+      "description": "Build the project graph and outline.",
+      "enabled": true
+    },
+    {
+      "stage_id": "design",
+      "label": "Design",
+      "description": "Apply theme and presentation tokens.",
+      "enabled": true
+    },
+    {
+      "stage_id": "export",
+      "label": "Export",
+      "description": "Generate local project bundles.",
+      "enabled": true
+    }
+  ]
+}

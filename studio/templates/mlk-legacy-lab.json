@@ -1,0 +1,88 @@
+{
+  "id": "mlk-legacy-lab",
+  "label": "MLK Legacy Lab",
+  "description": "An interactive civil-rights learning experience with analytics, historical evidence, and local mission planning.",
+  "project_type": "interactive_history_app",
+  "category": "history",
+  "supports_simulation": true,
+  "layout_direction": "immersive_story_panels",
+  "export_targets": [
+    "static_site",
+    "react_app",
+    "pdf_report",
+    "project_bundle"
+  ],
+  "starter_prompts": [
+    "Which movement scene anchors the project?",
+    "What should students understand by the end?",
+    "Which sources must be preserved as evidence?"
+  ],
+  "theme_tokens": {
+    "accent": "#cf7f2e",
+    "ink": "#1e3547",
+    "paper": "#f8f1e3",
+    "font_display": "Baskerville",
+    "font_body": "Source Serif",
+    "motion_style": "staggered archival reveal"
+  },
+  "sections": [
+    {
+      "section_id": "introduction",
+      "title": "Introduction",
+      "objective": "Frame the core historical question."
+    },
+    {
+      "section_id": "timeline",
+      "title": "Timeline",
+      "objective": "Show chronology and turning points."
+    },
+    {
+      "section_id": "evidence",
+      "title": "Evidence Gallery",
+      "objective": "Display cited documents and annotations."
+    },
+    {
+      "section_id": "reflection",
+      "title": "Reflection",
+      "objective": "Connect the history to civic understanding."
+    }
+  ],
+  "workflow": [
+    {
+      "stage_id": "ingest",
+      "label": "Ingest",
+      "description": "Extract and index uploaded sources.",
+      "enabled": true
+    },
+    {
+      "stage_id": "retrieve",
+      "label": "Retrieve",
+      "description": "Rank evidence for the project goals.",
+      "enabled": true
+    },
+    {
+      "stage_id": "cite",
+      "label": "Cite",
+      "description": "Attach provenance to sections.",
+      "enabled": true
+    },
+    {
+      "stage_id": "plan",
+      "label": "Plan",
+      "description": "Build the project graph and outline.",
+      "enabled": true
+    },
+    {
+      "stage_id": "design",
+      "label": "Design",
+      "description": "Apply theme and presentation tokens.",
+      "enabled": true
+    },
+    {
+      "stage_id": "export",
+      "label": "Export",
+      "description": "Generate local project bundles.",
+      "enabled": true
+    }
+  ]
+}

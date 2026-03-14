@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import pickle
 from datetime import UTC, datetime
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -15,8 +17,10 @@ from app.services.warehouse import WarehouseService
 
 
 class LearningIntelligenceService:
-    def __init__(self, warehouse: WarehouseService) -> None:
+    def __init__(self, warehouse: WarehouseService, cache_dir: Path | None = None) -> None:
         self.warehouse = warehouse
+        self.cache_dir = cache_dir
+        self.cache_path = cache_dir / "ml_bundle.pkl" if cache_dir is not None else None
         self.path_pipeline: Pipeline | None = None
         self.risk_pipeline: Pipeline | None = None
         self.cluster_scaler: StandardScaler | None = None
@@ -24,6 +28,14 @@ class LearningIntelligenceService:
         self.cluster_labels: dict[int, str] = {}
         self.training_rows = 0
         self.trained_at = ""
+        self.loaded_from_cache = False
+        if self.cache_dir is not None:
+            self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self._restore_cached_models()
+
+    @property
+    def is_trained(self) -> bool:
+        return bool(self.path_pipeline and self.risk_pipeline and self.cluster_model and self.cluster_scaler)
 
     def train_models(self) -> dict[str, object]:
         sessions = build_feature_frame(self.warehouse.fetch_sessions_frame())
@@ -55,6 +67,8 @@ class LearningIntelligenceService:
 
         self.training_rows = len(sessions)
         self.trained_at = datetime.now(UTC).isoformat()
+        self.loaded_from_cache = False
+        self._save_cached_models()
         return self.get_model_summary()
 
     def _name_clusters(self, sessions: pd.DataFrame, labels: np.ndarray) -> dict[int, str]:
@@ -75,8 +89,12 @@ class LearningIntelligenceService:
         return mapping
 
     def get_model_summary(self) -> dict[str, object]:
-        if self.path_pipeline is None or self.risk_pipeline is None:
-            return {"trained": False}
+        if not self.is_trained:
+            return {
+                "trained": False,
+                "cache_path": str(self.cache_path) if self.cache_path is not None else "",
+                "loaded_from_cache": False,
+            }
 
         path_model = self.path_pipeline.named_steps["model"]
         coefficients = np.abs(path_model.coef_).mean(axis=0)
@@ -96,13 +114,15 @@ class LearningIntelligenceService:
             "trained": True,
             "trained_at": self.trained_at,
             "training_rows": self.training_rows,
+            "loaded_from_cache": self.loaded_from_cache,
+            "cache_path": str(self.cache_path) if self.cache_path is not None else "",
             "path_classes": [str(label) for label in path_model.classes_],
             "risk_classes": [str(label) for label in self.risk_pipeline.named_steps["model"].classes_],
             "top_features": top_features,
         }
 
     def evaluate_profile(self, profile: LearnerProfile) -> dict[str, object]:
-        if self.path_pipeline is None or self.risk_pipeline is None or self.cluster_model is None or self.cluster_scaler is None:
+        if not self.is_trained:
             self.train_models()
 
         feature_row = build_feature_row(profile.model_dump())
@@ -218,3 +238,41 @@ class LearningIntelligenceService:
         if predicted_path == "movement_builder" and float(features["coalition_index"]) > 75:
             return "Poor People's Campaign"
         return "March on Washington"
+
+    def _restore_cached_models(self) -> None:
+        if self.cache_path is None or not self.cache_path.exists():
+            return
+
+        try:
+            payload = pickle.loads(self.cache_path.read_bytes())
+        except Exception:
+            return
+
+        self.path_pipeline = payload.get("path_pipeline")
+        self.risk_pipeline = payload.get("risk_pipeline")
+        self.cluster_scaler = payload.get("cluster_scaler")
+        self.cluster_model = payload.get("cluster_model")
+        self.cluster_labels = {
+            int(key): str(value)
+            for key, value in dict(payload.get("cluster_labels", {})).items()
+        }
+        self.training_rows = int(payload.get("training_rows", 0))
+        self.trained_at = str(payload.get("trained_at", ""))
+        self.loaded_from_cache = self.is_trained
+
+    def _save_cached_models(self) -> None:
+        if self.cache_path is None or not self.is_trained:
+            return
+
+        payload = {
+            "path_pipeline": self.path_pipeline,
+            "risk_pipeline": self.risk_pipeline,
+            "cluster_scaler": self.cluster_scaler,
+            "cluster_model": self.cluster_model,
+            "cluster_labels": self.cluster_labels,
+            "training_rows": self.training_rows,
+            "trained_at": self.trained_at,
+        }
+        temporary_path = self.cache_path.with_suffix(".tmp")
+        temporary_path.write_bytes(pickle.dumps(payload, protocol=pickle.HIGHEST_PROTOCOL))
+        temporary_path.replace(self.cache_path)

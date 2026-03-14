@@ -1,0 +1,11 @@
+{
+  "id": "oral-history-pack",
+  "label": "Oral History Pack",
+  "version": "0.1.0",
+  "description": "Adds interview-focused prompts, transcript parsing notes, and exhibit presets.",
+  "capabilities": [
+    "templates",
+    "document_parsers",
+    "design_tokens"
+  ]
+}

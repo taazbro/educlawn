@@ -2,8 +2,12 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 from typing import Any
 from urllib import error, request
+
+if TYPE_CHECKING:
+    from app.services.provider_ai import ProviderAIService
 
 
 STUDIO_AGENT_CATALOG: tuple[dict[str, Any], ...] = (
@@ -65,9 +69,15 @@ STUDIO_AGENT_CATALOG: tuple[dict[str, Any], ...] = (
 
 
 class ProjectAgentRuntime:
-    def __init__(self, local_llm_model: str = "", local_llm_base_url: str = "http://127.0.0.1:11434") -> None:
+    def __init__(
+        self,
+        local_llm_model: str = "",
+        local_llm_base_url: str = "http://127.0.0.1:11434",
+        ai_provider_service: ProviderAIService | None = None,
+    ) -> None:
         self.local_llm_model = local_llm_model.strip()
         self.local_llm_base_url = local_llm_base_url.rstrip("/")
+        self.ai_provider_service = ai_provider_service
 
     def catalog(self) -> list[dict[str, Any]]:
         return [dict(entry) for entry in STUDIO_AGENT_CATALOG]
@@ -92,6 +102,13 @@ class ProjectAgentRuntime:
         qa = self._qa_artifact(manifest, documents, writer, citation, simulation)
         teacher = self._teacher_artifact(manifest, writer, citation, qa)
         export = self._export_artifact(manifest, template, design, qa)
+        provider_context = self._maybe_apply_provider_ai(
+            manifest=manifest,
+            template=template,
+            research=research["artifact"],
+            writer=writer["artifact"],
+            teacher=teacher["artifact"],
+        )
         llm_context = self._maybe_apply_local_llm(
             manifest=manifest,
             template=template,
@@ -111,6 +128,15 @@ class ProjectAgentRuntime:
             "export_plan": export["artifact"],
             "simulation_blueprint": simulation,
         }
+        if provider_context["used"]:
+            artifacts["provider_ai_trace"] = {
+                "provider_id": provider_context["provider_id"],
+                "provider_label": provider_context["provider_label"],
+                "profile_id": provider_context["profile_id"],
+                "profile_label": provider_context["profile_label"],
+                "auth_mode": provider_context["auth_mode"],
+                "model": provider_context["model"],
+            }
         if llm_context["used"]:
             artifacts["local_llm_trace"] = {
                 "model": self.local_llm_model,
@@ -120,7 +146,7 @@ class ProjectAgentRuntime:
 
         return {
             "generated_at": generated_at,
-            "runtime_mode": self._runtime_mode(manifest, llm_context),
+            "runtime_mode": self._runtime_mode(manifest, llm_context, provider_context),
             "agents": [
                 research["agent"],
                 planner["agent"],
@@ -135,10 +161,24 @@ class ProjectAgentRuntime:
             "artifacts": artifacts,
         }
 
-    def _runtime_mode(self, manifest: dict[str, Any], llm_context: dict[str, Any]) -> dict[str, Any]:
+    def _runtime_mode(
+        self,
+        manifest: dict[str, Any],
+        llm_context: dict[str, Any],
+        provider_context: dict[str, Any],
+    ) -> dict[str, Any]:
         requested_mode = str(manifest.get("local_mode", "no-llm"))
         configured = bool(self.local_llm_model)
-        if requested_mode != "local-llm":
+        if requested_mode == "provider-ai" and provider_context["used"]:
+            note = (
+                f"Provider AI used {provider_context['provider_label']} "
+                f"through profile {provider_context['profile_label']}."
+            )
+        elif requested_mode == "provider-ai" and provider_context["error"]:
+            note = f"Provider AI fallback engaged: {provider_context['error']}"
+        elif requested_mode == "provider-ai":
+            note = "Provider AI mode was requested, but no provider profile is configured."
+        elif requested_mode != "local-llm":
             note = "Deterministic local generation is active."
         elif llm_context["used"]:
             note = f"Local model {self.local_llm_model} refined the generated artifacts."
@@ -151,8 +191,99 @@ class ProjectAgentRuntime:
         return {
             "requested_mode": requested_mode,
             "local_llm_configured": configured,
-            "effective_mode": "local-llm" if llm_context["used"] else "no-llm",
+            "provider_ai_configured": bool(manifest.get("ai_profile_id")),
+            "effective_mode": (
+                "provider-ai"
+                if provider_context["used"]
+                else "local-llm"
+                if llm_context["used"]
+                else "no-llm"
+            ),
             "note": note,
+        }
+
+    def _maybe_apply_provider_ai(
+        self,
+        manifest: dict[str, Any],
+        template: dict[str, Any],
+        research: dict[str, Any],
+        writer: dict[str, Any],
+        teacher: dict[str, Any],
+    ) -> dict[str, Any]:
+        requested_mode = str(manifest.get("local_mode", "no-llm"))
+        profile_id = str(manifest.get("ai_profile_id") or "").strip()
+        if requested_mode != "provider-ai":
+            return {"used": False, "error": ""}
+        if not profile_id:
+            return {"used": False, "error": "No provider AI profile is selected for this project."}
+        if self.ai_provider_service is None:
+            return {"used": False, "error": "Provider AI service is not available."}
+
+        context = (
+            f"Project title: {manifest['title']}. Topic: {manifest['topic']}. "
+            f"Audience: {manifest['audience']}. Template: {template['label']}."
+        )
+
+        research_result = self.ai_provider_service.generate_with_profile(
+            profile_id,
+            task="research",
+            source="studio_project",
+            metadata={"project_slug": manifest["slug"], "artifact": "research_brief"},
+            system_prompt="You are an evidence-grounded research assistant inside EduClawn.",
+            prompt=(
+                f"{context} Rewrite this project brief into a concise, cited-ready research brief for students. "
+                f"Draft brief: {research['executive_summary']}"
+            ),
+        )
+        if not research_result["used"]:
+            return research_result
+        research["executive_summary"] = research_result["output_text"]
+
+        revised_sections = 0
+        for section in writer["sections"][:4]:
+            section_result = self.ai_provider_service.generate_with_profile(
+                profile_id,
+                task="assignments",
+                source="studio_project",
+                metadata={
+                    "project_slug": manifest["slug"],
+                    "artifact": "written_sections",
+                    "section_id": section["section_id"],
+                },
+                system_prompt="You are a classroom-safe writing assistant inside EduClawn.",
+                prompt=(
+                    f"{context} Rewrite this section for clarity, evidence-grounding, and student readability. "
+                    f"Keep it under 140 words. Section: {section['title']}. Draft: {section['body']}"
+                ),
+            )
+            if section_result["used"]:
+                section["body"] = section_result["output_text"]
+                revised_sections += 1
+
+        review_result = self.ai_provider_service.generate_with_profile(
+            profile_id,
+            task="review",
+            source="studio_project",
+            metadata={"project_slug": manifest["slug"], "artifact": "teacher_review"},
+            system_prompt="You are a rubric-focused teacher coach inside EduClawn.",
+            prompt=(
+                f"{context} Produce one concise teacher coaching note for this draft. "
+                f"Current teacher note seed: {teacher['teacher_notes'][0]}"
+            ),
+        )
+        if review_result["used"]:
+            teacher["teacher_notes"][0] = review_result["output_text"]
+
+        return {
+            "used": True,
+            "error": "",
+            "provider_id": research_result["provider_id"],
+            "provider_label": research_result["provider_label"],
+            "profile_id": research_result["profile_id"],
+            "profile_label": research_result["profile_label"],
+            "auth_mode": research_result["auth_mode"],
+            "model": research_result["model"],
+            "revised_sections": revised_sections,
         }
 
     def _maybe_apply_local_llm(

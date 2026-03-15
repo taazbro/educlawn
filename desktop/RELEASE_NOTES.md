@@ -1,4 +1,4 @@
-# Civic Project Studio 0.3.0
+# EduClawn 0.3.0
 
 ## Added
 

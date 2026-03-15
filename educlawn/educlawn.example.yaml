@@ -1,6 +1,6 @@
 version: "1.0"
 product:
-  name: EduClaw
+  name: EduClawn
   source_shape: OpenClaw
   source_import_path: /Users/tanjim/Downloads/openclaw
   license_reference: MIT

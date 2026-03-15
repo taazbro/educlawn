@@ -56,7 +56,8 @@ class StudioProjectCreateRequest(BaseModel):
     goals: list[str] = Field(default_factory=list)
     rubric: list[str] = Field(default_factory=list)
     template_id: str = Field(min_length=3, max_length=120)
-    local_mode: Literal["no-llm", "local-llm"] = "no-llm"
+    local_mode: Literal["no-llm", "local-llm", "provider-ai"] = "no-llm"
+    ai_profile_id: str = Field(default="", max_length=120)
     slug: str | None = None
 
 
@@ -78,7 +79,8 @@ class StudioProjectUpdateRequest(BaseModel):
     audience: str | None = Field(default=None, min_length=3, max_length=120)
     goals: list[str] | None = None
     rubric: list[str] | None = None
-    local_mode: Literal["no-llm", "local-llm"] | None = None
+    local_mode: Literal["no-llm", "local-llm", "provider-ai"] | None = None
+    ai_profile_id: str | None = Field(default=None, max_length=120)
     theme_tokens: dict[str, str] | None = None
     sections: list[dict[str, object]] | None = None
     workflow: dict[str, list[WorkflowStage]] | None = None
@@ -143,6 +145,7 @@ class StudioProjectSummaryResponse(BaseModel):
     template_label: str
     project_type: str
     local_mode: str
+    ai_profile_id: str = ""
     status: str
     document_count: int
     export_count: int
@@ -165,6 +168,7 @@ class StudioProjectResponse(BaseModel):
     template_label: str
     project_type: str
     local_mode: str
+    ai_profile_id: str = ""
     status: str
     created_at: str
     updated_at: str
@@ -246,6 +250,7 @@ class StudioSystemStatusResponse(BaseModel):
     startup: dict[str, object]
     tools: dict[str, object]
     local_ai: dict[str, object]
+    provider_ai: dict[str, object]
     portability: dict[str, object]
     release: dict[str, object]
 

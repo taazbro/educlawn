@@ -1,6 +1,6 @@
 # Plugin SDK
 
-Plugins extend Civic Project Studio without modifying the core engine.
+Plugins extend EduClawn without modifying the core engine.
 
 ## Location
 

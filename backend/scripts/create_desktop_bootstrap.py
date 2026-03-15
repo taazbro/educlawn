@@ -17,7 +17,7 @@ def main(output_root: str) -> None:
         shutil.rmtree(target_root)
     target_root.mkdir(parents=True, exist_ok=True)
 
-    database_path = target_root / "civic_project_studio.sqlite3"
+    database_path = target_root / "educlawn.sqlite3"
     model_cache_dir = target_root / "model-cache"
     warehouse = WarehouseService(f"sqlite:///{database_path}")
     warehouse.initialize()

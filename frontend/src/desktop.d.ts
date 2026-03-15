@@ -2,7 +2,7 @@ import type { DesktopContext } from './types'
 
 declare global {
   interface Window {
-    civicStudioDesktop?: {
+    educlawnDesktop?: {
       getContext: () => Promise<DesktopContext>
       chooseWorkspace: () => Promise<DesktopContext>
       openWorkspace: () => Promise<void>

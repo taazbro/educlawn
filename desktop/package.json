@@ -1,8 +1,8 @@
 {
-  "name": "civic-project-studio-desktop",
+  "name": "educlawn-desktop",
   "private": true,
   "version": "0.3.0",
-  "description": "Electron desktop shell for Civic Project Studio.",
+  "description": "Electron desktop shell for EduClawn.",
   "author": "taazbro",
   "main": "main.mjs",
   "type": "module",
@@ -27,8 +27,8 @@
     "sharp": "^0.34.4"
   },
   "build": {
-    "appId": "com.taazbro.civicprojectstudio",
-    "productName": "Civic Project Studio",
+    "appId": "com.taazbro.educlawn",
+    "productName": "EduClawn",
     "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
     "directories": {
       "output": "release",
@@ -76,23 +76,23 @@
       {
         "provider": "github",
         "owner": "taazbro",
-        "repo": "Martin_luther_king",
+        "repo": "educlawn",
         "releaseType": "release"
       }
     ],
     "protocols": [
       {
-        "name": "EduClaw Link",
+        "name": "EduClawn Link",
         "schemes": [
-          "educlaw"
+          "educlawn"
         ]
       }
     ],
     "fileAssociations": [
       {
         "ext": "cpsbundle",
-        "name": "Civic Project Studio Bundle",
-        "description": "EduClaw/Civic Project Studio local project bundle",
+        "name": "EduClawn Bundle",
+        "description": "EduClawn local project bundle",
         "role": "Editor"
       }
     ],
@@ -154,7 +154,7 @@
       "category": "Education",
       "mimeTypes": [
         "application/x-cpsbundle",
-        "x-scheme-handler/educlaw"
+        "x-scheme-handler/educlawn"
       ],
       "target": [
         "AppImage",
@@ -162,8 +162,8 @@
       ],
       "desktop": {
         "entry": {
-          "StartupWMClass": "Civic Project Studio",
-          "MimeType": "application/x-cpsbundle;x-scheme-handler/educlaw;"
+          "StartupWMClass": "EduClawn",
+          "MimeType": "application/x-cpsbundle;x-scheme-handler/educlawn;"
         }
       }
     }

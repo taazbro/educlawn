@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 from app.api.education_schemas import EducationAssignment, EducationClassroomResponse
 
 
-class EduClawSourceSummaryResponse(BaseModel):
+class EduClawnSourceSummaryResponse(BaseModel):
     available: bool
     path: str
     package_name: str
@@ -21,17 +21,17 @@ class EduClawSourceSummaryResponse(BaseModel):
     key_paths: dict[str, str] | None = None
 
 
-class EduClawOverviewResponse(BaseModel):
+class EduClawnOverviewResponse(BaseModel):
     product_name: str
     tagline: str
-    source_summary: EduClawSourceSummaryResponse
+    source_summary: EduClawnSourceSummaryResponse
     product_shape: dict[str, str]
     derived_control_plane: dict[str, Any]
     education_templates: list[dict[str, str]]
     implementation_status: dict[str, bool]
 
 
-class EduClawBootstrapRequest(BaseModel):
+class EduClawnBootstrapRequest(BaseModel):
     school_name: str = Field(min_length=2, max_length=160)
     classroom_title: str = Field(min_length=3, max_length=160)
     teacher_name: str = Field(min_length=2, max_length=120)
@@ -48,10 +48,11 @@ class EduClawBootstrapRequest(BaseModel):
     rubric: list[str] = Field(default_factory=list)
     standards_focus: list[str] = Field(default_factory=list)
     due_date: str = Field(default="", max_length=80)
-    local_mode: Literal["no-llm", "local-llm"] = "no-llm"
+    local_mode: Literal["no-llm", "local-llm", "provider-ai"] = "no-llm"
+    ai_profile_id: str = Field(default="", max_length=120)
 
 
-class EduClawControlPlaneResponse(BaseModel):
+class EduClawnControlPlaneResponse(BaseModel):
     version: str
     product: dict[str, Any]
     school: dict[str, Any]
@@ -63,10 +64,10 @@ class EduClawControlPlaneResponse(BaseModel):
     security: dict[str, Any]
 
 
-class EduClawBootstrapResponse(BaseModel):
+class EduClawnBootstrapResponse(BaseModel):
     classroom: EducationClassroomResponse
     assignment: EducationAssignment
-    control_plane: EduClawControlPlaneResponse
+    control_plane: EduClawnControlPlaneResponse
     control_plane_path: str
     attestation_path: str
-    source_summary: EduClawSourceSummaryResponse
+    source_summary: EduClawnSourceSummaryResponse

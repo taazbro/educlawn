@@ -36,7 +36,7 @@ BLOCKED_OPENCLAW_FEATURES: tuple[str, ...] = (
     "silent-external-send",
 )
 
-EDUCLAW_TOOL_ALLOWLIST: tuple[str, ...] = (
+EDUCLAWN_TOOL_ALLOWLIST: tuple[str, ...] = (
     "classroom_read",
     "assignment_read",
     "approved_evidence_search",
@@ -48,7 +48,7 @@ EDUCLAW_TOOL_ALLOWLIST: tuple[str, ...] = (
     "local_export",
 )
 
-EDUCLAW_TOOL_DENYLIST: tuple[str, ...] = (
+EDUCLAWN_TOOL_DENYLIST: tuple[str, ...] = (
     "shell",
     "exec",
     "spawn",
@@ -64,7 +64,7 @@ EDUCLAW_TOOL_DENYLIST: tuple[str, ...] = (
 )
 
 
-class EduClawService:
+class EduClawnService:
     def __init__(
         self,
         settings: Settings,
@@ -74,9 +74,9 @@ class EduClawService:
         self.settings = settings
         self.education_service = education_service
         self.template_registry = template_registry
-        self.security_secret = settings.educlaw_security_secret.encode("utf-8")
+        self.security_secret = settings.educlawn_security_secret.encode("utf-8")
         self.source_root = settings.openclaw_root_dir
-        self.output_root = settings.studio_root_dir / "educlaw"
+        self.output_root = settings.studio_root_dir / "educlawn"
         self.output_root.mkdir(parents=True, exist_ok=True)
 
     def get_overview(self) -> dict[str, Any]:
@@ -84,7 +84,7 @@ class EduClawService:
         templates = self.template_registry.list_templates()
         safe_channels = self._derive_safe_channels(source.get("channels", []))
         return {
-            "product_name": "EduClaw",
+            "product_name": "EduClawn",
             "tagline": "A school-safe local-first agent studio built from the OpenClaw product shape.",
             "source_summary": source,
             "product_shape": {
@@ -96,8 +96,8 @@ class EduClawService:
             "derived_control_plane": {
                 "allowed_channels": safe_channels,
                 "blocked_features": list(BLOCKED_OPENCLAW_FEATURES),
-                "allowed_tools": list(EDUCLAW_TOOL_ALLOWLIST),
-                "denied_tools": sorted(set(EDUCLAW_TOOL_DENYLIST + tuple(source.get("dangerous_tools", [])))),
+                "allowed_tools": list(EDUCLAWN_TOOL_ALLOWLIST),
+                "denied_tools": sorted(set(EDUCLAWN_TOOL_DENYLIST + tuple(source.get("dangerous_tools", [])))),
                 "session_model": [
                     "teacher",
                     "student",
@@ -207,7 +207,7 @@ class EduClawService:
                 "subject": payload["subject"],
                 "grade_band": payload["grade_band"],
                 "teacher_name": payload["teacher_name"],
-                "description": payload.get("description") or f"EduClaw classroom for {payload['school_name']}.",
+                "description": payload.get("description") or f"EduClawn classroom for {payload['school_name']}.",
                 "default_template_id": payload.get("default_template_id") or "lesson-module",
                 "standards_focus": payload.get("standards_focus", []),
             }
@@ -229,6 +229,7 @@ class EduClawService:
                 "standards": payload.get("standards_focus", []),
                 "due_date": payload.get("due_date") or "",
                 "local_mode": payload.get("local_mode") or "no-llm",
+                "ai_profile_id": payload.get("ai_profile_id") or "",
                 "access_key": teacher_access_key,
             },
         )
@@ -265,7 +266,7 @@ class EduClawService:
         config = {
             "version": "1.0",
             "product": {
-                "name": "EduClaw",
+                "name": "EduClawn",
                 "source_shape": "OpenClaw",
                 "source_import_path": source.get("path", ""),
                 "license_reference": source.get("license", ""),
@@ -308,8 +309,8 @@ class EduClawService:
                 },
             },
             "tools": {
-                "allow": list(EDUCLAW_TOOL_ALLOWLIST),
-                "deny": sorted(set(EDUCLAW_TOOL_DENYLIST + tuple(source.get("dangerous_tools", [])))),
+                "allow": list(EDUCLAWN_TOOL_ALLOWLIST),
+                "deny": sorted(set(EDUCLAWN_TOOL_DENYLIST + tuple(source.get("dangerous_tools", [])))),
                 "approval_required_for": [
                     "external_messaging",
                     "browser_navigation",
@@ -347,9 +348,9 @@ class EduClawService:
                 "dangerous_tools_count": len(source.get("dangerous_tools", [])),
             },
         }
-        config_path = target_dir / "educlaw-control-plane.yaml"
+        config_path = target_dir / "educlawn-control-plane.yaml"
         config_path.write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")
-        attestation_path = target_dir / "educlaw-control-plane.attestation.json"
+        attestation_path = target_dir / "educlawn-control-plane.attestation.json"
         attestation = {
             "config_path": str(config_path),
             "config_sha256": config_sha256,
@@ -358,7 +359,7 @@ class EduClawService:
             "verified": self._verify_signature(canonical, signature),
         }
         attestation_path.write_text(json.dumps(attestation, indent=2), encoding="utf-8")
-        summary_path = target_dir / "educlaw-source-summary.json"
+        summary_path = target_dir / "educlawn-source-summary.json"
         summary_path.write_text(json.dumps(source, indent=2), encoding="utf-8")
         return {
             "path": str(config_path),
@@ -413,4 +414,4 @@ class EduClawService:
 
     def _slugify(self, value: str) -> str:
         normalized = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
-        return normalized or f"educlaw-{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}"
+        return normalized or f"educlawn-{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}"

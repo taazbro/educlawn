@@ -58,13 +58,13 @@ New templates should:
 - provide theme tokens and export targets
 - work in deterministic `no-llm` mode
 
-See [docs/TEMPLATE_SDK.md](/Users/tanjim/Downloads/Martin_luther_king/docs/TEMPLATE_SDK.md).
+See [docs/TEMPLATE_SDK.md](/Users/tanjim/Downloads/educlawn/docs/TEMPLATE_SDK.md).
 
 ## Plugins
 
 New plugins should ship a `plugin.json` manifest and clearly describe their capabilities.
 
-See [docs/PLUGIN_SDK.md](/Users/tanjim/Downloads/Martin_luther_king/docs/PLUGIN_SDK.md).
+See [docs/PLUGIN_SDK.md](/Users/tanjim/Downloads/educlawn/docs/PLUGIN_SDK.md).
 
 ## Content Licensing
 

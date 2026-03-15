@@ -159,11 +159,98 @@ export type StudioSystemStatus = {
     import_supported: boolean
     duplicate_supported: boolean
   }
+  provider_ai: {
+    configured_profiles: number
+    managed_profiles: number
+    providers_available: string[]
+  }
   release: {
     desktop_version: string
     release_notes_path: string
     packaged_app_path: string
   }
+}
+
+export type AIProviderId =
+  | 'openai'
+  | 'anthropic'
+  | 'google'
+  | 'groq'
+  | 'mistral'
+  | 'cohere'
+  | 'xai'
+
+export type AIAuthMode = 'user-key' | 'managed-subscription'
+
+export type AITaskCapability =
+  | 'research'
+  | 'assignments'
+  | 'feedback'
+  | 'planning'
+  | 'review'
+  | 'export'
+  | 'classroom'
+
+export type AIProviderCatalogEntry = {
+  provider_id: AIProviderId
+  label: string
+  sdk_package: string
+  docs_url: string
+  default_model: string
+  recommended_models: string[]
+  supports_custom_base_url: boolean
+  supports_managed_subscription: boolean
+  notes: string
+  sdk_installed: boolean
+  supported_tasks: AITaskCapability[]
+}
+
+export type AIProviderProfile = {
+  profile_id: string
+  label: string
+  provider_id: AIProviderId
+  provider_label: string
+  auth_mode: AIAuthMode
+  default_model: string
+  base_url: string
+  capabilities: AITaskCapability[]
+  api_key_hint: string
+  sdk_installed: boolean
+  last_tested_at: string
+  last_test_status: string
+  last_error: string
+  created_at: string
+  updated_at: string
+}
+
+export type AIProviderTestResponse = {
+  used: boolean
+  generated_at: string
+  provider_id: AIProviderId
+  provider_label: string
+  profile_id: string
+  profile_label: string
+  auth_mode: AIAuthMode
+  model: string
+  output_text: string
+  error: string
+}
+
+export type AIUsageEntry = {
+  usage_id: string
+  source: string
+  task: string
+  provider_id: AIProviderId
+  provider_label: string
+  profile_id: string
+  profile_label: string
+  auth_mode: AIAuthMode
+  model: string
+  success: boolean
+  error: string
+  prompt_preview: string
+  metadata: Record<string, unknown>
+  created_at: string
 }
 
 export type StudioOverview = {
@@ -255,7 +342,8 @@ export type StudioProject = {
   template_id: string
   template_label: string
   project_type: string
-  local_mode: 'no-llm' | 'local-llm'
+  local_mode: 'no-llm' | 'local-llm' | 'provider-ai'
+  ai_profile_id: string
   status: string
   created_at: string
   updated_at: string
@@ -346,7 +434,8 @@ export type ProjectDraft = {
   goalsText: string
   rubricText: string
   template_id: string
-  local_mode: 'no-llm' | 'local-llm'
+  local_mode: 'no-llm' | 'local-llm' | 'provider-ai'
+  ai_profile_id: string
 }
 
 export type EducationRole = 'teacher' | 'student' | 'shared'
@@ -413,7 +502,8 @@ export type EducationAssignment = {
   rubric: string[]
   standards: string[]
   due_date: string
-  local_mode: 'no-llm' | 'local-llm'
+  local_mode: 'no-llm' | 'local-llm' | 'provider-ai'
+  ai_profile_id: string
   status: string
   created_at: string
   updated_at: string
@@ -523,6 +613,7 @@ export type EducationAuditEntry = {
   status: string
   prompt_excerpt?: string | null
   risk_assessment?: EducationRiskAssessment | null
+  ai_usage?: Record<string, unknown> | null
   prev_hash?: string | null
   entry_hash?: string | null
 }
@@ -548,6 +639,7 @@ export type EducationSafetyStatus = {
   audit_chain_valid: boolean
   approval_chain_valid: boolean
   material_policy: Record<string, unknown>
+  provider_ai_profiles: number
 }
 
 export type EducationAgentRunResponse = {
@@ -563,6 +655,7 @@ export type EducationAgentRunResponse = {
   risk_assessment: EducationRiskAssessment
   approval_request: EducationApproval | null
   artifacts: Record<string, unknown>
+  provider_ai?: Record<string, unknown> | null
   audit_entry: EducationAuditEntry
 }
 
@@ -576,7 +669,7 @@ export type EducationLaunchResponse = {
   seeded_material_count: number
 }
 
-export type EduClawSourceSummary = {
+export type EduClawnSourceSummary = {
   available: boolean
   path: string
   package_name: string
@@ -595,17 +688,17 @@ export type EduClawSourceSummary = {
   key_paths?: Record<string, string> | null
 }
 
-export type EduClawOverview = {
+export type EduClawnOverview = {
   product_name: string
   tagline: string
-  source_summary: EduClawSourceSummary
+  source_summary: EduClawnSourceSummary
   product_shape: Record<string, string>
   derived_control_plane: Record<string, unknown>
   education_templates: Array<Record<string, string>>
   implementation_status: Record<string, boolean>
 }
 
-export type EduClawControlPlane = {
+export type EduClawnControlPlane = {
   version: string
   product: Record<string, unknown>
   school: Record<string, unknown>
@@ -617,11 +710,11 @@ export type EduClawControlPlane = {
   security: Record<string, unknown>
 }
 
-export type EduClawBootstrapResponse = {
+export type EduClawnBootstrapResponse = {
   classroom: EducationClassroom
   assignment: EducationAssignment
-  control_plane: EduClawControlPlane
+  control_plane: EduClawnControlPlane
   control_plane_path: string
   attestation_path: string
-  source_summary: EduClawSourceSummary
+  source_summary: EduClawnSourceSummary
 }

@@ -1,6 +1,6 @@
 # Desktop App
 
-The repository now includes a working Electron shell in [desktop/package.json](/Users/tanjim/Downloads/Martin_luther_king/desktop/package.json).
+The repository now includes a working Electron shell in [desktop/package.json](/Users/tanjim/Downloads/educlawn/desktop/package.json).
 
 ## What It Does
 
@@ -14,7 +14,7 @@ The repository now includes a working Electron shell in [desktop/package.json](/
 - checks for updates in packaged builds and stages downloaded updates for relaunch
 - supports launch-at-login and macOS move-to-Applications installation prompts
 - primes a new workspace from a packaged bootstrap database and model cache
-- exposes first-run onboarding, local AI runtime status, backup/import, teacher review, and revision history in the UI
+- exposes first-run onboarding, the Easy Start Center, role-based page navigation, local AI runtime status, backup/import, teacher review, and revision history in the UI
 - defers heavier model warmup on desktop boot so the shell becomes responsive faster
 - supports packaging through `electron-builder`
 
@@ -33,6 +33,13 @@ Run the desktop shell from source:
 cd desktop
 npm run dev
 ```
+
+Shortcut launchers from the repo root:
+
+- macOS: `Open-EduClawn.command`
+- Windows: `Open-EduClawn.bat`
+- shell: `scripts/start-desktop.sh`
+- PowerShell: `scripts/start-desktop.ps1`
 
 Build the backend executable used by packaged releases:
 
@@ -57,6 +64,8 @@ npm run dist:win
 npm run dist:linux
 ```
 
+Unsigned local macOS builds automatically disable hardened runtime in the packaging wrapper so the generated `.app` stays launchable on a developer machine without Apple signing credentials. Signed CI and release builds keep the hardened-runtime path needed for notarization.
+
 ## Packaging Notes
 
 - the desktop shell uses Electron because Rust is not required
@@ -79,8 +88,8 @@ npm run dist:linux
 
 The repo includes:
 
-- [signing.env.example](/Users/tanjim/Downloads/Martin_luther_king/desktop/signing.env.example)
-- [../.github/workflows/desktop-release.yml](/Users/tanjim/Downloads/Martin_luther_king/.github/workflows/desktop-release.yml)
+- [signing.env.example](/Users/tanjim/Downloads/educlawn/desktop/signing.env.example)
+- [../.github/workflows/desktop-release.yml](/Users/tanjim/Downloads/educlawn/.github/workflows/desktop-release.yml)
 
 Provide these when you are ready for a real public macOS release:
 
@@ -89,6 +98,8 @@ Provide these when you are ready for a real public macOS release:
 - `APPLE_ID`
 - `APPLE_APP_SPECIFIC_PASSWORD`
 - `APPLE_TEAM_ID`
+
+Without those credentials, local desktop packaging produces an ad-hoc or unsigned developer build. That is fine for local use, but Gatekeeper trust warnings are still expected until the release is signed and notarized.
 
 The desktop release workflow now builds:
 

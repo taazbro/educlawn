@@ -8,7 +8,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.api.educlaw_routes import router as educlaw_router
+from app.api.ai_routes import router as ai_router
+from app.api.educlawn_routes import router as educlawn_router
 from app.api.education_routes import router as education_router
 from app.api.routes import router
 from app.api.studio_routes import router as studio_router
@@ -16,7 +17,7 @@ from app.core.config import Settings
 from app.core.security import AuthService
 from app.services.agents import LocalAgentService
 from app.services.benchmarking import BenchmarkService
-from app.services.educlaw import EduClawService
+from app.services.educlawn import EduClawnService
 from app.services.education_os import EducationOperatingSystemService
 from app.services.experimentation import ExperimentationService
 from app.services.graph import KnowledgeGraphService
@@ -24,6 +25,7 @@ from app.services.knowledge import LocalKnowledgeService
 from app.services.ml import LearningIntelligenceService
 from app.services.orchestration import WorkflowOrchestrator
 from app.services.planner import MissionPlannerService
+from app.services.provider_ai import ProviderAIService
 from app.services.studio_agents import ProjectAgentRuntime
 from app.services.studio_engine import ProjectStudioService, TemplateRegistryService
 from app.services.temporal import TemporalLearnerModel
@@ -99,9 +101,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             template_dir=resolved_settings.studio_template_dir,
             community_root=resolved_settings.community_root_dir,
         )
+        ai_provider_service = ProviderAIService(resolved_settings)
         studio_agent_runtime = ProjectAgentRuntime(
             local_llm_model=resolved_settings.local_llm_model,
             local_llm_base_url=resolved_settings.local_llm_base_url,
+            ai_provider_service=ai_provider_service,
         )
         agent_service = LocalAgentService(warehouse, intelligence, knowledge_service)
         graph_service = KnowledgeGraphService()
@@ -127,13 +131,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             warehouse=warehouse,
             template_registry=template_registry,
             agent_runtime=studio_agent_runtime,
+            ai_provider_service=ai_provider_service,
         )
         education_service = EducationOperatingSystemService(
             settings=resolved_settings,
             studio_service=studio_service,
             template_registry=template_registry,
+            ai_provider_service=ai_provider_service,
         )
-        educlaw_service = EduClawService(
+        educlawn_service = EduClawnService(
             settings=resolved_settings,
             education_service=education_service,
             template_registry=template_registry,
@@ -157,10 +163,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.experimentation_service = experimentation_service
         app.state.agent_service = agent_service
         app.state.template_registry = template_registry
+        app.state.ai_provider_service = ai_provider_service
         app.state.studio_agent_runtime = studio_agent_runtime
         app.state.studio_service = studio_service
         app.state.education_service = education_service
-        app.state.educlaw_service = educlaw_service
+        app.state.educlawn_service = educlawn_service
         app.state.planner_service = planner_service
         app.state.benchmark_service = benchmark_service
         app.state.auth_service = auth_service
@@ -183,9 +190,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_headers=["*"],
     )
     app.include_router(router)
+    app.include_router(ai_router)
     app.include_router(studio_router)
     app.include_router(education_router)
-    app.include_router(educlaw_router)
+    app.include_router(educlawn_router)
     if resolved_settings.frontend_dist_dir.exists():
         app.mount(
             "/desktop",

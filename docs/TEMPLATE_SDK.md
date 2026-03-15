@@ -1,6 +1,6 @@
 # Template SDK
 
-Templates define how Civic Project Studio turns a manifest plus source documents into a structured project.
+Templates define how EduClawn turns a manifest plus source documents into a structured project.
 
 ## Location
 

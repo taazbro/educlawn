@@ -14,6 +14,7 @@ import yaml
 from pypdf import PdfReader
 
 from app.core.config import Settings
+from app.services.provider_ai import ProviderAIService
 from app.services.studio_engine import ProjectStudioService, TemplateRegistryService
 
 
@@ -233,11 +234,13 @@ class EducationOperatingSystemService:
         settings: Settings,
         studio_service: ProjectStudioService,
         template_registry: TemplateRegistryService,
+        ai_provider_service: ProviderAIService,
     ) -> None:
         self.settings = settings
         self.studio_service = studio_service
         self.template_registry = template_registry
-        self.security_secret = settings.educlaw_security_secret.encode("utf-8")
+        self.ai_provider_service = ai_provider_service
+        self.security_secret = settings.educlawn_security_secret.encode("utf-8")
         self.root_dir = settings.studio_root_dir / "education_os"
         self.classrooms_dir = self.root_dir / "classrooms"
         self.materials_dir = self.root_dir / "materials"
@@ -255,7 +258,7 @@ class EducationOperatingSystemService:
         approvals = self.list_approvals()
         audit_entries = self.list_audit_entries(limit=250)
         return {
-            "product_name": "Civic Project Studio Education OS",
+            "product_name": "EduClawn Education OS",
             "positioning": "An open-source local-first agent studio for teachers and students.",
             "difference_statement": "Bounded educational orchestration, not general autonomous action.",
             "role_models": [dict(item) for item in ROLE_MODELS],
@@ -356,7 +359,7 @@ class EducationOperatingSystemService:
             "student_access_key": access_bootstrap["student_access_key"],
             "reviewer_access_key": access_bootstrap["reviewer_access_key"],
             "issued_at": now,
-            "rotation_note": "Store these locally now. Only hashes remain in EduClaw after bootstrap.",
+            "rotation_note": "Store these locally now. Only hashes remain in EduClawn after bootstrap.",
         }
         return hydrated
 
@@ -411,6 +414,7 @@ class EducationOperatingSystemService:
             "standards": [str(item).strip() for item in payload.get("standards", []) if str(item).strip()],
             "due_date": str(payload.get("due_date") or "").strip(),
             "local_mode": str(payload.get("local_mode") or "no-llm"),
+            "ai_profile_id": self._normalize_ai_profile_id(payload.get("ai_profile_id")),
             "status": "draft",
             "created_at": now,
             "updated_at": now,
@@ -507,6 +511,7 @@ class EducationOperatingSystemService:
                 "rubric": assignment.get("rubric", []),
                 "template_id": assignment["template_id"],
                 "local_mode": assignment.get("local_mode", "no-llm"),
+                "ai_profile_id": assignment.get("ai_profile_id", ""),
                 "slug": f"{assignment['title']}-{student['name']}",
             }
         )
@@ -574,6 +579,7 @@ class EducationOperatingSystemService:
         assignment = self._find_assignment(classroom, payload["assignment_id"]) if classroom and payload.get("assignment_id") else None
         student = self._find_student(classroom, payload["student_id"]) if classroom and payload.get("student_id") else None
         project = self.studio_service.get_project(payload["project_slug"]) if payload.get("project_slug") else None
+        ai_profile_id = self._resolve_runtime_ai_profile_id(payload, assignment, project)
         risk_assessment = self._assess_prompt_risk(prompt)
         sensitive_actions = sorted(set(self._detect_sensitive_actions(prompt) + risk_assessment["policy_actions"]))
         approval = None
@@ -601,6 +607,17 @@ class EducationOperatingSystemService:
             student=student,
             project=project,
         )
+        provider_result = self._maybe_run_provider_ai(
+            agent_name=agent_name,
+            role=role,
+            prompt=prompt,
+            assignment=assignment,
+            project=project,
+            ai_profile_id=ai_profile_id,
+        )
+        if provider_result["used"]:
+            artifacts["provider_ai_assist"] = provider_result
+            summary = f"{summary} Enhanced with {provider_result['provider_label']}."
         audit_entry = self._append_audit(
             {
                 "actor_role": role,
@@ -616,6 +633,7 @@ class EducationOperatingSystemService:
                 "status": "approval_required" if approval else "completed",
                 "prompt_excerpt": risk_assessment["redacted_excerpt"],
                 "risk_assessment": risk_assessment,
+                "ai_usage": self._audit_ai_usage(provider_result),
             }
         )
         return {
@@ -631,6 +649,7 @@ class EducationOperatingSystemService:
             "risk_assessment": risk_assessment,
             "approval_request": approval,
             "artifacts": artifacts,
+            "provider_ai": provider_result if provider_result["used"] else None,
             "audit_entry": audit_entry,
         }
 
@@ -703,7 +722,75 @@ class EducationOperatingSystemService:
                 "max_material_bytes": self.settings.edu_material_max_bytes,
                 "allowed_content_types": list(ALLOWED_MATERIAL_CONTENT_TYPES),
             },
+            "provider_ai_profiles": len(self.ai_provider_service.list_profiles()),
         }
+
+    def _resolve_runtime_ai_profile_id(
+        self,
+        payload: dict[str, Any],
+        assignment: dict[str, Any] | None,
+        project: dict[str, Any] | None,
+    ) -> str:
+        explicit = self._normalize_ai_profile_id(payload.get("ai_profile_id"))
+        if explicit:
+            return explicit
+        if assignment and assignment.get("local_mode") == "provider-ai":
+            return self._normalize_ai_profile_id(assignment.get("ai_profile_id"))
+        if project and project.get("local_mode") == "provider-ai":
+            return self._normalize_ai_profile_id(project.get("ai_profile_id"))
+        return ""
+
+    def _maybe_run_provider_ai(
+        self,
+        *,
+        agent_name: str,
+        role: str,
+        prompt: str,
+        assignment: dict[str, Any] | None,
+        project: dict[str, Any] | None,
+        ai_profile_id: str,
+    ) -> dict[str, Any]:
+        if not ai_profile_id:
+            return {"used": False, "error": ""}
+
+        context = (
+            f"Role: {role}. Agent: {agent_name}. "
+            f"Assignment: {(assignment or {}).get('title', 'n/a')}. "
+            f"Project: {(project or {}).get('title', 'n/a')}."
+        )
+        result = self.ai_provider_service.generate_with_profile(
+            ai_profile_id,
+            task="classroom",
+            source="education_agent",
+            metadata={
+                "agent_name": agent_name,
+                "role": role,
+                "assignment_id": (assignment or {}).get("assignment_id", ""),
+                "project_slug": (project or {}).get("slug", ""),
+            },
+            system_prompt="You are a classroom-safe assistant inside EduClawn. Only produce educational guidance and do not propose uncontrolled external actions.",
+            prompt=f"{context} User request: {prompt}",
+        )
+        return result
+
+    def _audit_ai_usage(self, provider_result: dict[str, Any]) -> dict[str, Any] | None:
+        if not provider_result.get("used"):
+            return None
+        return {
+            "provider_id": provider_result["provider_id"],
+            "provider_label": provider_result["provider_label"],
+            "profile_id": provider_result["profile_id"],
+            "profile_label": provider_result["profile_label"],
+            "auth_mode": provider_result["auth_mode"],
+            "model": provider_result["model"],
+        }
+
+    def _normalize_ai_profile_id(self, value: Any) -> str:
+        raw_value = str(value or "").strip()
+        if not raw_value:
+            return ""
+        self.ai_provider_service.get_profile_summary(raw_value)
+        return raw_value
 
     def _agent_artifact(
         self,

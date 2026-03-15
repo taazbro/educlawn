@@ -1,15 +1,23 @@
 [project]
-name = "civic-project-studio-backend"
+name = "educlawn-backend"
 version = "0.1.0"
 description = "Local-first project studio backend with ingestion, retrieval, provenance, agents, export, and MLK intelligence workflows."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+  "anthropic>=0.67.0,<1.0.0",
+  "cohere>=5.18.0,<6.0.0",
+  "cryptography>=46.0.0,<47.0.0",
   "fastapi>=0.115.0,<1.0.0",
+  "google-genai>=1.30.0,<2.0.0",
+  "groq>=0.31.0,<1.0.0",
+  "mistralai>=1.9.10,<2.0.0",
   "uvicorn>=0.32.0,<1.0.0",
   "numpy>=2.2.0,<3.0.0",
+  "openai>=1.109.0,<2.0.0",
   "pandas>=2.2.0,<3.0.0",
   "pypdf>=5.4.0,<6.0.0",
+  "xai-sdk>=1.0.0,<2.0.0",
   "python-multipart>=0.0.20,<1.0.0",
   "pyyaml>=6.0.2,<7.0.0",
   "reportlab>=4.4.0,<5.0.0",

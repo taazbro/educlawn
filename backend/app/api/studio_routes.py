@@ -65,6 +65,8 @@ def create_project(payload: StudioProjectCreateRequest, request: Request) -> Stu
         project = studio_service.create_project(payload.model_dump())
     except KeyError as error:
         raise HTTPException(status_code=404, detail=f"Template not found: {error.args[0]}") from error
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
     return StudioProjectResponse(**project)
 
 
@@ -103,6 +105,8 @@ def update_project(slug: str, payload: StudioProjectUpdateRequest, request: Requ
         project = studio_service.update_project(slug, payload.model_dump(exclude_none=True))
     except FileNotFoundError as error:
         raise HTTPException(status_code=404, detail="Project not found.") from error
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
     return StudioProjectResponse(**project)
 
 

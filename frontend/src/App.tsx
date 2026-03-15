@@ -12,6 +12,11 @@ import './App.css'
 import { ApiError, api } from './api'
 import type {
   AdminStatusResponse,
+  AIAuthMode,
+  AIProviderCatalogEntry,
+  AIProviderId,
+  AIProviderProfile,
+  AIUsageEntry,
   BenchmarkReportResponse,
   DesktopContext,
   EducationAgentCatalogEntry,
@@ -21,8 +26,8 @@ import type {
   EducationClassroom,
   EducationOverview,
   EducationSafetyStatus,
-  EduClawBootstrapResponse,
-  EduClawOverview,
+  EduClawnBootstrapResponse,
+  EduClawnOverview,
   HealthStatus,
   ProjectDraft,
   ProjectSummary,
@@ -38,10 +43,11 @@ import type {
   StudioTemplate,
 } from './types'
 
-const DRAFT_STORAGE_KEY = 'civic-project-studio-draft'
-const ADMIN_TOKEN_STORAGE_KEY = 'civic-project-studio-admin-token'
-const ONBOARDING_STORAGE_KEY = 'civic-project-studio-onboarding-complete'
-const CLASSROOM_ACCESS_STORAGE_KEY = 'civic-project-studio-classroom-access'
+const DRAFT_STORAGE_KEY = 'educlawn-draft'
+const ADMIN_TOKEN_STORAGE_KEY = 'educlawn-admin-token'
+const ONBOARDING_STORAGE_KEY = 'educlawn-onboarding-complete'
+const CLASSROOM_ACCESS_STORAGE_KEY = 'educlawn-classroom-access'
+const EXPERIENCE_SETTINGS_STORAGE_KEY = 'educlawn-experience-settings'
 
 const defaultDraft: ProjectDraft = {
   title: 'Neighborhood Memory Archive',
@@ -52,6 +58,7 @@ const defaultDraft: ProjectDraft = {
   rubricText: 'Evidence Quality\nClarity\nAudience Fit\nDesign\nRevision Quality',
   template_id: 'mlk-legacy-lab',
   local_mode: 'no-llm',
+  ai_profile_id: '',
 }
 
 const defaultCredentials = {
@@ -86,13 +93,15 @@ const defaultAssignmentDraft = {
   rubricText: 'Evidence Quality\nCitation Accuracy\nClarity',
   standardsText: 'C3 Inquiry\nArgument Writing',
   due_date: '2026-04-15',
-  local_mode: 'no-llm' as const,
+  local_mode: 'no-llm' as 'no-llm' | 'local-llm' | 'provider-ai',
+  ai_profile_id: '',
 }
 
 const defaultEducationAgentDraft = {
   role: 'teacher' as const,
   agent_name: 'lesson-planner',
   prompt: 'Build a bounded classroom plan using only approved materials and teacher-reviewed steps.',
+  ai_profile_id: '',
 }
 
 const defaultApprovalReview = {
@@ -100,13 +109,13 @@ const defaultApprovalReview = {
   note: 'Teacher reviewed. Sensitive external actions still require manual handling.',
 }
 
-const defaultEduClawDraft = {
+const defaultEduClawnDraft = {
   school_name: 'Roosevelt High',
   classroom_title: 'Civics 2A',
   teacher_name: 'Ms. Rivera',
   subject: 'Civics',
   grade_band: 'Grades 9-10',
-  description: 'EduClaw control plane for a bounded classroom runtime.',
+  description: 'EduClawn control plane for a bounded classroom runtime.',
   default_template_id: 'lesson-module',
   template_id: 'research-portfolio',
   assignment_title: 'Community Archive Brief',
@@ -117,7 +126,18 @@ const defaultEduClawDraft = {
   rubricText: 'Evidence Quality\nCitation Accuracy',
   standardsText: 'Source Analysis\nCivic Inquiry',
   due_date: '2026-04-20',
-  local_mode: 'no-llm' as const,
+  local_mode: 'no-llm' as 'no-llm' | 'local-llm' | 'provider-ai',
+  ai_profile_id: '',
+}
+
+const defaultAiProfileDraft = {
+  label: 'Teacher OpenAI Workspace',
+  provider_id: 'openai' as AIProviderId,
+  auth_mode: 'user-key' as AIAuthMode,
+  api_key: '',
+  default_model: 'gpt-5-mini',
+  base_url: '',
+  capabilitiesText: 'research\nassignments\nfeedback',
 }
 
 type ClassroomAccessKeys = {
@@ -127,11 +147,39 @@ type ClassroomAccessKeys = {
   issued_at: string
 }
 
+type ExperienceProfile = 'teacher' | 'student' | 'family' | 'builder'
+type ExperienceLevel = 'guided' | 'standard' | 'advanced'
+
+type ExperienceSettings = {
+  profile: ExperienceProfile
+  level: ExperienceLevel
+  simplifiedDashboard: boolean
+  largeText: boolean
+  reducedMotion: boolean
+}
+
+type PageId = 'home' | 'projects' | 'classroom' | 'ai' | 'desktop' | 'advanced'
+type ProjectView = 'create' | 'build' | 'review'
+type ClassroomView = 'setup' | 'launch' | 'safety'
+
+const defaultExperienceSettings: ExperienceSettings = {
+  profile: 'teacher',
+  level: 'guided',
+  simplifiedDashboard: true,
+  largeText: false,
+  reducedMotion: false,
+}
+
 function App() {
   const [health, setHealth] = useState<HealthStatus | null>(null)
   const [overview, setOverview] = useState<StudioOverview | null>(null)
   const [systemStatus, setSystemStatus] = useState<StudioSystemStatus | null>(null)
   const [desktopContext, setDesktopContext] = useState<DesktopContext | null>(null)
+  const [aiCatalog, setAiCatalog] = useState<AIProviderCatalogEntry[]>([])
+  const [aiProfiles, setAiProfiles] = useState<AIProviderProfile[]>([])
+  const [aiUsage, setAiUsage] = useState<AIUsageEntry[]>([])
+  const [aiProfileDraft, setAiProfileDraft] = useState(defaultAiProfileDraft)
+  const [selectedAiProfileId, setSelectedAiProfileId] = useState('')
   const [templates, setTemplates] = useState<StudioTemplate[]>([])
   const [projects, setProjects] = useState<ProjectSummary[]>([])
   const [agentCatalog, setAgentCatalog] = useState<StudioAgentCatalogEntry[]>([])
@@ -141,9 +189,9 @@ function App() {
   const [educationApprovals, setEducationApprovals] = useState<EducationApproval[]>([])
   const [educationAudit, setEducationAudit] = useState<EducationAuditEntry[]>([])
   const [educationSafety, setEducationSafety] = useState<EducationSafetyStatus | null>(null)
-  const [educlawOverview, setEduclawOverview] = useState<EduClawOverview | null>(null)
-  const [educlawDraft, setEduclawDraft] = useState(defaultEduClawDraft)
-  const [educlawBootstrapResult, setEduclawBootstrapResult] = useState<EduClawBootstrapResponse | null>(null)
+  const [educlawnOverview, setEduclawnOverview] = useState<EduClawnOverview | null>(null)
+  const [educlawnDraft, setEduclawnDraft] = useState(defaultEduClawnDraft)
+  const [educlawnBootstrapResult, setEduclawnBootstrapResult] = useState<EduClawnBootstrapResponse | null>(null)
   const [selectedClassroomId, setSelectedClassroomId] = useState<string>('')
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<string>('')
   const [selectedStudentId, setSelectedStudentId] = useState<string>('')
@@ -158,6 +206,17 @@ function App() {
       return {}
     }
   })
+  const [experienceSettings, setExperienceSettings] = useState<ExperienceSettings>(() => {
+    const saved = window.localStorage.getItem(EXPERIENCE_SETTINGS_STORAGE_KEY)
+    if (!saved) {
+      return defaultExperienceSettings
+    }
+    try {
+      return { ...defaultExperienceSettings, ...(JSON.parse(saved) as Partial<ExperienceSettings>) }
+    } catch {
+      return defaultExperienceSettings
+    }
+  })
   const [classroomDraft, setClassroomDraft] = useState(defaultClassroomDraft)
   const [studentDraft, setStudentDraft] = useState(defaultStudentDraft)
   const [assignmentDraft, setAssignmentDraft] = useState(defaultAssignmentDraft)
@@ -165,6 +224,7 @@ function App() {
     role: 'teacher' | 'student' | 'shared'
     agent_name: string
     prompt: string
+    ai_profile_id: string
   }>(defaultEducationAgentDraft)
   const [educationAgentResult, setEducationAgentResult] = useState<EducationAgentRunResponse | null>(null)
   const [approvalReview, setApprovalReview] = useState(defaultApprovalReview)
@@ -193,6 +253,9 @@ function App() {
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const [authError, setAuthError] = useState<string | null>(null)
+  const [activePage, setActivePage] = useState<PageId>('home')
+  const [projectView, setProjectView] = useState<ProjectView>('create')
+  const [classroomView, setClassroomView] = useState<ClassroomView>('setup')
   const [isBooting, setIsBooting] = useState(true)
   const [isWorking, setIsWorking] = useState(false)
   const [isOnboardingComplete, setIsOnboardingComplete] = useState(
@@ -210,6 +273,9 @@ function App() {
   const deferredOverview = useDeferredValue(overview)
   const deferredSystemStatus = useDeferredValue(systemStatus)
   const deferredDesktopContext = useDeferredValue(desktopContext)
+  const deferredAiCatalog = useDeferredValue(aiCatalog)
+  const deferredAiProfiles = useDeferredValue(aiProfiles)
+  const deferredAiUsage = useDeferredValue(aiUsage)
   const deferredTemplates = useDeferredValue(templates)
   const deferredProjects = useDeferredValue(projects)
   const deferredEducationOverview = useDeferredValue(educationOverview)
@@ -217,8 +283,8 @@ function App() {
   const deferredEducationApprovals = useDeferredValue(educationApprovals)
   const deferredEducationAudit = useDeferredValue(educationAudit)
   const deferredEducationSafety = useDeferredValue(educationSafety)
-  const deferredEduclawOverview = useDeferredValue(educlawOverview)
-  const deferredEduclawBootstrapResult = useDeferredValue(educlawBootstrapResult)
+  const deferredEduclawnOverview = useDeferredValue(educlawnOverview)
+  const deferredEduclawnBootstrapResult = useDeferredValue(educlawnBootstrapResult)
   const deferredProject = useDeferredValue(project)
   const deferredArtifacts = useDeferredValue(artifactBundle)
   const deferredGraph = useDeferredValue(graph)
@@ -256,11 +322,28 @@ function App() {
         setSelectedProjectSlug(projectResponse[0].slug)
       }
     } catch (refreshError) {
-      setError(getErrorMessage(refreshError, 'Failed to load Civic Project Studio.'))
+      setError(getErrorMessage(refreshError, 'Failed to load EduClawn.'))
     } finally {
       if (showBootRibbon) {
         setIsBooting(false)
       }
+    }
+  })
+
+  const refreshAi = useEffectEvent(async () => {
+    try {
+      const [catalogResponse, profilesResponse, usageResponse] = await Promise.all([
+        api.aiProviderCatalog(),
+        api.aiProfiles(),
+        api.aiUsage(),
+      ])
+      startTransition(() => {
+        setAiCatalog(catalogResponse)
+        setAiProfiles(profilesResponse)
+        setAiUsage(usageResponse)
+      })
+    } catch (aiError) {
+      setError(getErrorMessage(aiError, 'Failed to load AI providers.'))
     }
   })
 
@@ -303,23 +386,23 @@ function App() {
     }
   })
 
-  const refreshEduClaw = useEffectEvent(async () => {
+  const refreshEduClawn = useEffectEvent(async () => {
     try {
-      const overviewResponse = await api.educlawOverview()
+      const overviewResponse = await api.educlawnOverview()
       startTransition(() => {
-        setEduclawOverview(overviewResponse)
+        setEduclawnOverview(overviewResponse)
       })
-    } catch (educlawError) {
-      setError(getErrorMessage(educlawError, 'Failed to load EduClaw.'))
+    } catch (educlawnError) {
+      setError(getErrorMessage(educlawnError, 'Failed to load EduClawn.'))
     }
   })
 
   const loadDesktopContext = useEffectEvent(async () => {
-    if (!window.civicStudioDesktop?.getContext) {
+    if (!window.educlawnDesktop?.getContext) {
       return
     }
     try {
-      const context = await window.civicStudioDesktop.getContext()
+      const context = await window.educlawnDesktop.getContext()
       startTransition(() => {
         setDesktopContext(context)
       })
@@ -402,7 +485,11 @@ function App() {
   }, [])
 
   useEffect(() => {
-    void refreshEduClaw()
+    void refreshEduClawn()
+  }, [])
+
+  useEffect(() => {
+    void refreshAi()
   }, [])
 
   useEffect(() => {
@@ -410,10 +497,10 @@ function App() {
   }, [])
 
   useEffect(() => {
-    if (!window.civicStudioDesktop?.onStateChanged) {
+    if (!window.educlawnDesktop?.onStateChanged) {
       return undefined
     }
-    return window.civicStudioDesktop.onStateChanged((context) => {
+    return window.educlawnDesktop.onStateChanged((context) => {
       startTransition(() => {
         setDesktopContext(context)
       })
@@ -433,6 +520,10 @@ function App() {
   }, [classroomAccessVault])
 
   useEffect(() => {
+    window.localStorage.setItem(EXPERIENCE_SETTINGS_STORAGE_KEY, JSON.stringify(experienceSettings))
+  }, [experienceSettings])
+
+  useEffect(() => {
     if (!selectedProjectSlug) {
       return
     }
@@ -444,7 +535,7 @@ function App() {
       return
     }
     setSelectedProjectSlug(desktopContext.pendingProjectSlug)
-    void window.civicStudioDesktop?.consumePendingProject?.(desktopContext.pendingProjectSlug)
+    void window.educlawnDesktop?.consumePendingProject?.(desktopContext.pendingProjectSlug)
   }, [desktopContext?.pendingProjectSlug])
 
   useEffect(() => {
@@ -462,10 +553,10 @@ function App() {
   }, [desktopContext?.recovery.imported_path, desktopContext?.recovery.imported_project_slug])
 
   useEffect(() => {
-    if (!project?.slug || !window.civicStudioDesktop?.trackProject) {
+    if (!project?.slug || !window.educlawnDesktop?.trackProject) {
       return
     }
-    void window.civicStudioDesktop.trackProject({
+    void window.educlawnDesktop.trackProject({
       slug: project.slug,
       title: project.title,
     })
@@ -477,6 +568,16 @@ function App() {
     }
     void refreshEducation()
   }, [classroomAccessVault, selectedClassroomId])
+
+  useEffect(() => {
+    if (!selectedAiProfileId) {
+      return
+    }
+    if (!aiProfiles.some(profile => profile.profile_id === selectedAiProfileId)) {
+      setSelectedAiProfileId('')
+      setAiProfileDraft(defaultAiProfileDraft)
+    }
+  }, [aiProfiles, selectedAiProfileId])
 
   useEffect(() => {
     if (!token) {
@@ -523,9 +624,12 @@ function App() {
         rubric: linesToArray(draft.rubricText),
         template_id: draft.template_id,
         local_mode: draft.local_mode,
+        ai_profile_id: draft.ai_profile_id,
       })
 
       await refreshStudio(false)
+      setProjectView('build')
+      setActivePage('projects')
       setSelectedProjectSlug(created.slug)
       setNotice(`Created ${created.title}.`)
     } catch (createError) {
@@ -553,6 +657,7 @@ function App() {
         goals: project.goals,
         rubric: project.rubric,
         local_mode: project.local_mode,
+        ai_profile_id: project.ai_profile_id,
         sections: project.sections,
         workflow: project.workflow,
         theme_tokens: project.theme_tokens,
@@ -591,6 +696,8 @@ function App() {
       if (token) {
         await refreshAdmin(token)
       }
+      setProjectView('review')
+      setActivePage('projects')
       setNotice(`Compiled ${compiled.project.title} into ${compiled.exports.length} local exports.`)
     } catch (compileError) {
       setError(getErrorMessage(compileError, 'Failed to compile the project.'))
@@ -727,6 +834,8 @@ function App() {
       storeClassroomAccess(classroom)
       await refreshEducation()
       setSelectedClassroomId(classroom.classroom_id)
+      setClassroomView('setup')
+      setActivePage('classroom')
       setNotice(`Created classroom ${classroom.title}. Local access keys were stored on this device.`)
     } catch (classroomError) {
       setError(getErrorMessage(classroomError, 'Failed to create the classroom.'))
@@ -794,11 +903,13 @@ function App() {
         standards: linesToArray(assignmentDraft.standardsText),
         due_date: assignmentDraft.due_date.trim(),
         local_mode: assignmentDraft.local_mode,
+        ai_profile_id: assignmentDraft.ai_profile_id,
         access_key: teacherAccessKey,
       })
       await refreshEducation()
       setSelectedClassroomId(classroom.classroom_id)
       setSelectedAssignmentId(classroom.assignments[classroom.assignments.length - 1]?.assignment_id ?? selectedAssignmentId)
+      setClassroomView('launch')
       setNotice(`Created assignment ${assignmentDraft.title}.`)
     } catch (assignmentError) {
       setError(getErrorMessage(assignmentError, 'Failed to create the assignment.'))
@@ -857,6 +968,9 @@ function App() {
       await refreshStudio(false)
       setSelectedClassroomId(launch.classroom.classroom_id)
       setSelectedProjectSlug(launch.project.slug)
+      setClassroomView('launch')
+      setProjectView('build')
+      setActivePage('classroom')
       startTransition(() => {
         setProject(launch.project)
       })
@@ -889,6 +1003,7 @@ function App() {
         assignment_id: selectedAssignmentId || undefined,
         student_id: selectedStudentId || undefined,
         project_slug: selectedProjectSlug || undefined,
+        ai_profile_id: educationAgentDraft.ai_profile_id || undefined,
         access_key: accessKey,
         prompt: educationAgentDraft.prompt.trim(),
       })
@@ -896,6 +1011,9 @@ function App() {
       startTransition(() => {
         setEducationAgentResult(result)
       })
+      if (result.requires_approval) {
+        setClassroomView('safety')
+      }
       setNotice(result.requires_approval ? 'Agent run completed and queued a sensitive action for approval.' : 'Education agent run completed.')
     } catch (agentError) {
       setError(getErrorMessage(agentError, 'Failed to run the education agent.'))
@@ -932,42 +1050,43 @@ function App() {
     }
   }
 
-  async function bootstrapEduClaw(event: FormEvent<HTMLFormElement>) {
+  async function bootstrapEduClawn(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setIsWorking(true)
     setError(null)
     setNotice(null)
 
     try {
-      const result = await api.educlawBootstrap({
-        school_name: educlawDraft.school_name.trim(),
-        classroom_title: educlawDraft.classroom_title.trim(),
-        teacher_name: educlawDraft.teacher_name.trim(),
-        subject: educlawDraft.subject.trim(),
-        grade_band: educlawDraft.grade_band.trim(),
-        description: educlawDraft.description.trim(),
-        default_template_id: educlawDraft.default_template_id,
-        template_id: educlawDraft.template_id,
-        assignment_title: educlawDraft.assignment_title.trim(),
-        assignment_summary: educlawDraft.assignment_summary.trim(),
-        topic: educlawDraft.topic.trim(),
-        audience: educlawDraft.audience.trim(),
-        goals: linesToArray(educlawDraft.goalsText),
-        rubric: linesToArray(educlawDraft.rubricText),
-        standards_focus: linesToArray(educlawDraft.standardsText),
-        due_date: educlawDraft.due_date.trim(),
-        local_mode: educlawDraft.local_mode,
+      const result = await api.educlawnBootstrap({
+        school_name: educlawnDraft.school_name.trim(),
+        classroom_title: educlawnDraft.classroom_title.trim(),
+        teacher_name: educlawnDraft.teacher_name.trim(),
+        subject: educlawnDraft.subject.trim(),
+        grade_band: educlawnDraft.grade_band.trim(),
+        description: educlawnDraft.description.trim(),
+        default_template_id: educlawnDraft.default_template_id,
+        template_id: educlawnDraft.template_id,
+        assignment_title: educlawnDraft.assignment_title.trim(),
+        assignment_summary: educlawnDraft.assignment_summary.trim(),
+        topic: educlawnDraft.topic.trim(),
+        audience: educlawnDraft.audience.trim(),
+        goals: linesToArray(educlawnDraft.goalsText),
+        rubric: linesToArray(educlawnDraft.rubricText),
+        standards_focus: linesToArray(educlawnDraft.standardsText),
+        due_date: educlawnDraft.due_date.trim(),
+        local_mode: educlawnDraft.local_mode,
+        ai_profile_id: educlawnDraft.ai_profile_id,
       })
       storeClassroomAccess(result.classroom)
-      await Promise.all([refreshEduClaw(), refreshEducation(), refreshStudio(false)])
+      await Promise.all([refreshEduClawn(), refreshEducation(), refreshStudio(false)])
       setSelectedClassroomId(result.classroom.classroom_id)
       setSelectedAssignmentId(result.assignment.assignment_id)
       startTransition(() => {
-        setEduclawBootstrapResult(result)
+        setEduclawnBootstrapResult(result)
       })
-      setNotice(`Bootstrapped EduClaw for ${result.classroom.title}. Signed control plane and local classroom keys are ready.`)
+      setNotice(`Bootstrapped EduClawn for ${result.classroom.title}. Signed control plane and local classroom keys are ready.`)
     } catch (bootstrapError) {
-      setError(getErrorMessage(bootstrapError, 'Failed to bootstrap EduClaw.'))
+      setError(getErrorMessage(bootstrapError, 'Failed to bootstrap EduClawn.'))
     } finally {
       setIsWorking(false)
     }
@@ -1010,6 +1129,20 @@ function App() {
     setProject(current => (current ? { ...current, [field]: value } : current))
   }
 
+  function updateAiProviderDraft<K extends keyof typeof defaultAiProfileDraft>(field: K, value: typeof defaultAiProfileDraft[K]) {
+    if (field === 'provider_id') {
+      const provider = aiCatalog.find(item => item.provider_id === value)
+      setAiProfileDraft(current => ({
+        ...current,
+        provider_id: value as AIProviderId,
+        default_model: provider?.default_model ?? current.default_model,
+        base_url: provider?.supports_custom_base_url ? current.base_url : '',
+      }))
+      return
+    }
+    setAiProfileDraft(current => ({ ...current, [field]: value }))
+  }
+
   function updateEducationAgentRole(role: 'teacher' | 'student' | 'shared') {
     const firstAgent = educationAgentCatalog.find(agent => agent.role === role)
     setEducationAgentDraft(current => ({
@@ -1040,8 +1173,125 @@ function App() {
     })
   }
 
+  async function saveAiProfile(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setIsWorking(true)
+    setError(null)
+    setNotice(null)
+
+    try {
+      const payload = {
+        label: aiProfileDraft.label.trim(),
+        provider_id: aiProfileDraft.provider_id,
+        auth_mode: aiProfileDraft.auth_mode,
+        api_key: aiProfileDraft.api_key.trim(),
+        default_model: aiProfileDraft.default_model.trim(),
+        base_url: aiProfileDraft.base_url.trim(),
+        capabilities: linesToArray(aiProfileDraft.capabilitiesText),
+      }
+      const saved = selectedAiProfileId
+        ? await api.updateAiProfile(selectedAiProfileId, {
+            label: payload.label,
+            auth_mode: payload.auth_mode,
+            api_key: payload.api_key || undefined,
+            default_model: payload.default_model,
+            base_url: payload.base_url,
+            capabilities: payload.capabilities,
+          })
+        : await api.createAiProfile(payload)
+
+      await refreshAi()
+      setSelectedAiProfileId(saved.profile_id)
+      setAiProfileDraft({
+        label: saved.label,
+        provider_id: saved.provider_id,
+        auth_mode: saved.auth_mode,
+        api_key: '',
+        default_model: saved.default_model,
+        base_url: saved.base_url,
+        capabilitiesText: saved.capabilities.join('\n'),
+      })
+      setNotice(selectedAiProfileId ? `Updated AI profile ${saved.label}.` : `Added AI profile ${saved.label}.`)
+    } catch (saveError) {
+      setError(getErrorMessage(saveError, 'Failed to save the AI provider profile.'))
+    } finally {
+      setIsWorking(false)
+    }
+  }
+
+  function loadAiProfile(profile: AIProviderProfile) {
+    setSelectedAiProfileId(profile.profile_id)
+    setAiProfileDraft({
+      label: profile.label,
+      provider_id: profile.provider_id,
+      auth_mode: profile.auth_mode,
+      api_key: '',
+      default_model: profile.default_model,
+      base_url: profile.base_url,
+      capabilitiesText: profile.capabilities.join('\n'),
+    })
+    setActivePage('ai')
+  }
+
+  function resetAiProfileDraft() {
+    setSelectedAiProfileId('')
+    const provider = aiCatalog.find(item => item.provider_id === defaultAiProfileDraft.provider_id)
+    setAiProfileDraft({
+      ...defaultAiProfileDraft,
+      default_model: provider?.default_model ?? defaultAiProfileDraft.default_model,
+    })
+  }
+
+  async function testAiProfile(profileId: string) {
+    setIsWorking(true)
+    setError(null)
+    setNotice(null)
+
+    try {
+      const result = await api.testAiProfile(profileId)
+      await refreshAi()
+      setNotice(result.used ? `${result.provider_label} responded successfully.` : `${result.provider_label} test failed: ${result.error}`)
+    } catch (testError) {
+      setError(getErrorMessage(testError, 'Failed to test the AI provider profile.'))
+    } finally {
+      setIsWorking(false)
+    }
+  }
+
+  async function deleteAiProfile(profileId: string) {
+    const profile = aiProfiles.find(item => item.profile_id === profileId)
+    if (!profile || !window.confirm(`Delete AI profile "${profile.label}"?`)) {
+      return
+    }
+
+    setIsWorking(true)
+    setError(null)
+    setNotice(null)
+
+    try {
+      await api.deleteAiProfile(profileId)
+      await refreshAi()
+      setDraft(current => current.ai_profile_id === profileId ? { ...current, ai_profile_id: '' } : current)
+      setAssignmentDraft(current => current.ai_profile_id === profileId ? { ...current, ai_profile_id: '' } : current)
+      setEducationAgentDraft(current => current.ai_profile_id === profileId ? { ...current, ai_profile_id: '' } : current)
+      setEduclawnDraft(current => current.ai_profile_id === profileId ? { ...current, ai_profile_id: '' } : current)
+      setProject(current => current && current.ai_profile_id === profileId ? { ...current, ai_profile_id: '', local_mode: 'no-llm' } : current)
+      if (selectedAiProfileId === profileId) {
+        resetAiProfileDraft()
+      }
+      setNotice(`Deleted AI profile ${profile.label}.`)
+    } catch (deleteError) {
+      setError(getErrorMessage(deleteError, 'Failed to delete the AI provider profile.'))
+    } finally {
+      setIsWorking(false)
+    }
+  }
+
   const selectedTemplate = deferredTemplates.find(template => template.id === draft.template_id) ?? deferredTemplates[0] ?? null
   const adminReady = token.length > 0
+  const isSimpleMode = experienceSettings.simplifiedDashboard && experienceSettings.level !== 'advanced'
+  const showAdvancedSystems = !experienceSettings.simplifiedDashboard || experienceSettings.level === 'advanced'
+  const visiblePages = getVisiblePages(experienceSettings.profile, showAdvancedSystems)
   const compileArtifacts = compileResult?.artifacts ?? deferredArtifacts
   const exports = deferredProject?.exports ?? []
   const bundleExport = exports.find(exportEntry => exportEntry.export_type === 'project_bundle')
@@ -1054,9 +1304,75 @@ function App() {
   const selectedStudent = selectedClassroom?.students.find(item => item.student_id === selectedStudentId) ?? null
   const selectedClassroomKeys = selectedClassroomId ? classroomAccessVault[selectedClassroomId] : undefined
   const filteredEducationAgents = educationAgentCatalog.filter(agent => agent.role === educationAgentDraft.role)
-  const educlawAllowedChannels = ((deferredEduclawOverview?.derived_control_plane.allowed_channels as string[] | undefined) ?? [])
-  const educlawDeniedTools = ((deferredEduclawOverview?.derived_control_plane.denied_tools as string[] | undefined) ?? [])
-  const educlawAttestation = (deferredEduclawBootstrapResult?.control_plane.security as Record<string, unknown> | undefined) ?? undefined
+  const educlawnAllowedChannels = ((deferredEduclawnOverview?.derived_control_plane.allowed_channels as string[] | undefined) ?? [])
+  const educlawnDeniedTools = ((deferredEduclawnOverview?.derived_control_plane.denied_tools as string[] | undefined) ?? [])
+  const educlawnAttestation = (deferredEduclawnBootstrapResult?.control_plane.security as Record<string, unknown> | undefined) ?? undefined
+  const recommendedSample = pickRecommendedSample(experienceSettings.profile, deferredOverview?.sample_projects ?? [])
+  const selectedProviderProfile = deferredAiProfiles.find(item => item.profile_id === selectedAiProfileId) ?? null
+  const draftProviderProfile = deferredAiProfiles.find(item => item.profile_id === draft.ai_profile_id) ?? null
+  const projectProviderProfile = deferredAiProfiles.find(item => item.profile_id === deferredProject?.ai_profile_id) ?? null
+  const educlawnProviderProfile = deferredAiProfiles.find(item => item.profile_id === educlawnDraft.ai_profile_id) ?? null
+  const setupChecklist = [
+    {
+      label: 'Workspace selected',
+      ready: Boolean(deferredDesktopContext?.workspaceRoot || deferredSystemStatus?.workspace_root),
+    },
+    {
+      label: 'Local engine ready',
+      ready: deferredHealth?.status === 'ok',
+    },
+    {
+      label: 'Starter picked',
+      ready: Boolean(draft.title.trim() && draft.template_id),
+    },
+    {
+      label: 'Classroom keys ready',
+      ready: Object.keys(classroomAccessVault).length > 0,
+    },
+  ]
+  const readyChecklistCount = setupChecklist.filter(item => item.ready).length
+  const activePageMeta = visiblePages.find(page => page.id === activePage) ?? visiblePages[0]
+  const pageHeading =
+    activePage === 'home'
+      ? {
+          title: 'Welcome to EduClawn',
+          description: 'Choose a role, finish setup, and move into one focused part of the product at a time.',
+        }
+      : activePage === 'projects'
+        ? {
+            title: 'Projects',
+            description: isSimpleMode
+              ? 'Create, build, or review one project step at a time.'
+              : 'Create, compile, review, and export local-first project work.',
+          }
+        : activePage === 'classroom'
+          ? {
+              title: experienceSettings.profile === 'student' ? 'Student Workspace' : 'Classroom',
+              description: isSimpleMode
+                ? 'Set up the classroom, launch student work, or review safety in separate steps.'
+                : 'Assignments, approved materials, bounded agents, and safety workflows.',
+            }
+          : activePage === 'ai'
+            ? {
+                title: 'AI Providers',
+                description: 'Connect preferred model providers, store classroom-safe profiles locally, and route project or classroom work through them.',
+              }
+          : activePage === 'desktop'
+            ? {
+                title: 'Desktop Tools',
+                description: 'Manage the workspace, recent projects, updates, and packaged-app behavior.',
+              }
+            : {
+                title: 'Advanced Systems',
+                description: 'EduClawn control plane, admin monitoring, and deeper orchestration surfaces.',
+              }
+
+  useEffect(() => {
+    const pages = getVisiblePages(experienceSettings.profile, showAdvancedSystems)
+    if (!pages.some(page => page.id === activePage)) {
+      setActivePage('home')
+    }
+  }, [activePage, experienceSettings.profile, showAdvancedSystems])
 
   function applySampleProject(sample: StudioSampleProject) {
     setDraft(current => ({
@@ -1066,14 +1382,168 @@ function App() {
       topic: sample.title,
       template_id: sample.template_id,
     }))
+    setActivePage('projects')
+    setProjectView('create')
     setNotice(`Loaded sample starter: ${sample.title}.`)
   }
 
-  async function chooseWorkspace() {
-    if (!window.civicStudioDesktop?.chooseWorkspace) {
+  function updateExperienceSetting<K extends keyof ExperienceSettings>(field: K, value: ExperienceSettings[K]) {
+    setExperienceSettings(current => ({ ...current, [field]: value }))
+  }
+
+  function applyExperienceProfile(profile: ExperienceProfile) {
+    setExperienceSettings(current => ({
+      ...current,
+      profile,
+      level: profile === 'builder' ? 'advanced' : profile === 'family' ? 'guided' : 'standard',
+      simplifiedDashboard: profile === 'builder' ? false : true,
+      largeText: profile === 'family' ? true : current.largeText,
+    }))
+    setActivePage(profile === 'teacher' ? 'classroom' : profile === 'student' ? 'projects' : profile === 'builder' ? 'projects' : 'home')
+    setProjectView(profile === 'teacher' ? 'create' : 'build')
+    setClassroomView(profile === 'teacher' ? 'setup' : profile === 'student' ? 'launch' : 'setup')
+
+    if (profile === 'teacher') {
+      setDraft({
+        title: 'Classroom Inquiry Project',
+        summary: 'A teacher-guided local project with approved sources, scaffolded sections, and rubric-aligned outputs.',
+        topic: 'A local civic issue or community history topic',
+        audience: 'Students, families, and classroom reviewers',
+        goalsText: 'Build a classroom-ready project\nUse approved evidence\nSupport revision and teacher review',
+        rubricText: 'Evidence Quality\nCitation Accuracy\nStudent Reflection\nRevision Quality',
+        template_id: 'lesson-module',
+        local_mode: 'no-llm',
+        ai_profile_id: '',
+      })
+      setClassroomDraft({
+        title: 'Civics Period 3',
+        subject: 'Civics',
+        grade_band: 'Grades 8-10',
+        teacher_name: 'Ms. Rivera',
+        description: 'A guided classroom workspace for assignments, approved evidence, and teacher review.',
+        default_template_id: 'lesson-module',
+        standardsText: 'C3 Inquiry\nSource Analysis',
+      })
+      setAssignmentDraft({
+        title: 'Community Evidence Brief',
+        summary: 'Students investigate an issue with teacher-approved evidence and produce a cited class project.',
+        topic: 'A local civic challenge',
+        audience: 'Middle and high school students',
+        template_id: 'research-portfolio',
+        goalsText: 'Use classroom-approved evidence\nDraft an argument with citations',
+        rubricText: 'Evidence Quality\nCitation Accuracy\nClarity',
+        standardsText: 'C3 Inquiry\nArgument Writing',
+        due_date: '2026-04-15',
+        local_mode: 'no-llm',
+        ai_profile_id: '',
+      })
+      setEducationAgentDraft({
+        role: 'teacher',
+        agent_name: 'lesson-planner',
+        prompt: 'Build a bounded lesson plan with approved evidence, teacher review points, and revision checkpoints.',
+        ai_profile_id: '',
+      })
+      setNotice('Teacher quick-start loaded.')
       return
     }
-    const context = await window.civicStudioDesktop.chooseWorkspace()
+
+    if (profile === 'student') {
+      setDraft({
+        title: 'Student Evidence Portfolio',
+        summary: 'A simple student project built from local documents, guided writing, and teacher feedback.',
+        topic: 'A classroom topic or community question',
+        audience: 'Teacher and classmates',
+        goalsText: 'Understand the topic\nAdd strong evidence\nRevise after feedback',
+        rubricText: 'Evidence Quality\nClarity\nRevision Quality',
+        template_id: 'research-portfolio',
+        local_mode: 'no-llm',
+        ai_profile_id: '',
+      })
+      setStudentDraft({
+        name: 'Jordan Lee',
+        grade_level: 'Grade 9',
+        learningGoalsText: 'Use stronger evidence\nExplain ideas clearly',
+        notes: 'Interested in local stories and community issues.',
+      })
+      setEducationAgentDraft({
+        role: 'student',
+        agent_name: 'research-coach',
+        prompt: 'Coach me through finding evidence, drafting a claim, and revising safely inside the classroom rules.',
+        ai_profile_id: '',
+      })
+      setNotice('Student quick-start loaded.')
+      return
+    }
+
+    if (profile === 'family') {
+      setDraft({
+        title: 'Family Learning Story',
+        summary: 'A simpler project space for guided uploads, easy reading, and local storytelling.',
+        topic: 'Family history, neighborhood memory, or a local issue',
+        audience: 'Family, teacher, and community visitors',
+        goalsText: 'Collect a few sources\nExplain the story simply\nShare a clear final project',
+        rubricText: 'Clarity\nEvidence Quality\nAccessibility',
+        template_id: 'documentary-story',
+        local_mode: 'no-llm',
+        ai_profile_id: '',
+      })
+      setNotice('Family-friendly quick-start loaded.')
+      return
+    }
+
+    setDraft({
+      title: 'Advanced Project Build',
+      summary: 'A more technical workspace for templates, workflows, provenance, and local compilation.',
+      topic: 'A complex civic or educational problem',
+      audience: 'Mixed classroom and public audiences',
+      goalsText: 'Design a custom workflow\nUse advanced evidence retrieval\nCompile multiple exports',
+      rubricText: 'System Design\nEvidence Quality\nOutput Quality',
+      template_id: 'civic-campaign-simulator',
+      local_mode: deferredSystemStatus?.local_ai.ollama_reachable ? 'local-llm' : 'no-llm',
+      ai_profile_id: '',
+    })
+    setEducationAgentDraft({
+      role: 'shared',
+      agent_name: 'evidence-librarian',
+      prompt: 'Coordinate the bounded workflow across planning, evidence, review, and export steps.',
+      ai_profile_id: '',
+    })
+    setProjectView('create')
+    setNotice('Advanced builder quick-start loaded.')
+  }
+
+  function jumpToPanel(panelId: string) {
+    const pageId =
+      panelId === 'starter-wizard' || panelId === 'workspace'
+        ? 'projects'
+        : panelId === 'teacher-os'
+          ? 'classroom'
+          : panelId === 'ai-hub'
+            ? 'ai'
+          : panelId === 'educlawn' || panelId === 'admin-ops'
+            ? 'advanced'
+            : panelId === 'desktop-tools'
+              ? 'desktop'
+              : 'home'
+    setActivePage(pageId)
+    window.setTimeout(() => {
+      document.getElementById(panelId)?.scrollIntoView({
+        behavior: experienceSettings.reducedMotion ? 'auto' : 'smooth',
+        block: 'start',
+      })
+    }, 0)
+  }
+
+  function finishOnboarding() {
+    setIsOnboardingComplete(true)
+    setNotice('First-run setup saved. You can reopen the guided path at any time from the Easy Start Center.')
+  }
+
+  async function chooseWorkspace() {
+    if (!window.educlawnDesktop?.chooseWorkspace) {
+      return
+    }
+    const context = await window.educlawnDesktop.chooseWorkspace()
     startTransition(() => {
       setDesktopContext(context)
     })
@@ -1082,48 +1552,50 @@ function App() {
   }
 
   async function openWorkspace() {
-    await window.civicStudioDesktop?.openWorkspace?.()
+    await window.educlawnDesktop?.openWorkspace?.()
   }
 
   async function openReleaseNotes() {
-    await window.civicStudioDesktop?.openReleaseNotes?.()
+    await window.educlawnDesktop?.openReleaseNotes?.()
   }
 
   async function checkForUpdates() {
-    if (!window.civicStudioDesktop?.checkForUpdates) {
+    if (!window.educlawnDesktop?.checkForUpdates) {
       return
     }
-    const context = await window.civicStudioDesktop.checkForUpdates()
+    const context = await window.educlawnDesktop.checkForUpdates()
     startTransition(() => {
       setDesktopContext(context)
     })
   }
 
   async function installDownloadedUpdate() {
-    await window.civicStudioDesktop?.installUpdate?.()
+    await window.educlawnDesktop?.installUpdate?.()
   }
 
   async function toggleLaunchAtLogin() {
-    if (!window.civicStudioDesktop?.setLaunchAtLogin || !desktopContext) {
+    if (!window.educlawnDesktop?.setLaunchAtLogin || !desktopContext) {
       return
     }
-    const context = await window.civicStudioDesktop.setLaunchAtLogin(!desktopContext.preferences.launchAtLogin)
+    const context = await window.educlawnDesktop.setLaunchAtLogin(!desktopContext.preferences.launchAtLogin)
     startTransition(() => {
       setDesktopContext(context)
     })
   }
 
   async function installToApplications() {
-    if (!window.civicStudioDesktop?.installToApplications) {
+    if (!window.educlawnDesktop?.installToApplications) {
       return
     }
-    const context = await window.civicStudioDesktop.installToApplications()
+    const context = await window.educlawnDesktop.installToApplications()
     startTransition(() => {
       setDesktopContext(context)
     })
   }
 
   function openRecentProject(slug: string) {
+    setActivePage('projects')
+    setProjectView('build')
     setSelectedProjectSlug(slug)
     setNotice(`Opened recent project ${slug}.`)
   }
@@ -1171,23 +1643,26 @@ function App() {
   }
 
   return (
-    <div className="studio-shell">
+    <div
+      className={[
+        'studio-shell',
+        experienceSettings.largeText ? 'large-text' : '',
+        experienceSettings.reducedMotion ? 'reduced-motion' : '',
+      ].filter(Boolean).join(' ')}
+    >
       <div className="glow glow-left" />
       <div className="glow glow-right" />
 
       <main className="studio-dashboard">
-        <section className="hero-panel">
-          <div className="hero-copy">
-            <p className="eyebrow">Civic Project Studio</p>
-            <h1>Upload sources, choose a template, and locally build a cited, editable project operating system.</h1>
-            <p className="hero-text">
-              This platform generalizes the original MLK project into a reusable local-first studio with manifests,
-              document ingestion, provenance, agent artifacts, workflow compilation, and export bundles. The legacy
-              experience is still preserved alongside the new engine.
+        <aside className="app-sidebar">
+          <div className="sidebar-brand">
+            <p className="eyebrow">EduClawn</p>
+            <h1>EduClawn</h1>
+            <p className="sidebar-copy">
+              Local-first project building for students and teachers, with simple mode by default and advanced systems only when needed.
             </p>
-
-            <div className="hero-tags">
-              {(deferredOverview?.install_modes ?? []).map(mode => (
+            <div className="chip-row">
+              {(deferredOverview?.install_modes ?? []).slice(0, 3).map(mode => (
                 <span className="hero-tag" key={String(mode.mode)}>
                   {String(mode.mode).replaceAll('_', ' ')}
                 </span>
@@ -1195,80 +1670,136 @@ function App() {
             </div>
           </div>
 
-          <div className="hero-actions">
-            <div className={`status-pill ${deferredHealth?.trained ? 'trained' : 'neutral'}`}>
-              <span className="status-dot" />
-              {deferredHealth?.app ?? 'Civic Project Studio'}
+          <div className="sidebar-block">
+            <span className="mini-label">Navigation</span>
+            <div className="sidebar-nav">
+              {visiblePages.map(page => (
+                <button
+                  className={`sidebar-link ${activePage === page.id ? 'active' : ''}`}
+                  key={page.id}
+                  type="button"
+                  onClick={() => setActivePage(page.id)}
+                >
+                  <strong>{page.label}</strong>
+                  <span>{page.detail}</span>
+                </button>
+              ))}
             </div>
-            <div className="status-pill neutral">
-              <span className="status-dot" />
-              DB {deferredHealth?.database_backend ?? 'pending'}
-            </div>
-            <div className="status-pill neutral">
-              <span className="status-dot" />
-              v{deferredSystemStatus?.release.desktop_version ?? '0.2.0'}
-            </div>
-            <div className="status-pill neutral">
-              <span className="status-dot" />
-              {deferredSystemStatus?.local_ai.ollama_reachable ? 'Local AI ready' : 'No local AI runtime'}
-            </div>
-            <button className="action-button secondary" onClick={() => void refreshStudio(false)} disabled={isWorking}>
-              Refresh Studio
-            </button>
-            {deferredProject ? (
-              <button className="action-button" onClick={() => void compileProject()} disabled={isWorking}>
-                Compile Project
-              </button>
-            ) : null}
-            {deferredProject ? (
-              <button className="action-button dark" onClick={() => void cloneProject()} disabled={isWorking}>
-                Duplicate Project
-              </button>
-            ) : null}
-            {deferredDesktopContext ? (
-              <button className="text-button" type="button" onClick={() => void chooseWorkspace()}>
-                Choose Workspace
-              </button>
-            ) : null}
-            {deferredDesktopContext ? (
-              <button className="text-button" type="button" onClick={() => void openWorkspace()}>
-                Open Workspace
-              </button>
-            ) : null}
-            {deferredDesktopContext ? (
-              <button className="text-button" type="button" onClick={() => void openReleaseNotes()}>
-                Release Notes
-              </button>
-            ) : null}
-            {deferredDesktopContext ? (
-              <button className="text-button" type="button" onClick={() => void checkForUpdates()}>
-                Check Updates
-              </button>
-            ) : null}
-            {deferredDesktopContext ? (
-              <button className="text-button" type="button" onClick={() => void toggleLaunchAtLogin()}>
-                {deferredDesktopContext.preferences.launchAtLogin ? 'Disable Login Launch' : 'Enable Login Launch'}
-              </button>
-            ) : null}
-            {deferredDesktopContext?.canInstallToApplications ? (
-              <button className="text-button" type="button" onClick={() => void installToApplications()}>
-                Install to Applications
-              </button>
-            ) : null}
-            {deferredDesktopContext?.updater.status === 'downloaded' ? (
-              <button className="text-button" type="button" onClick={() => void installDownloadedUpdate()}>
-                Install Update
-              </button>
-            ) : null}
-            <a className="legacy-link" href={api.legacyUrl()} target="_blank" rel="noreferrer">
-              Open Preserved Legacy HTML
-            </a>
           </div>
-        </section>
 
-        {!isOnboardingComplete ? (
-          <Panel title="First-Run Onboarding" subtitle="Pick a workspace, inspect runtime health, choose a sample starter, and confirm the local-first setup.">
+          <div className="sidebar-block">
+            <span className="mini-label">Status</span>
+            <div className="sidebar-status">
+              <div className={`status-pill ${deferredHealth?.trained ? 'trained' : 'neutral'}`}>
+                <span className="status-dot" />
+                {deferredHealth?.app ?? 'EduClawn'}
+              </div>
+              <div className="status-pill neutral">
+                <span className="status-dot" />
+                {formatProfileLabel(experienceSettings.profile)}
+              </div>
+              <div className="status-pill neutral">
+                <span className="status-dot" />
+                v{deferredSystemStatus?.release.desktop_version ?? '0.2.0'}
+              </div>
+              <div className="status-pill neutral">
+                <span className="status-dot" />
+                {deferredSystemStatus?.local_ai.ollama_reachable ? 'Local AI ready' : 'Fallback mode'}
+              </div>
+            </div>
+          </div>
+
+          <div className="sidebar-block">
+            <span className="mini-label">Quick actions</span>
+            <div className="sidebar-actions">
+              <button className="action-button secondary" onClick={() => setActivePage(experienceSettings.profile === 'teacher' ? 'classroom' : 'projects')} disabled={isWorking}>
+                {experienceSettings.profile === 'teacher' ? 'Open Classroom' : 'Open Projects'}
+              </button>
+              <button className="action-button" onClick={() => setActivePage('desktop')} disabled={isWorking}>
+                Desktop Tools
+              </button>
+              <button className="text-button dark-on-light" type="button" onClick={() => setActivePage('ai')} disabled={isWorking}>
+                AI Providers
+              </button>
+              {deferredProject ? (
+                <button className="text-button dark-on-light" type="button" onClick={() => void compileProject()} disabled={isWorking}>
+                  Compile Project
+                </button>
+              ) : null}
+              <button className="text-button dark-on-light" type="button" onClick={() => void refreshStudio(false)}>
+                Refresh Studio
+              </button>
+              <a className="text-button dark-on-light" href={api.legacyUrl()} target="_blank" rel="noreferrer">
+                Legacy HTML
+              </a>
+            </div>
+          </div>
+        </aside>
+
+        <section className="app-main">
+          <section className="page-header">
+            <div>
+              <p className="eyebrow">{activePageMeta?.label ?? 'Home'}</p>
+              <h2>{pageHeading.title}</h2>
+              <p>{pageHeading.description}</p>
+            </div>
+            <div className="page-header-actions">
+              <span className="pill">{formatProfileLabel(experienceSettings.profile)}</span>
+              <span className="pill">{formatLevelLabel(experienceSettings.level)}</span>
+              {showAdvancedSystems ? <span className="pill">Advanced on</span> : <span className="pill">Simple mode</span>}
+              {activePage === 'desktop' ? (
+                <button className="text-button dark-on-light" type="button" onClick={() => void openWorkspace()}>
+                  Open Workspace
+                </button>
+              ) : null}
+              {activePage === 'ai' ? (
+                <button className="text-button dark-on-light" type="button" onClick={() => void refreshAi()}>
+                  Refresh AI
+                </button>
+              ) : null}
+              {activePage === 'advanced' && !showAdvancedSystems ? (
+                <button className="text-button dark-on-light" type="button" onClick={() => updateExperienceSetting('simplifiedDashboard', false)}>
+                  Reveal Advanced
+                </button>
+              ) : null}
+            </div>
+          </section>
+
+          {activePage === 'home' && !isOnboardingComplete ? (
+          <Panel
+            panelId="first-run"
+            title="First-Run Onboarding"
+            subtitle="Pick who the app is for, confirm the local setup, and start with a guided path instead of the full system all at once."
+          >
             <div className="stack-tight">
+              <div className="preview-card embedded">
+                <div className="preview-topline">
+                  <div>
+                    <span className="mini-label">Who is using EduClawn?</span>
+                    <h3>{formatProfileLabel(experienceSettings.profile)}</h3>
+                  </div>
+                  <span className="pill">{formatLevelLabel(experienceSettings.level)}</span>
+                </div>
+                <div className="persona-grid">
+                  {([
+                    { id: 'teacher', title: 'Teacher', detail: 'Classrooms, assignments, evidence libraries, and review.' },
+                    { id: 'student', title: 'Student', detail: 'Simpler research, drafting, and revision support.' },
+                    { id: 'family', title: 'Family', detail: 'Larger text, simpler starters, and fewer advanced controls.' },
+                    { id: 'builder', title: 'Advanced Builder', detail: 'Templates, workflows, provenance, and the full power surface.' },
+                  ] as const).map(option => (
+                    <button
+                      className={`persona-card ${experienceSettings.profile === option.id ? 'selected' : ''}`}
+                      key={option.id}
+                      type="button"
+                      onClick={() => applyExperienceProfile(option.id)}
+                    >
+                      <strong>{option.title}</strong>
+                      <span>{option.detail}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="preview-card embedded">
                 <div className="preview-topline">
                   <div>
@@ -1278,22 +1809,20 @@ function App() {
                   <span className="pill">{String((deferredSystemStatus?.startup.state ?? 'pending')).replaceAll('_', ' ')}</span>
                 </div>
                 <div className="chip-row">
+                  <span className="chip">Setup {readyChecklistCount}/{setupChecklist.length} ready</span>
+                  {setupChecklist.map(item => (
+                    <span className="chip" key={item.label}>
+                      {item.ready ? 'Ready' : 'Next'} {item.label}
+                    </span>
+                  ))}
+                </div>
+                <div className="chip-row">
                   <span className="chip">Warmup {(deferredSystemStatus?.startup.state as string | undefined) ?? 'pending'}</span>
-                  <span className="chip">
-                    OCR {deferredSystemStatus?.tools.tesseract_available ? 'ready' : 'not detected'}
-                  </span>
-                  <span className="chip">
-                    Local AI {deferredSystemStatus?.local_ai.ollama_reachable ? 'reachable' : 'offline'}
-                  </span>
-                  <span className="chip">
-                    Models {deferredSystemStatus?.local_ai.available_models.length ?? 0}
-                  </span>
-                  <span className="chip">
-                    Updates {deferredDesktopContext?.updater.status ?? 'n/a'}
-                  </span>
-                  <span className="chip">
-                    Launch at login {deferredDesktopContext?.preferences.launchAtLogin ? 'on' : 'off'}
-                  </span>
+                  <span className="chip">OCR {deferredSystemStatus?.tools.tesseract_available ? 'ready' : 'not detected'}</span>
+                  <span className="chip">Local AI {deferredSystemStatus?.local_ai.ollama_reachable ? 'reachable' : 'offline'}</span>
+                  <span className="chip">Models {deferredSystemStatus?.local_ai.available_models.length ?? 0}</span>
+                  <span className="chip">Updates {deferredDesktopContext?.updater.status ?? 'n/a'}</span>
+                  <span className="chip">Launch at login {deferredDesktopContext?.preferences.launchAtLogin ? 'on' : 'off'}</span>
                 </div>
                 <div className="action-row">
                   {deferredDesktopContext ? (
@@ -1361,7 +1890,12 @@ function App() {
               </div>
 
               <div className="action-row">
-                <button className="action-button" type="button" onClick={() => setIsOnboardingComplete(true)}>
+                {recommendedSample ? (
+                  <button className="action-button secondary" type="button" onClick={() => applySampleProject(recommendedSample)}>
+                    Load Recommended Starter
+                  </button>
+                ) : null}
+                <button className="action-button" type="button" onClick={finishOnboarding}>
                   Finish Onboarding
                 </button>
               </div>
@@ -1369,44 +1903,276 @@ function App() {
           </Panel>
         ) : null}
 
+          {activePage === 'home' && isOnboardingComplete ? (
+          <Panel
+            panelId="easy-start"
+            title="Easy Start Center"
+            subtitle="Keep the product comfortable for different kinds of users and move through the next steps with fewer decisions."
+          >
+          <div className="two-up">
+            <div className="subpanel">
+              <div className="preview-topline">
+                <div>
+                  <span className="mini-label">Current path</span>
+                  <h3>{formatProfileLabel(experienceSettings.profile)}</h3>
+                </div>
+                <span className="pill">{formatLevelLabel(experienceSettings.level)}</span>
+              </div>
+              <div className="persona-grid">
+                {([
+                  { id: 'teacher', title: 'Teacher', detail: 'Assignments, evidence, and review.' },
+                  { id: 'student', title: 'Student', detail: 'Research, drafting, and revision.' },
+                  { id: 'family', title: 'Family', detail: 'A simpler and easier-to-read experience.' },
+                  { id: 'builder', title: 'Advanced Builder', detail: 'Full templates, workflows, and system panels.' },
+                ] as const).map(option => (
+                  <button
+                    className={`persona-card ${experienceSettings.profile === option.id ? 'selected' : ''}`}
+                    key={option.id}
+                    type="button"
+                    onClick={() => applyExperienceProfile(option.id)}
+                  >
+                    <strong>{option.title}</strong>
+                    <span>{option.detail}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="action-row">
+                <button className="text-button dark-on-light" type="button" onClick={() => setIsOnboardingComplete(false)}>
+                  Reopen Guided Setup
+                </button>
+                {recommendedSample ? (
+                  <button className="text-button dark-on-light" type="button" onClick={() => applySampleProject(recommendedSample)}>
+                    Load Recommended Starter
+                  </button>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="subpanel">
+              <div className="preview-topline">
+                <div>
+                  <span className="mini-label">Comfort and accessibility</span>
+                  <h3>Use What Feels Easier</h3>
+                </div>
+                <span className="pill">{showAdvancedSystems ? 'full system' : 'simple mode'}</span>
+              </div>
+              <div className="setting-list">
+                <button
+                  className={`setting-toggle ${experienceSettings.simplifiedDashboard ? 'enabled' : ''}`}
+                  type="button"
+                  onClick={() => updateExperienceSetting('simplifiedDashboard', !experienceSettings.simplifiedDashboard)}
+                >
+                  <strong>Simple dashboard</strong>
+                  <span>Hide advanced power-user panels until you need them.</span>
+                </button>
+                <button
+                  className={`setting-toggle ${experienceSettings.largeText ? 'enabled' : ''}`}
+                  type="button"
+                  onClick={() => updateExperienceSetting('largeText', !experienceSettings.largeText)}
+                >
+                  <strong>Larger text</strong>
+                  <span>Increase readability for classrooms, families, and presentations.</span>
+                </button>
+                <button
+                  className={`setting-toggle ${experienceSettings.reducedMotion ? 'enabled' : ''}`}
+                  type="button"
+                  onClick={() => updateExperienceSetting('reducedMotion', !experienceSettings.reducedMotion)}
+                >
+                  <strong>Reduced motion</strong>
+                  <span>Turn off extra animation and smooth scrolling.</span>
+                </button>
+              </div>
+              <div className="chip-row">
+                {setupChecklist.map(item => (
+                  <span className="chip" key={item.label}>
+                    {item.ready ? 'Ready' : 'Pending'} {item.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="card-grid compact">
+            {experienceSettings.profile === 'teacher' ? (
+              <>
+                <article className="mini-card action-card">
+                  <h3>Create a classroom</h3>
+                  <p>Jump directly to the Teacher OS form and start a bounded classroom.</p>
+                  <button className="text-button dark-on-light" type="button" onClick={() => jumpToPanel('teacher-os')}>
+                    Open Teacher OS
+                  </button>
+                </article>
+                <article className="mini-card action-card">
+                  <h3>Prepare a starter project</h3>
+                  <p>Use a guided template and create a project manifest first.</p>
+                  <button className="text-button dark-on-light" type="button" onClick={() => jumpToPanel('starter-wizard')}>
+                    Open Starter Wizard
+                  </button>
+                </article>
+                <article className="mini-card action-card">
+                  <h3>Open the workspace folder</h3>
+                  <p>Review saved exports, bundles, and classroom materials outside the app.</p>
+                  <button className="text-button dark-on-light" type="button" onClick={() => void openWorkspace()}>
+                    Open Workspace
+                  </button>
+                </article>
+              </>
+            ) : null}
+
+            {experienceSettings.profile === 'student' ? (
+              <>
+                <article className="mini-card action-card">
+                  <h3>Start with a sample</h3>
+                  <p>Load a recommended sample and edit it instead of starting from scratch.</p>
+                  <button className="text-button dark-on-light" type="button" onClick={() => recommendedSample && applySampleProject(recommendedSample)}>
+                    Load Sample
+                  </button>
+                </article>
+                <article className="mini-card action-card">
+                  <h3>Build your project</h3>
+                  <p>Go straight to the starter form and create a first local project.</p>
+                  <button className="text-button dark-on-light" type="button" onClick={() => jumpToPanel('starter-wizard')}>
+                    Open Starter Wizard
+                  </button>
+                </article>
+                <article className="mini-card action-card">
+                  <h3>Upload sources</h3>
+                  <p>Move into the workspace and add PDFs, notes, or images.</p>
+                  <button className="text-button dark-on-light" type="button" onClick={() => jumpToPanel('workspace')}>
+                    Open Workspace
+                  </button>
+                </article>
+              </>
+            ) : null}
+
+            {experienceSettings.profile === 'family' ? (
+              <>
+                <article className="mini-card action-card">
+                  <h3>Use the easiest starter</h3>
+                  <p>Load a family-friendly project starter with simpler defaults.</p>
+                  <button className="text-button dark-on-light" type="button" onClick={() => recommendedSample && applySampleProject(recommendedSample)}>
+                    Load Starter
+                  </button>
+                </article>
+                <article className="mini-card action-card">
+                  <h3>Choose the workspace</h3>
+                  <p>Pick a folder that is easy to find later.</p>
+                  <button className="text-button dark-on-light" type="button" onClick={() => void chooseWorkspace()}>
+                    Choose Workspace
+                  </button>
+                </article>
+                <article className="mini-card action-card">
+                  <h3>Turn on larger text</h3>
+                  <p>Keep reading comfortable while reviewing sources and outputs.</p>
+                  <button className="text-button dark-on-light" type="button" onClick={() => updateExperienceSetting('largeText', true)}>
+                    Enable Larger Text
+                  </button>
+                </article>
+              </>
+            ) : null}
+
+            {experienceSettings.profile === 'builder' ? (
+              <>
+                <article className="mini-card action-card">
+                  <h3>Open advanced systems</h3>
+                  <p>Jump into EduClawn, approvals, and the deeper orchestration surfaces.</p>
+                  <button className="text-button dark-on-light" type="button" onClick={() => jumpToPanel('educlawn')}>
+                    Open EduClawn
+                  </button>
+                </article>
+                <article className="mini-card action-card">
+                  <h3>Build a workflow</h3>
+                  <p>Start in the starter wizard, then move into the workspace and compile exports.</p>
+                  <button className="text-button dark-on-light" type="button" onClick={() => jumpToPanel('starter-wizard')}>
+                    Open Starter Wizard
+                  </button>
+                </article>
+                <article className="mini-card action-card">
+                  <h3>Check update state</h3>
+                  <p>Confirm build version and staged updates from the desktop shell.</p>
+                  <button className="text-button dark-on-light" type="button" onClick={() => void checkForUpdates()}>
+                    Check Updates
+                  </button>
+                </article>
+              </>
+            ) : null}
+          </div>
+          </Panel>
+        ) : null}
+
         {error ? <section className="error-banner">{error}</section> : null}
         {authError ? <section className="error-banner">{authError}</section> : null}
         {notice ? <section className="notice-banner">{notice}</section> : null}
 
-        <section className="metric-grid">
+        {activePage === 'home' && isOnboardingComplete ? (
+          <>
+            <section className="metric-grid">
           <MetricCard label="Templates" value={deferredOverview?.counts.templates} />
           <MetricCard label="Projects" value={deferredOverview?.counts.projects} />
           <MetricCard label="Documents" value={deferredOverview?.counts.documents} />
           <MetricCard label="Exports" value={deferredOverview?.counts.exports} />
           <MetricCard label="Plugins" value={deferredOverview?.counts.plugins} />
           <MetricCard label="Benchmark Cadence" value={formatSeconds(deferredHealth?.scheduler.benchmark_interval_seconds)} />
-        </section>
+            </section>
 
-        <Panel title="EduClaw" subtitle="OpenClaw-derived control plane for bounded teacher and student orchestration.">
-          <div className="two-up">
+            <Panel title="Current Workspace" subtitle="Use the simpler page navigation instead of scrolling through every system at once.">
+              <div className="card-grid compact">
+                <article className="mini-card action-card">
+                  <h3>Current project</h3>
+                  <p>{deferredProject?.title ?? 'No active project selected yet.'}</p>
+                  <button className="text-button dark-on-light" type="button" onClick={() => setActivePage('projects')}>
+                    Open Projects
+                  </button>
+                </article>
+                <article className="mini-card action-card">
+                  <h3>Current classroom</h3>
+                  <p>{selectedClassroom?.title ?? 'No classroom selected yet.'}</p>
+                  <button
+                    className="text-button dark-on-light"
+                    type="button"
+                    onClick={() => setActivePage(visiblePages.some(page => page.id === 'classroom') ? 'classroom' : 'projects')}
+                  >
+                    {visiblePages.some(page => page.id === 'classroom') ? 'Open Classroom' : 'Open Projects'}
+                  </button>
+                </article>
+                <article className="mini-card action-card">
+                  <h3>Desktop status</h3>
+                  <p>{deferredDesktopContext?.workspaceRoot ?? deferredSystemStatus?.workspace_root ?? 'Workspace pending'}</p>
+                  <button className="text-button dark-on-light" type="button" onClick={() => setActivePage('desktop')}>
+                    Open Desktop Tools
+                  </button>
+                </article>
+              </div>
+            </Panel>
+          </>
+        ) : null}
+
+        {activePage === 'advanced' && showAdvancedSystems ? (
+          <Panel panelId="educlawn" title="EduClawn" subtitle="OpenClaw-derived control plane for bounded teacher and student orchestration.">
+            <div className="two-up">
             <div className="subpanel">
               <div className="preview-topline">
                 <div>
                   <span className="mini-label">Imported source</span>
-                  <h3>{deferredEduclawOverview?.source_summary.package_name || 'openclaw source pending'}</h3>
+                  <h3>{deferredEduclawnOverview?.source_summary.package_name || 'openclaw source pending'}</h3>
                 </div>
                 <span className="pill">
-                  {deferredEduclawOverview?.source_summary.available ? `v${deferredEduclawOverview.source_summary.version}` : 'missing'}
+                  {deferredEduclawnOverview?.source_summary.available ? `v${deferredEduclawnOverview.source_summary.version}` : 'missing'}
                 </span>
               </div>
-              <p>{deferredEduclawOverview?.tagline ?? 'EduClaw turns the OpenClaw product shape into a school-safe local-first system.'}</p>
+              <p>{deferredEduclawnOverview?.tagline ?? 'EduClawn turns the OpenClaw product shape into a school-safe local-first system.'}</p>
               <div className="chip-row">
-                <span className="chip">License {deferredEduclawOverview?.source_summary.license || 'n/a'}</span>
-                <span className="chip">Node {deferredEduclawOverview?.source_summary.node_requirement || 'n/a'}</span>
-                <span className="chip">Channels {deferredEduclawOverview?.source_summary.counts.channels ?? 0}</span>
-                <span className="chip">Skills {deferredEduclawOverview?.source_summary.counts.skills ?? 0}</span>
-                <span className="chip">Extensions {deferredEduclawOverview?.source_summary.counts.extensions ?? 0}</span>
+                <span className="chip">License {deferredEduclawnOverview?.source_summary.license || 'n/a'}</span>
+                <span className="chip">Node {deferredEduclawnOverview?.source_summary.node_requirement || 'n/a'}</span>
+                <span className="chip">Channels {deferredEduclawnOverview?.source_summary.counts.channels ?? 0}</span>
+                <span className="chip">Skills {deferredEduclawnOverview?.source_summary.counts.skills ?? 0}</span>
+                <span className="chip">Extensions {deferredEduclawnOverview?.source_summary.counts.extensions ?? 0}</span>
               </div>
               <div className="card-grid compact">
                 <article className="mini-card">
                   <h3>Allowed channels</h3>
                   <div className="chip-row">
-                    {educlawAllowedChannels.map(channel => (
+                    {educlawnAllowedChannels.map(channel => (
                       <span className="chip" key={channel}>{channel}</span>
                     ))}
                   </div>
@@ -1414,7 +2180,7 @@ function App() {
                 <article className="mini-card">
                   <h3>Denied tools</h3>
                   <div className="chip-row">
-                    {educlawDeniedTools.slice(0, 8).map(tool => (
+                    {educlawnDeniedTools.slice(0, 8).map(tool => (
                       <span className="chip" key={tool}>{tool}</span>
                     ))}
                   </div>
@@ -1422,7 +2188,7 @@ function App() {
               </div>
               <div className="preview-card embedded">
                 <p className="mini-label">Imported from</p>
-                <p>{deferredEduclawOverview?.source_summary.path || 'No local OpenClaw path detected.'}</p>
+                <p>{deferredEduclawnOverview?.source_summary.path || 'No local OpenClaw path detected.'}</p>
               </div>
             </div>
 
@@ -1430,52 +2196,66 @@ function App() {
               <div className="preview-topline">
                 <div>
                   <span className="mini-label">Bootstrap</span>
-                  <h3>Create EduClaw Control Plane</h3>
+                  <h3>Create EduClawn Control Plane</h3>
                 </div>
-                <span className="pill">{educlawDraft.local_mode}</span>
+                <span className="pill">{educlawnDraft.local_mode}</span>
               </div>
-              <form className="form-grid" onSubmit={bootstrapEduClaw}>
+              <form className="form-grid" onSubmit={bootstrapEduClawn}>
                 <div className="two-up">
                   <label className="field">
                     <span>School</span>
-                    <input value={educlawDraft.school_name} onChange={event => setEduclawDraft(current => ({ ...current, school_name: event.target.value }))} />
+                    <input value={educlawnDraft.school_name} onChange={event => setEduclawnDraft(current => ({ ...current, school_name: event.target.value }))} />
                   </label>
                   <label className="field">
                     <span>Teacher</span>
-                    <input value={educlawDraft.teacher_name} onChange={event => setEduclawDraft(current => ({ ...current, teacher_name: event.target.value }))} />
+                    <input value={educlawnDraft.teacher_name} onChange={event => setEduclawnDraft(current => ({ ...current, teacher_name: event.target.value }))} />
                   </label>
                 </div>
                 <div className="two-up">
                   <label className="field">
                     <span>Classroom</span>
-                    <input value={educlawDraft.classroom_title} onChange={event => setEduclawDraft(current => ({ ...current, classroom_title: event.target.value }))} />
+                    <input value={educlawnDraft.classroom_title} onChange={event => setEduclawnDraft(current => ({ ...current, classroom_title: event.target.value }))} />
                   </label>
                   <label className="field">
                     <span>Subject</span>
-                    <input value={educlawDraft.subject} onChange={event => setEduclawDraft(current => ({ ...current, subject: event.target.value }))} />
+                    <input value={educlawnDraft.subject} onChange={event => setEduclawnDraft(current => ({ ...current, subject: event.target.value }))} />
                   </label>
                 </div>
                 <div className="two-up">
                   <label className="field">
                     <span>Grade band</span>
-                    <input value={educlawDraft.grade_band} onChange={event => setEduclawDraft(current => ({ ...current, grade_band: event.target.value }))} />
+                    <input value={educlawnDraft.grade_band} onChange={event => setEduclawnDraft(current => ({ ...current, grade_band: event.target.value }))} />
                   </label>
                   <label className="field">
                     <span>Runtime mode</span>
-                    <select value={educlawDraft.local_mode} onChange={event => setEduclawDraft(current => ({ ...current, local_mode: event.target.value as typeof defaultEduClawDraft.local_mode }))}>
+                    <select value={educlawnDraft.local_mode} onChange={event => setEduclawnDraft(current => ({ ...current, local_mode: event.target.value as typeof defaultEduClawnDraft.local_mode }))}>
                       <option value="no-llm">No-LLM</option>
                       <option value="local-llm">Local-LLM</option>
+                      <option value="provider-ai">Provider AI</option>
                     </select>
                   </label>
                 </div>
+                {educlawnDraft.local_mode === 'provider-ai' ? (
+                  <label className="field">
+                    <span>AI provider profile</span>
+                    <select value={educlawnDraft.ai_profile_id} onChange={event => setEduclawnDraft(current => ({ ...current, ai_profile_id: event.target.value }))}>
+                      <option value="">Choose a connected provider</option>
+                      {deferredAiProfiles.map(profile => (
+                        <option key={profile.profile_id} value={profile.profile_id}>
+                          {profile.label} · {profile.provider_label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
                 <label className="field">
                   <span>Description</span>
-                  <textarea value={educlawDraft.description} onChange={event => setEduclawDraft(current => ({ ...current, description: event.target.value }))} />
+                  <textarea value={educlawnDraft.description} onChange={event => setEduclawnDraft(current => ({ ...current, description: event.target.value }))} />
                 </label>
                 <div className="two-up">
                   <label className="field">
                     <span>Default template</span>
-                    <select value={educlawDraft.default_template_id} onChange={event => setEduclawDraft(current => ({ ...current, default_template_id: event.target.value }))}>
+                    <select value={educlawnDraft.default_template_id} onChange={event => setEduclawnDraft(current => ({ ...current, default_template_id: event.target.value }))}>
                       {deferredTemplates.map(template => (
                         <option key={template.id} value={template.id}>
                           {template.label}
@@ -1485,7 +2265,7 @@ function App() {
                   </label>
                   <label className="field">
                     <span>Assignment template</span>
-                    <select value={educlawDraft.template_id} onChange={event => setEduclawDraft(current => ({ ...current, template_id: event.target.value }))}>
+                    <select value={educlawnDraft.template_id} onChange={event => setEduclawnDraft(current => ({ ...current, template_id: event.target.value }))}>
                       {deferredTemplates.map(template => (
                         <option key={template.id} value={template.id}>
                           {template.label}
@@ -1496,71 +2276,128 @@ function App() {
                 </div>
                 <label className="field">
                   <span>Assignment title</span>
-                  <input value={educlawDraft.assignment_title} onChange={event => setEduclawDraft(current => ({ ...current, assignment_title: event.target.value }))} />
+                  <input value={educlawnDraft.assignment_title} onChange={event => setEduclawnDraft(current => ({ ...current, assignment_title: event.target.value }))} />
                 </label>
                 <label className="field">
                   <span>Assignment summary</span>
-                  <textarea value={educlawDraft.assignment_summary} onChange={event => setEduclawDraft(current => ({ ...current, assignment_summary: event.target.value }))} />
+                  <textarea value={educlawnDraft.assignment_summary} onChange={event => setEduclawnDraft(current => ({ ...current, assignment_summary: event.target.value }))} />
                 </label>
                 <label className="field">
                   <span>Topic</span>
-                  <input value={educlawDraft.topic} onChange={event => setEduclawDraft(current => ({ ...current, topic: event.target.value }))} />
+                  <input value={educlawnDraft.topic} onChange={event => setEduclawnDraft(current => ({ ...current, topic: event.target.value }))} />
                 </label>
                 <div className="two-up">
                   <label className="field">
                     <span>Goals</span>
-                    <textarea value={educlawDraft.goalsText} onChange={event => setEduclawDraft(current => ({ ...current, goalsText: event.target.value }))} />
+                    <textarea value={educlawnDraft.goalsText} onChange={event => setEduclawnDraft(current => ({ ...current, goalsText: event.target.value }))} />
                   </label>
                   <label className="field">
                     <span>Rubric</span>
-                    <textarea value={educlawDraft.rubricText} onChange={event => setEduclawDraft(current => ({ ...current, rubricText: event.target.value }))} />
+                    <textarea value={educlawnDraft.rubricText} onChange={event => setEduclawnDraft(current => ({ ...current, rubricText: event.target.value }))} />
                   </label>
                 </div>
                 <div className="two-up">
                   <label className="field">
                     <span>Standards</span>
-                    <textarea value={educlawDraft.standardsText} onChange={event => setEduclawDraft(current => ({ ...current, standardsText: event.target.value }))} />
+                    <textarea value={educlawnDraft.standardsText} onChange={event => setEduclawnDraft(current => ({ ...current, standardsText: event.target.value }))} />
                   </label>
                   <label className="field">
                     <span>Due date</span>
-                    <input value={educlawDraft.due_date} onChange={event => setEduclawDraft(current => ({ ...current, due_date: event.target.value }))} />
+                    <input value={educlawnDraft.due_date} onChange={event => setEduclawnDraft(current => ({ ...current, due_date: event.target.value }))} />
                   </label>
                 </div>
-                <button className="action-button full-width" disabled={isWorking || !deferredEduclawOverview?.source_summary.available}>
-                  {isWorking ? 'Bootstrapping EduClaw...' : 'Bootstrap EduClaw'}
+                <button className="action-button full-width" disabled={isWorking || !deferredEduclawnOverview?.source_summary.available}>
+                  {isWorking ? 'Bootstrapping EduClawn...' : 'Bootstrap EduClawn'}
                 </button>
               </form>
+              {educlawnProviderProfile ? (
+                <div className="preview-card embedded">
+                  <div className="preview-topline">
+                    <div>
+                      <span className="mini-label">Provider-backed bootstrap</span>
+                      <h3>{educlawnProviderProfile.label}</h3>
+                    </div>
+                    <span className="pill">{educlawnProviderProfile.provider_label}</span>
+                  </div>
+                  <p>{educlawnProviderProfile.default_model}</p>
+                </div>
+              ) : null}
             </div>
           </div>
 
-          {deferredEduclawBootstrapResult ? (
+          {deferredEduclawnBootstrapResult ? (
             <div className="preview-card">
               <div className="preview-topline">
                 <div>
                   <span className="mini-label">Generated control plane</span>
-                  <h3>{deferredEduclawBootstrapResult.classroom.title}</h3>
+                  <h3>{deferredEduclawnBootstrapResult.classroom.title}</h3>
                 </div>
-                <span className="pill">{deferredEduclawBootstrapResult.assignment.title}</span>
+                <span className="pill">{deferredEduclawnBootstrapResult.assignment.title}</span>
               </div>
-              <p>{deferredEduclawBootstrapResult.control_plane_path}</p>
-              <p className="mini-label">Attestation: {deferredEduclawBootstrapResult.attestation_path}</p>
+              <p>{deferredEduclawnBootstrapResult.control_plane_path}</p>
+              <p className="mini-label">Attestation: {deferredEduclawnBootstrapResult.attestation_path}</p>
               <div className="chip-row">
-                {((((deferredEduclawBootstrapResult.control_plane.gateway as Record<string, unknown> | undefined)?.allowed_channels) as string[] | undefined) ?? []).map(channel => (
+                {((((deferredEduclawnBootstrapResult.control_plane.gateway as Record<string, unknown> | undefined)?.allowed_channels) as string[] | undefined) ?? []).map(channel => (
                   <span className="chip" key={channel}>{channel}</span>
                 ))}
               </div>
               <div className="chip-row">
-                <span className="chip">Integrity {(educlawAttestation?.config_sha256 as string | undefined)?.slice(0, 12) ?? 'n/a'}</span>
-                <span className="chip">Signature {String(educlawAttestation?.signature_algorithm ?? 'n/a')}</span>
-                <span className="chip">Attestation {String(educlawAttestation?.attestation_id ?? 'n/a')}</span>
+                <span className="chip">Integrity {(educlawnAttestation?.config_sha256 as string | undefined)?.slice(0, 12) ?? 'n/a'}</span>
+                <span className="chip">Signature {String(educlawnAttestation?.signature_algorithm ?? 'n/a')}</span>
+                <span className="chip">Attestation {String(educlawnAttestation?.attestation_id ?? 'n/a')}</span>
               </div>
             </div>
           ) : null}
-        </Panel>
+          </Panel>
+        ) : activePage === 'advanced' ? (
+          <Panel title="Advanced Systems Hidden" subtitle="Simple mode keeps expert controls out of the way until the core project and classroom flow are working.">
+            <div className="preview-card embedded">
+              <div className="preview-topline">
+                <div>
+                  <span className="mini-label">Currently hidden</span>
+                  <h3>EduClawn, admin ops, and deeper orchestration panels</h3>
+                </div>
+                <span className="pill">simple mode</span>
+              </div>
+              <p>Use the Easy Start Center to keep the app calmer for beginners, then reveal the advanced systems when you need them.</p>
+              <div className="action-row">
+                <button className="action-button" type="button" onClick={() => updateExperienceSetting('simplifiedDashboard', false)}>
+                  Reveal Advanced Systems
+                </button>
+              </div>
+            </div>
+          </Panel>
+        ) : null}
 
-        <section className="studio-grid">
+        {activePage === 'projects' ? (
+          <>
+            {isSimpleMode ? (
+              <section className="focus-strip">
+                <div className="preview-topline">
+                  <div>
+                    <span className="mini-label">Projects flow</span>
+                    <h3>One step at a time</h3>
+                  </div>
+                  <span className="pill">{projectView}</span>
+                </div>
+                <div className="focus-switch">
+                  <button className={`focus-pill ${projectView === 'create' ? 'active' : ''}`} type="button" onClick={() => setProjectView('create')}>
+                    Create
+                  </button>
+                  <button className={`focus-pill ${projectView === 'build' ? 'active' : ''}`} type="button" onClick={() => setProjectView('build')}>
+                    Build
+                  </button>
+                  <button className={`focus-pill ${projectView === 'review' ? 'active' : ''}`} type="button" onClick={() => setProjectView('review')}>
+                    Review
+                  </button>
+                </div>
+              </section>
+            ) : null}
+
+            <section className={`studio-grid ${isSimpleMode ? 'single-column' : ''}`}>
           <div className="column">
-            <Panel title="Starter Wizard" subtitle="Create a typed local project manifest and save it as project.yaml.">
+            {!isSimpleMode || projectView === 'create' ? (
+              <Panel panelId="starter-wizard" title="Starter Wizard" subtitle="Create a typed local project manifest and save it as project.yaml.">
               <form className="form-grid" onSubmit={createProject}>
                 <label className="field">
                   <span>Project title</span>
@@ -1609,9 +2446,28 @@ function App() {
                     <select value={draft.local_mode} onChange={event => updateDraftField('local_mode', event.target.value as ProjectDraft['local_mode'])}>
                       <option value="no-llm">No-LLM</option>
                       <option value="local-llm">Local-LLM</option>
+                      <option value="provider-ai">Provider AI</option>
                     </select>
                   </label>
                 </div>
+
+                {draft.local_mode === 'provider-ai' ? (
+                  <label className="field">
+                    <span>AI provider profile</span>
+                    <select value={draft.ai_profile_id} onChange={event => updateDraftField('ai_profile_id', event.target.value)}>
+                      <option value="">Choose a connected provider</option>
+                      {deferredAiProfiles.map(profile => (
+                        <option key={profile.profile_id} value={profile.profile_id}>
+                          {profile.label} · {profile.provider_label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
+
+                {draft.local_mode === 'provider-ai' && !deferredAiProfiles.length ? (
+                  <div className="empty-state">Add a provider profile on the AI page before using provider-ai mode.</div>
+                ) : null}
 
                 <button className="action-button full-width" disabled={isWorking || isBooting}>
                   {isWorking ? 'Creating project...' : 'Create Local Project'}
@@ -1632,12 +2488,15 @@ function App() {
                     {selectedTemplate.export_targets.map(target => (
                       <span className="chip" key={target}>{target}</span>
                     ))}
+                    {draftProviderProfile ? <span className="chip">AI {draftProviderProfile.provider_label}</span> : null}
                   </div>
                 </div>
               ) : null}
-            </Panel>
+              </Panel>
+            ) : null}
 
-            <Panel title="Template Registry" subtitle="Built-in project blueprints for local-first open-source creation.">
+            {!isSimpleMode ? (
+              <Panel title="Template Registry" subtitle="Built-in project blueprints for local-first open-source creation.">
               <div className="card-grid">
                 {deferredTemplates.map(template => (
                   <article className={`template-card ${draft.template_id === template.id ? 'selected' : ''}`} key={template.id}>
@@ -1660,9 +2519,11 @@ function App() {
                   </article>
                 ))}
               </div>
-            </Panel>
+              </Panel>
+            ) : null}
 
-            <Panel title="Community Packs" subtitle="Sample projects and plugin packs included for open-source reuse.">
+            {!isSimpleMode ? (
+              <Panel title="Community Packs" subtitle="Sample projects and plugin packs included for open-source reuse.">
               <div className="stack-tight">
                 <div>
                   <p className="mini-label">Sample projects</p>
@@ -1693,12 +2554,14 @@ function App() {
                   </div>
                 </div>
               </div>
-            </Panel>
+              </Panel>
+            ) : null}
           </div>
 
           <div className="column">
-            <Panel title="Workspace" subtitle="Select a project, edit the manifest, upload evidence, and compile locally.">
-              <div className="workspace-shell">
+            {!isSimpleMode || projectView === 'build' ? (
+              <Panel panelId="workspace" title="Workspace" subtitle="Select a project, edit the manifest, upload evidence, and compile locally.">
+              <div className={`workspace-shell ${isSimpleMode ? 'single-column' : ''}`}>
                 <div className="workspace-sidebar">
                   <p className="mini-label">Projects</p>
                   <div className="project-list">
@@ -1734,6 +2597,7 @@ function App() {
                           <span className="chip">{deferredProject.project_type.replaceAll('_', ' ')}</span>
                           <span className="chip">{deferredProject.documents.length} documents</span>
                           <span className="chip">{deferredProject.exports.length} exports</span>
+                          {projectProviderProfile ? <span className="chip">AI {projectProviderProfile.provider_label}</span> : null}
                         </div>
                       </div>
 
@@ -1762,8 +2626,25 @@ function App() {
                           >
                             <option value="no-llm">No-LLM</option>
                             <option value="local-llm">Local-LLM</option>
+                            <option value="provider-ai">Provider AI</option>
                           </select>
                         </label>
+                        {deferredProject.local_mode === 'provider-ai' ? (
+                          <label className="field">
+                            <span>AI provider profile</span>
+                            <select
+                              value={deferredProject.ai_profile_id}
+                              onChange={event => updateProjectField('ai_profile_id', event.target.value)}
+                            >
+                              <option value="">Choose a connected provider</option>
+                              {deferredAiProfiles.map(profile => (
+                                <option key={profile.profile_id} value={profile.profile_id}>
+                                  {profile.label} · {profile.provider_label}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        ) : null}
                         <label className="field">
                           <span>Goals</span>
                           <textarea value={deferredProject.goals.join('\n')} onChange={event => updateProjectTextList('goals', event.target.value)} />
@@ -1847,7 +2728,7 @@ function App() {
                             <span>Imported project title override</span>
                             <input value={importTitle} onChange={event => setImportTitle(event.target.value)} placeholder="Optional imported title" />
                           </label>
-                          <input className="file-input" type="file" accept=".zip" onChange={importProjectBundle} />
+                          <input className="file-input" type="file" accept=".cpsbundle,.zip" onChange={importProjectBundle} />
                           <div className="action-row">
                             {bundleExport ? (
                               <a
@@ -1902,9 +2783,11 @@ function App() {
                   )}
                 </div>
               </div>
-            </Panel>
+              </Panel>
+            ) : null}
 
-            <Panel title="Evidence and Provenance" subtitle="Search uploaded chunks and inspect the compiled knowledge graph.">
+            {!isSimpleMode || projectView === 'review' ? (
+              <Panel title="Evidence and Provenance" subtitle="Search uploaded chunks and inspect the compiled knowledge graph.">
               {deferredProject ? (
                 <div className="stack-tight">
                   <div className="action-row">
@@ -1954,9 +2837,11 @@ function App() {
               ) : (
                 <div className="empty-state">Evidence search activates after a project is selected.</div>
               )}
-            </Panel>
+              </Panel>
+            ) : null}
 
-            <Panel title="Agent Runtime and Exports" subtitle="Artifact-producing agents, rubric review, simulation blueprint, and local bundles.">
+            {!isSimpleMode || projectView === 'review' ? (
+              <Panel title="Agent Runtime and Exports" subtitle="Artifact-producing agents, rubric review, simulation blueprint, and local bundles.">
               {deferredProject ? (
                 <div className="stack-tight">
                   {compileArtifacts ? (
@@ -2182,14 +3067,43 @@ function App() {
                   Select a project to inspect agent outputs, teacher review, revision history, and export bundles.
                 </div>
               )}
-            </Panel>
+              </Panel>
+            ) : null}
           </div>
-        </section>
+            </section>
+          </>
+        ) : null}
 
-        <section className="studio-grid">
+        {activePage === 'classroom' ? (
+          <>
+            {isSimpleMode ? (
+              <section className="focus-strip">
+                <div className="preview-topline">
+                  <div>
+                    <span className="mini-label">Classroom flow</span>
+                    <h3>Keep the classroom work focused</h3>
+                  </div>
+                  <span className="pill">{classroomView}</span>
+                </div>
+                <div className="focus-switch">
+                  <button className={`focus-pill ${classroomView === 'setup' ? 'active' : ''}`} type="button" onClick={() => setClassroomView('setup')}>
+                    Setup
+                  </button>
+                  <button className={`focus-pill ${classroomView === 'launch' ? 'active' : ''}`} type="button" onClick={() => setClassroomView('launch')}>
+                    Launch
+                  </button>
+                  <button className={`focus-pill ${classroomView === 'safety' ? 'active' : ''}`} type="button" onClick={() => setClassroomView('safety')}>
+                    Safety
+                  </button>
+                </div>
+              </section>
+            ) : null}
+
+            <section className={`studio-grid ${isSimpleMode ? 'single-column' : ''}`}>
           <div className="column">
-            <Panel title="Teacher OS" subtitle="Create bounded classrooms, seed approved evidence, and launch assignment-driven student work.">
-              <div className="workspace-shell">
+            {!isSimpleMode || classroomView === 'setup' ? (
+              <Panel panelId="teacher-os" title="Teacher OS" subtitle="Create bounded classrooms, seed approved evidence, and launch assignment-driven student work.">
+              <div className={`workspace-shell ${isSimpleMode ? 'single-column' : ''}`}>
                 <div className="workspace-sidebar">
                   <p className="mini-label">Classrooms</p>
                   <div className="project-list">
@@ -2226,7 +3140,8 @@ function App() {
                       </div>
                     </div>
 
-                    <form className="form-grid" onSubmit={createClassroom}>
+                    {!isSimpleMode || classroomView === 'setup' ? (
+                      <form className="form-grid" onSubmit={createClassroom}>
                       <label className="field">
                         <span>Classroom title</span>
                         <input value={classroomDraft.title} onChange={event => setClassroomDraft(current => ({ ...current, title: event.target.value }))} />
@@ -2266,7 +3181,8 @@ function App() {
                       <button className="action-button full-width" disabled={isWorking}>
                         {isWorking ? 'Saving classroom...' : 'Create Bounded Classroom'}
                       </button>
-                    </form>
+                      </form>
+                    ) : null}
 
                     {selectedClassroom ? (
                       <>
@@ -2293,7 +3209,8 @@ function App() {
                           </div>
                         </div>
 
-                        <div className="two-up">
+                        {!isSimpleMode || classroomView === 'launch' ? (
+                          <div className="two-up">
                           <div className="subpanel">
                             <div className="preview-topline">
                               <div>
@@ -2361,9 +3278,26 @@ function App() {
                                   >
                                     <option value="no-llm">No-LLM</option>
                                     <option value="local-llm">Local-LLM</option>
+                                    <option value="provider-ai">Provider AI</option>
                                   </select>
                                 </label>
                               </div>
+                              {assignmentDraft.local_mode === 'provider-ai' ? (
+                                <label className="field">
+                                  <span>AI provider profile</span>
+                                  <select
+                                    value={assignmentDraft.ai_profile_id}
+                                    onChange={event => setAssignmentDraft(current => ({ ...current, ai_profile_id: event.target.value }))}
+                                  >
+                                    <option value="">Choose a connected provider</option>
+                                    {deferredAiProfiles.map(profile => (
+                                      <option key={profile.profile_id} value={profile.profile_id}>
+                                        {profile.label} · {profile.provider_label}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </label>
+                              ) : null}
                               <label className="field">
                                 <span>Goals</span>
                                 <textarea value={assignmentDraft.goalsText} onChange={event => setAssignmentDraft(current => ({ ...current, goalsText: event.target.value }))} />
@@ -2385,7 +3319,8 @@ function App() {
                               <button className="action-button" disabled={isWorking}>Create Assignment</button>
                             </form>
                           </div>
-                        </div>
+                          </div>
+                        ) : null}
                       </>
                     ) : (
                       <div className="empty-state">Create the first classroom to activate Teacher OS.</div>
@@ -2393,14 +3328,17 @@ function App() {
                   </div>
                 </div>
               </div>
-            </Panel>
+              </Panel>
+            ) : null}
           </div>
 
           <div className="column">
-            <Panel title="Student OS and Safety Layer" subtitle="Launch student projects from approved materials, run scoped agents, and inspect approvals and audit trails.">
+            {!isSimpleMode || classroomView !== 'setup' ? (
+              <Panel title="Student OS and Safety Layer" subtitle="Launch student projects from approved materials, run scoped agents, and inspect approvals and audit trails.">
               {selectedClassroom ? (
                 <div className="stack-tight">
-                  <div className="two-up">
+                  {!isSimpleMode || classroomView === 'launch' ? (
+                    <div className="two-up">
                     <div className="subpanel">
                       <div className="preview-topline">
                         <div>
@@ -2436,6 +3374,7 @@ function App() {
                         <span className="chip">{selectedStudent?.name ?? 'No student selected'}</span>
                         <span className="chip">{selectedClassroom.evidence_library.length} approved materials</span>
                         <span className="chip">Max upload {selectedClassroom.security_posture?.max_material_bytes ?? 0} bytes</span>
+                        {selectedAssignment?.ai_profile_id ? <span className="chip">Provider AI linked</span> : null}
                       </div>
                       <div className="action-row">
                         <button className="action-button" type="button" onClick={() => void launchStudentProject()} disabled={isWorking || !selectedAssignment || !selectedStudent}>
@@ -2499,6 +3438,20 @@ function App() {
                           placeholder="Describe the classroom-safe task for the agent."
                         />
                       </label>
+                      <label className="field">
+                        <span>Provider override</span>
+                        <select
+                          value={educationAgentDraft.ai_profile_id}
+                          onChange={event => setEducationAgentDraft(current => ({ ...current, ai_profile_id: event.target.value }))}
+                        >
+                          <option value="">Use assignment or project default</option>
+                          {deferredAiProfiles.map(profile => (
+                            <option key={profile.profile_id} value={profile.profile_id}>
+                              {profile.label} · {profile.provider_label}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
                       <button className="action-button full-width" type="button" onClick={() => void runEducationAgent()} disabled={isWorking}>
                         Run Bounded Agent
                       </button>
@@ -2521,6 +3474,7 @@ function App() {
                             ))}
                             <span className="chip">Risk {educationAgentResult.risk_assessment.band}</span>
                             <span className="chip">Score {educationAgentResult.risk_assessment.score}</span>
+                            {educationAgentResult.provider_ai ? <span className="chip">Provider AI active</span> : null}
                           </div>
                           <div className="chip-row">
                             {educationAgentResult.risk_assessment.signals.map(signal => (
@@ -2537,9 +3491,11 @@ function App() {
                         </div>
                       ) : null}
                     </div>
-                  </div>
+                    </div>
+                  ) : null}
 
-                  <div className="two-up">
+                  {!isSimpleMode || classroomView === 'safety' ? (
+                    <div className="two-up">
                     <div className="subpanel">
                       <div className="preview-topline">
                         <div>
@@ -2635,90 +3591,419 @@ function App() {
                         ))}
                       </div>
                     </div>
-                  </div>
+                    </div>
+                  ) : null}
                 </div>
               ) : (
                 <div className="empty-state">
                   Teacher OS activates after the first classroom is created.
                 </div>
               )}
-            </Panel>
+              </Panel>
+            ) : null}
           </div>
-        </section>
+            </section>
+          </>
+        ) : null}
 
-        <section className="lower-grid">
-          <Panel title="Open Source Guidance" subtitle="What this repo now ships for reusable local-first project building.">
-            <div className="card-grid compact">
-              {agentCatalog.map(agent => (
-                <article className="mini-card" key={agent.name}>
-                  <h3>{agent.display_name}</h3>
-                  <p>{agent.description}</p>
-                </article>
-              ))}
-            </div>
-          </Panel>
-
-          <Panel title="Admin Ops" subtitle="Optional monitoring for local orchestration and benchmark health.">
-            {adminReady ? (
-              <div className="stack-tight">
-                <div className="preview-card embedded">
-                  <div className="preview-topline">
-                    <div>
-                      <span className="mini-label">Admin session</span>
-                      <h3>{deferredAdminStatus?.current_user.username ?? 'admin'}</h3>
+        {activePage === 'ai' ? (
+          <section className="studio-grid">
+            <div className="column">
+              <Panel panelId="ai-hub" title="Connected Providers" subtitle="Profiles are stored locally with encrypted secrets so projects and classroom agents can use your chosen provider or a managed subscription profile.">
+                <div className="stack-tight">
+                  <div className="preview-card">
+                    <div className="preview-topline">
+                      <div>
+                        <span className="mini-label">AI control plane</span>
+                        <h3>{deferredAiProfiles.length} connected profiles</h3>
+                      </div>
+                      <span className="pill">{deferredSystemStatus?.provider_ai.configured_profiles ?? 0} active</span>
                     </div>
-                    <button className="text-button dark-on-light" type="button" onClick={logout}>
-                      Log out
-                    </button>
+                    <div className="chip-row">
+                      <span className="chip">Managed subscriptions {deferredSystemStatus?.provider_ai.managed_profiles ?? 0}</span>
+                      <span className="chip">Providers {deferredSystemStatus?.provider_ai.providers_available.length ?? 0}</span>
+                      <span className="chip">Usage entries {deferredAiUsage.length}</span>
+                    </div>
                   </div>
-                  <p>{maskDatabaseUrl(deferredAdminStatus?.database_url ?? '')}</p>
-                  <div className="chip-row">
-                    <span className="chip">Scheduler {deferredHealth?.scheduler.enabled ? 'enabled' : 'disabled'}</span>
-                    <span className="chip">ETL {formatSeconds(deferredHealth?.scheduler.etl_interval_seconds)}</span>
-                    <span className="chip">Retrain {formatSeconds(deferredHealth?.scheduler.retrain_interval_seconds)}</span>
-                    <span className="chip">Benchmark {formatSeconds(deferredHealth?.scheduler.benchmark_interval_seconds)}</span>
+
+                  <div className="card-grid compact">
+                    {deferredAiProfiles.length ? (
+                      deferredAiProfiles.map(profile => (
+                        <article className={`mini-card ${selectedAiProfileId === profile.profile_id ? 'selected' : ''}`} key={profile.profile_id}>
+                          <div className="preview-topline">
+                            <div>
+                              <span className="mini-label">{profile.provider_label}</span>
+                              <h3>{profile.label}</h3>
+                            </div>
+                            <span className="pill">{profile.auth_mode}</span>
+                          </div>
+                          <p>{profile.default_model}</p>
+                          <div className="chip-row">
+                            <span className="chip">{profile.api_key_hint}</span>
+                            <span className="chip">Test {profile.last_test_status}</span>
+                            <span className="chip">SDK {profile.sdk_installed ? 'installed' : 'missing'}</span>
+                          </div>
+                          <div className="chip-row">
+                            {profile.capabilities.map(capability => (
+                              <span className="chip" key={capability}>{capability}</span>
+                            ))}
+                          </div>
+                          <div className="action-row">
+                            <button className="text-button dark-on-light" type="button" onClick={() => loadAiProfile(profile)}>
+                              Edit
+                            </button>
+                            <button className="text-button dark-on-light" type="button" onClick={() => void testAiProfile(profile.profile_id)} disabled={isWorking}>
+                              Test
+                            </button>
+                            <button className="text-button dark-on-light" type="button" onClick={() => void deleteAiProfile(profile.profile_id)} disabled={isWorking}>
+                              Delete
+                            </button>
+                          </div>
+                        </article>
+                      ))
+                    ) : (
+                      <div className="empty-state">No provider profiles yet. Add OpenAI, Anthropic, Google Gemini, Groq, Mistral, Cohere, or xAI from this page.</div>
+                    )}
                   </div>
                 </div>
+              </Panel>
+            </div>
 
-                {deferredBenchmark ? (
+            <div className="column">
+              <Panel title={selectedProviderProfile ? 'Update Provider Profile' : 'Add Provider Profile'} subtitle="Use user keys for bring-your-own credentials or managed-subscription mode when EduClawn should route work through a provider profile you manage locally.">
+                <form className="form-grid" onSubmit={saveAiProfile}>
+                  <label className="field">
+                    <span>Profile label</span>
+                    <input value={aiProfileDraft.label} onChange={event => updateAiProviderDraft('label', event.target.value)} />
+                  </label>
+                  <div className="two-up">
+                    <label className="field">
+                      <span>Provider</span>
+                      <select value={aiProfileDraft.provider_id} onChange={event => updateAiProviderDraft('provider_id', event.target.value as AIProviderId)}>
+                        {deferredAiCatalog.map(provider => (
+                          <option key={provider.provider_id} value={provider.provider_id}>
+                            {provider.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="field">
+                      <span>Auth mode</span>
+                      <select value={aiProfileDraft.auth_mode} onChange={event => updateAiProviderDraft('auth_mode', event.target.value as AIAuthMode)}>
+                        <option value="user-key">User key</option>
+                        <option value="managed-subscription">Managed subscription</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div className="two-up">
+                    <label className="field">
+                      <span>Default model</span>
+                      <input value={aiProfileDraft.default_model} onChange={event => updateAiProviderDraft('default_model', event.target.value)} />
+                    </label>
+                    <label className="field">
+                      <span>Base URL</span>
+                      <input
+                        value={aiProfileDraft.base_url}
+                        disabled={!deferredAiCatalog.find(provider => provider.provider_id === aiProfileDraft.provider_id)?.supports_custom_base_url}
+                        onChange={event => updateAiProviderDraft('base_url', event.target.value)}
+                        placeholder="Optional custom endpoint"
+                      />
+                    </label>
+                  </div>
+                  <label className="field">
+                    <span>{selectedProviderProfile ? 'New API key (leave blank to keep current secret)' : 'API key or provider secret'}</span>
+                    <input
+                      type="password"
+                      value={aiProfileDraft.api_key}
+                      onChange={event => updateAiProviderDraft('api_key', event.target.value)}
+                      placeholder={selectedProviderProfile ? 'Keep existing secret' : 'Paste the provider key'}
+                    />
+                  </label>
+                  <label className="field">
+                    <span>Capabilities</span>
+                    <textarea
+                      value={aiProfileDraft.capabilitiesText}
+                      onChange={event => updateAiProviderDraft('capabilitiesText', event.target.value)}
+                      placeholder="research&#10;assignments&#10;feedback"
+                    />
+                  </label>
+                  <div className="action-row">
+                    <button className="action-button" disabled={isWorking}>
+                      {isWorking ? 'Saving profile...' : selectedProviderProfile ? 'Update Profile' : 'Add Profile'}
+                    </button>
+                    <button className="text-button dark-on-light" type="button" onClick={resetAiProfileDraft}>
+                      New Profile
+                    </button>
+                  </div>
+                </form>
+
+                <div className="stack-tight">
                   <div className="preview-card embedded">
                     <div className="preview-topline">
                       <div>
-                        <span className="mini-label">Latest benchmark</span>
-                        <h3>{deferredBenchmark.overall_score}%</h3>
+                        <span className="mini-label">Selected provider</span>
+                        <h3>{deferredAiCatalog.find(provider => provider.provider_id === aiProfileDraft.provider_id)?.label ?? aiProfileDraft.provider_id}</h3>
                       </div>
-                      <span className="pill">{formatTimestamp(deferredBenchmark.generated_at)}</span>
+                      <span className="pill">{aiProfileDraft.auth_mode}</span>
                     </div>
-                    <ul className="narrative-list">
-                      {deferredBenchmark.recommendations.map(item => (
-                        <li key={item}>{item}</li>
+                    <div className="chip-row">
+                      {(deferredAiCatalog.find(provider => provider.provider_id === aiProfileDraft.provider_id)?.recommended_models ?? []).map(model => (
+                        <span className="chip" key={model}>{model}</span>
                       ))}
-                    </ul>
+                    </div>
+                    <p>{deferredAiCatalog.find(provider => provider.provider_id === aiProfileDraft.provider_id)?.notes ?? 'Provider details pending.'}</p>
                   </div>
-                ) : (
-                  <div className="empty-state">No benchmark report has been generated yet.</div>
-                )}
+
+                  <div className="card-grid compact">
+                    {deferredAiCatalog.map(provider => (
+                      <article className="mini-card" key={provider.provider_id}>
+                        <div className="preview-topline">
+                          <div>
+                            <span className="mini-label">{provider.sdk_package}</span>
+                            <h3>{provider.label}</h3>
+                          </div>
+                          <span className="pill">{provider.sdk_installed ? 'sdk ready' : 'sdk install needed'}</span>
+                        </div>
+                        <p>{provider.notes}</p>
+                        <div className="chip-row">
+                          {provider.supported_tasks.slice(0, 4).map(task => (
+                            <span className="chip" key={task}>{task}</span>
+                          ))}
+                        </div>
+                        <div className="action-row">
+                          <button className="text-button dark-on-light" type="button" onClick={() => updateAiProviderDraft('provider_id', provider.provider_id)}>
+                            Use Provider
+                          </button>
+                          <a className="text-button dark-on-light" href={provider.docs_url} target="_blank" rel="noreferrer">
+                            SDK Docs
+                          </a>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+
+                  <div className="subpanel">
+                    <div className="preview-topline">
+                      <div>
+                        <span className="mini-label">Recent AI usage</span>
+                        <h3>Provider-backed actions</h3>
+                      </div>
+                      <span className="pill">{deferredAiUsage.length}</span>
+                    </div>
+                    <div className="card-grid compact">
+                      {deferredAiUsage.length ? (
+                        deferredAiUsage.slice(0, 8).map(entry => (
+                          <article className="mini-card" key={entry.usage_id}>
+                            <div className="preview-topline">
+                              <div>
+                                <span className="mini-label">{entry.source}</span>
+                                <h3>{entry.profile_label}</h3>
+                              </div>
+                              <span className={`priority-pill ${entry.success ? 'low' : 'high'}`}>
+                                {entry.success ? 'success' : 'error'}
+                              </span>
+                            </div>
+                            <p>{entry.prompt_preview}</p>
+                            <div className="chip-row">
+                              <span className="chip">{entry.provider_label}</span>
+                              <span className="chip">{entry.model}</span>
+                              <span className="chip">{entry.task}</span>
+                            </div>
+                          </article>
+                        ))
+                      ) : (
+                        <div className="empty-state">Usage appears here after a project compile, assignment, or classroom agent run uses a provider profile.</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Panel>
+            </div>
+          </section>
+        ) : null}
+
+        {activePage === 'desktop' ? (
+          <section className="studio-grid">
+            <div className="column">
+              <Panel panelId="desktop-tools" title="Desktop Tools" subtitle="Manage workspace location, updates, install behavior, and packaged-app convenience features.">
+                <div className="stack-tight">
+                  <div className="preview-card">
+                    <div className="preview-topline">
+                      <div>
+                        <span className="mini-label">Desktop shell</span>
+                        <h3>{deferredDesktopContext?.workspaceRoot ?? deferredSystemStatus?.workspace_root ?? 'Workspace pending'}</h3>
+                      </div>
+                      <span className="pill">v{deferredSystemStatus?.release.desktop_version ?? 'n/a'}</span>
+                    </div>
+                    <div className="chip-row">
+                      <span className="chip">Updates {deferredDesktopContext?.updater.status ?? 'n/a'}</span>
+                      <span className="chip">Launch at login {deferredDesktopContext?.preferences.launchAtLogin ? 'on' : 'off'}</span>
+                      <span className="chip">OCR {deferredSystemStatus?.tools.tesseract_available ? 'ready' : 'not detected'}</span>
+                      <span className="chip">Local AI {deferredSystemStatus?.local_ai.ollama_reachable ? 'reachable' : 'offline'}</span>
+                    </div>
+                  </div>
+
+                  <div className="action-row">
+                    {deferredDesktopContext ? (
+                      <button className="action-button secondary" type="button" onClick={() => void chooseWorkspace()}>
+                        Choose Workspace
+                      </button>
+                    ) : null}
+                    {deferredDesktopContext ? (
+                      <button className="text-button dark-on-light" type="button" onClick={() => void openWorkspace()}>
+                        Open Workspace
+                      </button>
+                    ) : null}
+                    {deferredDesktopContext ? (
+                      <button className="text-button dark-on-light" type="button" onClick={() => void openReleaseNotes()}>
+                        Release Notes
+                      </button>
+                    ) : null}
+                    {deferredDesktopContext ? (
+                      <button className="text-button dark-on-light" type="button" onClick={() => void checkForUpdates()}>
+                        Check Updates
+                      </button>
+                    ) : null}
+                    {deferredDesktopContext ? (
+                      <button className="text-button dark-on-light" type="button" onClick={() => void toggleLaunchAtLogin()}>
+                        {deferredDesktopContext.preferences.launchAtLogin ? 'Disable Launch at Login' : 'Enable Launch at Login'}
+                      </button>
+                    ) : null}
+                    {deferredDesktopContext?.canInstallToApplications ? (
+                      <button className="text-button dark-on-light" type="button" onClick={() => void installToApplications()}>
+                        Install to Applications
+                      </button>
+                    ) : null}
+                    {deferredDesktopContext?.updater.status === 'downloaded' ? (
+                      <button className="text-button dark-on-light" type="button" onClick={() => void installDownloadedUpdate()}>
+                        Install Update
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+              </Panel>
+            </div>
+
+            <div className="column">
+              <Panel title="Recent and Helpful" subtitle="Open recent work, review packaging status, and use the simplest launch path for this machine.">
+                <div className="stack-tight">
+                  <div className="card-grid compact">
+                    {deferredDesktopContext?.recentProjects.length ? (
+                      deferredDesktopContext.recentProjects.slice(0, 6).map(item => (
+                        <article className="mini-card" key={item.slug}>
+                          <h3>{item.title}</h3>
+                          <p>{item.slug}</p>
+                          <button className="text-button dark-on-light" type="button" onClick={() => openRecentProject(item.slug)}>
+                            Open Project
+                          </button>
+                        </article>
+                      ))
+                    ) : (
+                      <div className="empty-state">Recent projects will appear here after you open or create them.</div>
+                    )}
+                  </div>
+
+                  <div className="preview-card embedded">
+                    <div className="preview-topline">
+                      <div>
+                        <span className="mini-label">Best launch path</span>
+                        <h3>Use the packaged desktop app when possible</h3>
+                      </div>
+                      <span className="pill">{deferredDesktopContext?.isDesktop ? 'desktop mode' : 'browser mode'}</span>
+                    </div>
+                    <p>{deferredDesktopContext?.updater.message ?? 'Desktop update status pending.'}</p>
+                    <div className="chip-row">
+                      <span className="chip">Packaged app {deferredSystemStatus?.release.packaged_app_path || 'n/a'}</span>
+                      <span className="chip">Release notes {deferredSystemStatus?.release.release_notes_path || 'n/a'}</span>
+                    </div>
+                    <div className="action-row">
+                      <a className="legacy-link" href={api.legacyUrl()} target="_blank" rel="noreferrer">
+                        Open Preserved Legacy HTML
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </Panel>
+            </div>
+          </section>
+        ) : null}
+
+        {activePage === 'advanced' && showAdvancedSystems ? (
+          <section className="lower-grid">
+            <Panel title="Open Source Guidance" subtitle="What this repo now ships for reusable local-first project building.">
+              <div className="card-grid compact">
+                {agentCatalog.map(agent => (
+                  <article className="mini-card" key={agent.name}>
+                    <h3>{agent.display_name}</h3>
+                    <p>{agent.description}</p>
+                  </article>
+                ))}
               </div>
-            ) : (
-              <form className="form-grid" onSubmit={handleLogin}>
-                <label className="field">
-                  <span>Username</span>
-                  <input value={credentials.username} onChange={event => setCredentials(current => ({ ...current, username: event.target.value }))} />
-                </label>
-                <label className="field">
-                  <span>Password</span>
-                  <input
-                    type="password"
-                    value={credentials.password}
-                    onChange={event => setCredentials(current => ({ ...current, password: event.target.value }))}
-                  />
-                </label>
-                <button className="action-button full-width" disabled={isWorking}>
-                  {isWorking ? 'Signing in...' : 'Log in for admin monitoring'}
-                </button>
-              </form>
-            )}
-          </Panel>
+            </Panel>
+
+            <Panel panelId="admin-ops" title="Admin Ops" subtitle="Optional monitoring for local orchestration and benchmark health.">
+              {adminReady ? (
+                <div className="stack-tight">
+                  <div className="preview-card embedded">
+                    <div className="preview-topline">
+                      <div>
+                        <span className="mini-label">Admin session</span>
+                        <h3>{deferredAdminStatus?.current_user.username ?? 'admin'}</h3>
+                      </div>
+                      <button className="text-button dark-on-light" type="button" onClick={logout}>
+                        Log out
+                      </button>
+                    </div>
+                    <p>{maskDatabaseUrl(deferredAdminStatus?.database_url ?? '')}</p>
+                    <div className="chip-row">
+                      <span className="chip">Scheduler {deferredHealth?.scheduler.enabled ? 'enabled' : 'disabled'}</span>
+                      <span className="chip">ETL {formatSeconds(deferredHealth?.scheduler.etl_interval_seconds)}</span>
+                      <span className="chip">Retrain {formatSeconds(deferredHealth?.scheduler.retrain_interval_seconds)}</span>
+                      <span className="chip">Benchmark {formatSeconds(deferredHealth?.scheduler.benchmark_interval_seconds)}</span>
+                    </div>
+                  </div>
+
+                  {deferredBenchmark ? (
+                    <div className="preview-card embedded">
+                      <div className="preview-topline">
+                        <div>
+                          <span className="mini-label">Latest benchmark</span>
+                          <h3>{deferredBenchmark.overall_score}%</h3>
+                        </div>
+                        <span className="pill">{formatTimestamp(deferredBenchmark.generated_at)}</span>
+                      </div>
+                      <ul className="narrative-list">
+                        {deferredBenchmark.recommendations.map(item => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <div className="empty-state">No benchmark report has been generated yet.</div>
+                  )}
+                </div>
+              ) : (
+                <form className="form-grid" onSubmit={handleLogin}>
+                  <label className="field">
+                    <span>Username</span>
+                    <input value={credentials.username} onChange={event => setCredentials(current => ({ ...current, username: event.target.value }))} />
+                  </label>
+                  <label className="field">
+                    <span>Password</span>
+                    <input
+                      type="password"
+                      value={credentials.password}
+                      onChange={event => setCredentials(current => ({ ...current, password: event.target.value }))}
+                    />
+                  </label>
+                  <button className="action-button full-width" disabled={isWorking}>
+                    {isWorking ? 'Signing in...' : 'Log in for admin monitoring'}
+                  </button>
+                </form>
+              )}
+            </Panel>
+          </section>
+        ) : null}
         </section>
       </main>
 
@@ -2731,13 +4016,15 @@ function Panel({
   title,
   subtitle,
   children,
+  panelId,
 }: {
   title: string
   subtitle: string
   children: ReactNode
+  panelId?: string
 }) {
   return (
-    <section className="panel">
+    <section className="panel" id={panelId}>
       <header className="panel-header">
         <div>
           <h2>{title}</h2>
@@ -2813,6 +4100,103 @@ function maskDatabaseUrl(databaseUrl: string): string {
     return `sqlite:///.../${segments.slice(-2).join('/')}`
   }
   return databaseUrl.replace(/:\/\/([^:]+):([^@]+)@/, '://$1:••••@')
+}
+
+function formatProfileLabel(profile: ExperienceProfile): string {
+  switch (profile) {
+    case 'teacher':
+      return 'Teacher'
+    case 'student':
+      return 'Student'
+    case 'family':
+      return 'Family'
+    case 'builder':
+      return 'Advanced Builder'
+    default:
+      return 'User'
+  }
+}
+
+function getVisiblePages(profile: ExperienceProfile, showAdvancedSystems: boolean): Array<{
+  id: PageId
+  label: string
+  detail: string
+}> {
+  const basePages: Array<{
+    id: PageId
+    label: string
+    detail: string
+  }> = [
+    {
+      id: 'home',
+      label: 'Home',
+      detail: 'Guided setup, quick starts, and the simpler entry point into the product.',
+    },
+    {
+      id: 'projects',
+      label: 'Projects',
+      detail: 'Create, edit, compile, and export local-first project work.',
+    },
+  ]
+
+  if (profile !== 'family') {
+    basePages.push({
+      id: 'classroom',
+      label: profile === 'student' ? 'Student' : 'Classroom',
+      detail: 'Assignments, approved materials, bounded agents, and safety workflows.',
+    })
+  }
+
+  basePages.push({
+    id: 'ai',
+    label: 'AI',
+    detail: 'Provider profiles, managed subscriptions, SDK status, and recent AI usage.',
+  })
+
+  basePages.push({
+    id: 'desktop',
+    label: 'Desktop',
+    detail: 'Workspace, updates, recent projects, and install behavior.',
+  })
+
+  if (showAdvancedSystems) {
+    basePages.push({
+      id: 'advanced',
+      label: 'Advanced',
+      detail: 'EduClawn control plane, admin ops, and deeper orchestration surfaces.',
+    })
+  }
+
+  return basePages
+}
+
+function formatLevelLabel(level: ExperienceLevel): string {
+  switch (level) {
+    case 'guided':
+      return 'Guided'
+    case 'standard':
+      return 'Standard'
+    case 'advanced':
+      return 'Advanced'
+    default:
+      return 'Guided'
+  }
+}
+
+function pickRecommendedSample(
+  profile: ExperienceProfile,
+  sampleProjects: StudioSampleProject[],
+): StudioSampleProject | null {
+  const wantedSlug =
+    profile === 'teacher'
+      ? 'community-water-justice-portfolio'
+      : profile === 'student'
+        ? 'mlk-movement-strategy-exhibit'
+        : profile === 'family'
+          ? 'neighborhood-transit-campaign-simulator'
+          : 'community-water-justice-portfolio'
+
+  return sampleProjects.find(sample => sample.slug === wantedSlug) ?? sampleProjects[0] ?? null
 }
 
 export default App

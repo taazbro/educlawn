@@ -193,3 +193,119 @@ def test_education_os_classroom_flow(tmp_path):
         assert len(audit_payload["entries"]) > 0
         assert any(entry["action"] == "approval_resolved" for entry in audit_payload["entries"])
         assert all(entry["entry_hash"] for entry in audit_payload["entries"])
+
+
+def test_education_os_provider_ai_flow(tmp_path, monkeypatch):
+    settings = Settings(
+        db_path=tmp_path / "education-provider.sqlite3",
+        workflow_scheduler_enabled=False,
+        admin_password="mlk-admin-demo",
+        studio_root_dir=tmp_path / "studio_workspace",
+        studio_template_dir=tmp_path / "templates",
+        community_root_dir=tmp_path / "community",
+    )
+    app = create_app(settings)
+
+    def fake_invoke_provider(**_: object) -> str:
+        return "Provider AI suggests a stronger evidence-backed revision path."
+
+    with TestClient(app) as client:
+        monkeypatch.setattr(app.state.ai_provider_service, "_invoke_provider", fake_invoke_provider)
+        profile_response = client.post(
+            "/api/v1/ai/profiles",
+            json={
+                "label": "Anthropic Classroom Subscription",
+                "provider_id": "anthropic",
+                "auth_mode": "managed-subscription",
+                "api_key": "anthropic-managed-key",
+                "default_model": "claude-sonnet-4-5",
+                "base_url": "",
+                "capabilities": ["classroom", "feedback", "review"],
+            },
+        )
+        assert profile_response.status_code == 201
+        profile_id = profile_response.json()["profile_id"]
+
+        create_classroom = client.post(
+            "/api/v1/edu/classrooms",
+            json={
+                "title": "Civics Period 4",
+                "subject": "Civics",
+                "grade_band": "Grades 9-10",
+                "teacher_name": "Ms. Rivera",
+                "description": "Provider-backed classroom workflow.",
+                "default_template_id": "lesson-module",
+                "standards_focus": ["C3 Inquiry"],
+            },
+        )
+        assert create_classroom.status_code == 201
+        classroom = create_classroom.json()
+        classroom_id = classroom["classroom_id"]
+        teacher_access_key = classroom["security_bootstrap"]["teacher_access_key"]
+        student_access_key = classroom["security_bootstrap"]["student_access_key"]
+
+        enroll_student = client.post(
+            f"/api/v1/edu/classrooms/{classroom_id}/students",
+            json={
+                "name": "Jordan Lee",
+                "grade_level": "Grade 9",
+                "learning_goals": ["Use stronger evidence"],
+                "notes": "Interested in local policy.",
+                "access_key": teacher_access_key,
+            },
+        )
+        assert enroll_student.status_code == 200
+        student_id = enroll_student.json()["students"][0]["student_id"]
+
+        create_assignment = client.post(
+            f"/api/v1/edu/classrooms/{classroom_id}/assignments",
+            json={
+                "title": "Transit Justice Brief",
+                "summary": "Investigate transit access with approved evidence.",
+                "topic": "Transit access and local policy",
+                "audience": "Grade 9 students",
+                "template_id": "research-portfolio",
+                "goals": ["Compare evidence", "Draft a claim"],
+                "rubric": ["Evidence Quality", "Citation Accuracy"],
+                "standards": ["C3 Inquiry"],
+                "due_date": "2026-04-15",
+                "local_mode": "provider-ai",
+                "ai_profile_id": profile_id,
+                "access_key": teacher_access_key,
+            },
+        )
+        assert create_assignment.status_code == 200
+        assignment = create_assignment.json()["assignments"][0]
+        assignment_id = assignment["assignment_id"]
+        assert assignment["ai_profile_id"] == profile_id
+
+        launch = client.post(
+            f"/api/v1/edu/classrooms/{classroom_id}/launch",
+            json={"assignment_id": assignment_id, "student_id": student_id, "access_key": teacher_access_key},
+        )
+        assert launch.status_code == 200
+        project_slug = launch.json()["project"]["slug"]
+
+        agent_run = client.post(
+            "/api/v1/edu/agents/run",
+            json={
+                "role": "student",
+                "agent_name": "research-coach",
+                "classroom_id": classroom_id,
+                "assignment_id": assignment_id,
+                "student_id": student_id,
+                "project_slug": project_slug,
+                "ai_profile_id": profile_id,
+                "access_key": student_access_key,
+                "prompt": "Help me revise my question with stronger evidence.",
+            },
+        )
+        assert agent_run.status_code == 200
+        payload = agent_run.json()
+        assert payload["provider_ai"]["profile_id"] == profile_id
+        assert payload["artifacts"]["provider_ai_assist"]["used"] is True
+        assert payload["audit_entry"]["ai_usage"]["profile_id"] == profile_id
+
+        safety = client.get("/api/v1/edu/safety")
+        assert safety.status_code == 200
+        assert safety.json()["provider_ai_profiles"] == 1

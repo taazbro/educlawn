@@ -146,3 +146,67 @@ def test_studio_project_flow(tmp_path):
         )
         assert imported.status_code == 201
         assert imported.json()["title"] == "Imported Water Justice Exhibit"
+
+
+def test_studio_provider_ai_flow(tmp_path, monkeypatch):
+    settings = Settings(
+        db_path=tmp_path / "studio-provider.sqlite3",
+        workflow_scheduler_enabled=False,
+        admin_password="mlk-admin-demo",
+        studio_root_dir=tmp_path / "studio_workspace",
+        studio_template_dir=tmp_path / "templates",
+        community_root_dir=tmp_path / "community",
+    )
+    app = create_app(settings)
+
+    def fake_invoke_provider(**_: object) -> str:
+        return "Provider AI generated a sharper evidence-backed classroom draft."
+
+    with TestClient(app) as client:
+        monkeypatch.setattr(app.state.ai_provider_service, "_invoke_provider", fake_invoke_provider)
+        profile_response = client.post(
+            "/api/v1/ai/profiles",
+            json={
+                "label": "OpenAI Managed Seat",
+                "provider_id": "openai",
+                "auth_mode": "managed-subscription",
+                "api_key": "sk-managed-provider-key",
+                "default_model": "gpt-5-mini",
+                "base_url": "",
+                "capabilities": ["research", "assignments", "planning", "review"],
+            },
+        )
+        assert profile_response.status_code == 201
+        profile_id = profile_response.json()["profile_id"]
+
+        create = client.post(
+            "/api/v1/studio/projects",
+            json={
+                "title": "Provider AI Water Justice Exhibit",
+                "summary": "A local-first project with provider-backed drafting.",
+                "topic": "Water justice in the local community",
+                "audience": "High school students",
+                "goals": ["Explain the issue", "Compare evidence", "Present a civic response"],
+                "rubric": ["Evidence", "Clarity", "Audience Fit"],
+                "template_id": "research-portfolio",
+                "local_mode": "provider-ai",
+                "ai_profile_id": profile_id,
+            },
+        )
+        assert create.status_code == 201
+        slug = create.json()["slug"]
+        assert create.json()["ai_profile_id"] == profile_id
+
+        upload = client.post(
+            f"/api/v1/studio/projects/{slug}/documents",
+            files={"file": ("water-notes.txt", b"Residents compared clean water maps, testimony, and infrastructure records in 2024.", "text/plain")},
+        )
+        assert upload.status_code == 200
+
+        compiled = client.post(f"/api/v1/studio/projects/{slug}/compile", json={})
+        assert compiled.status_code == 200
+        payload = compiled.json()
+        assert payload["artifacts"]["runtime_mode"]["requested_mode"] == "provider-ai"
+        assert payload["artifacts"]["runtime_mode"]["effective_mode"] == "provider-ai"
+        assert payload["artifacts"]["artifacts"]["provider_ai_trace"]["profile_id"] == profile_id
+        assert payload["project"]["ai_profile_id"] == profile_id

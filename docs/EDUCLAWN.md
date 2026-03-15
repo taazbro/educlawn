@@ -1,6 +1,6 @@
-# EduClaw
+# EduClawn
 
-`EduClaw` is the school-safe product line built from the local `openclaw` repo shape.
+`EduClawn` is the school-safe product line built from the local `openclaw` repo shape.
 
 It keeps the parts that matter for education:
 - local-first gateway thinking
@@ -16,20 +16,20 @@ It explicitly removes or blocks the parts that do not belong in a classroom runt
 - destructive filesystem actions
 - personal-device control surfaces
 
-## What EduClaw Adds
+## What EduClawn Adds
 
 - `Teacher OS`: lesson planning, rubric design, feedback, dashboards
 - `Student OS`: project coaching, research support, citation tutoring, revision help
 - `Shared Classroom Layer`: evidence libraries, provenance, audit logs, approvals
-- `EduClaw Control Plane`: generated local YAML config for bounded classroom orchestration
+- `EduClawn Control Plane`: generated local YAML config for bounded classroom orchestration
 
 ## Security Model
 
-EduClaw now runs with a classroom protection model instead of implicit trust:
+EduClawn now runs with a classroom protection model instead of implicit trust:
 
 - bootstrap-issued `teacher`, `student`, and `reviewer` access keys
 - HMAC-hashed classroom access credentials stored on disk, not plaintext keys
-- signed `educlaw-control-plane.yaml` attestations with companion JSON proof files
+- signed `educlawn-control-plane.yaml` attestations with companion JSON proof files
 - prompt risk scoring for policy override, secret exfiltration, shell, browser, and external-send requests
 - approval gates for sensitive actions and elevated-risk prompts
 - tamper-evident audit and approval logs with chained HMAC record hashes
@@ -45,21 +45,21 @@ The intended result is OpenClaw-shaped orchestration with a school-safe permissi
 ## Runtime Contract
 
 - `OpenClaw` is treated as a local source architecture and capability inventory.
-- `EduClaw` is generated inside this repo and wired into the existing FastAPI, React, and desktop shell.
-- The generated control plane lives under `studio_workspace/educlaw/` at runtime.
+- `EduClawn` is generated inside this repo and wired into the existing FastAPI, React, and desktop shell.
+- The generated control plane lives under `studio_workspace/educlawn/` at runtime.
 
 ## API
 
-- `GET /api/v1/educlaw/overview`
-- `GET /api/v1/educlaw/source`
-- `POST /api/v1/educlaw/bootstrap`
+- `GET /api/v1/educlawn/overview`
+- `GET /api/v1/educlawn/source`
+- `POST /api/v1/educlawn/bootstrap`
 
 ## Bootstrap Result
 
-Bootstrapping EduClaw:
+Bootstrapping EduClawn:
 - creates a bounded classroom in Education OS
 - creates a starter assignment
-- writes `educlaw-control-plane.yaml`
-- writes `educlaw-control-plane.attestation.json`
+- writes `educlawn-control-plane.yaml`
+- writes `educlawn-control-plane.attestation.json`
 - returns local classroom bootstrap keys once so the desktop/web client can store them locally
 - preserves the existing local-first project studio and legacy MLK experience

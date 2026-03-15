@@ -1,5 +1,9 @@
 import type {
   AdminStatusResponse,
+  AIProviderCatalogEntry,
+  AIProviderProfile,
+  AIProviderTestResponse,
+  AIUsageEntry,
   AuthTokenResponse,
   BenchmarkReportResponse,
   EducationAgentCatalogEntry,
@@ -11,9 +15,9 @@ import type {
   EducationMaterial,
   EducationOverview,
   EducationSafetyStatus,
-  EduClawBootstrapResponse,
-  EduClawOverview,
-  EduClawSourceSummary,
+  EduClawnBootstrapResponse,
+  EduClawnOverview,
+  EduClawnSourceSummary,
   HealthStatus,
   ProjectDocument,
   ProjectSummary,
@@ -65,6 +69,15 @@ async function request<T>(path: string, init?: RequestOptions): Promise<T> {
     throw new ApiError(response.status, await readError(response))
   }
 
+  if (response.status === 204) {
+    return undefined as T
+  }
+
+  const contentType = response.headers.get('content-type') ?? ''
+  if (!contentType.includes('application/json')) {
+    return undefined as T
+  }
+
   return response.json() as Promise<T>
 }
 
@@ -82,6 +95,42 @@ async function readError(response: Response): Promise<string> {
 
 export const api = {
   health: () => request<HealthStatus>('/health'),
+  aiProviderCatalog: () => request<AIProviderCatalogEntry[]>('/api/v1/ai/catalog'),
+  aiProfiles: () => request<AIProviderProfile[]>('/api/v1/ai/profiles'),
+  createAiProfile: (payload: {
+    label: string
+    provider_id: AIProviderCatalogEntry['provider_id']
+    auth_mode: 'user-key' | 'managed-subscription'
+    api_key: string
+    default_model: string
+    base_url: string
+    capabilities: string[]
+  }) =>
+    request<AIProviderProfile>('/api/v1/ai/profiles', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  updateAiProfile: (profileId: string, payload: {
+    label?: string
+    auth_mode?: 'user-key' | 'managed-subscription'
+    api_key?: string
+    default_model?: string
+    base_url?: string
+    capabilities?: string[]
+  }) =>
+    request<AIProviderProfile>(`/api/v1/ai/profiles/${encodeURIComponent(profileId)}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }),
+  deleteAiProfile: (profileId: string) =>
+    request<void>(`/api/v1/ai/profiles/${encodeURIComponent(profileId)}`, {
+      method: 'DELETE',
+    }),
+  testAiProfile: (profileId: string) =>
+    request<AIProviderTestResponse>(`/api/v1/ai/profiles/${encodeURIComponent(profileId)}/test`, {
+      method: 'POST',
+    }),
+  aiUsage: () => request<AIUsageEntry[]>('/api/v1/ai/usage'),
   login: (payload: { username: string; password: string }) =>
     request<AuthTokenResponse>('/api/v1/auth/login', {
       method: 'POST',
@@ -112,9 +161,9 @@ export const api = {
       `/api/v1/edu/audit?classroom_id=${encodeURIComponent(classroomId)}&access_key=${encodeURIComponent(accessKey)}`,
     ),
   educationSafety: () => request<EducationSafetyStatus>('/api/v1/edu/safety'),
-  educlawOverview: () => request<EduClawOverview>('/api/v1/educlaw/overview'),
-  educlawSource: () => request<EduClawSourceSummary>('/api/v1/educlaw/source'),
-  educlawBootstrap: (payload: {
+  educlawnOverview: () => request<EduClawnOverview>('/api/v1/educlawn/overview'),
+  educlawnSource: () => request<EduClawnSourceSummary>('/api/v1/educlawn/source'),
+  educlawnBootstrap: (payload: {
     school_name: string
     classroom_title: string
     teacher_name: string
@@ -131,9 +180,10 @@ export const api = {
     rubric: string[]
     standards_focus: string[]
     due_date: string
-    local_mode: 'no-llm' | 'local-llm'
+    local_mode: 'no-llm' | 'local-llm' | 'provider-ai'
+    ai_profile_id: string
   }) =>
-    request<EduClawBootstrapResponse>('/api/v1/educlaw/bootstrap', {
+    request<EduClawnBootstrapResponse>('/api/v1/educlawn/bootstrap', {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
@@ -171,7 +221,8 @@ export const api = {
     rubric: string[]
     standards: string[]
     due_date: string
-    local_mode: 'no-llm' | 'local-llm'
+    local_mode: 'no-llm' | 'local-llm' | 'provider-ai'
+    ai_profile_id: string
     access_key: string
   }) =>
     request<EducationClassroom>(`/api/v1/edu/classrooms/${encodeURIComponent(classroomId)}/assignments`, {
@@ -202,6 +253,7 @@ export const api = {
     assignment_id?: string
     student_id?: string
     project_slug?: string
+    ai_profile_id?: string
     access_key: string
     prompt: string
   }) =>
@@ -225,7 +277,8 @@ export const api = {
     goals: string[]
     rubric: string[]
     template_id: string
-    local_mode: 'no-llm' | 'local-llm'
+    local_mode: 'no-llm' | 'local-llm' | 'provider-ai'
+    ai_profile_id: string
   }) =>
     request<StudioProject>('/api/v1/studio/projects', {
       method: 'POST',

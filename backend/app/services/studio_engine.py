@@ -25,6 +25,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 from app.core.config import Settings
 from app.services.studio_agents import ProjectAgentRuntime
+from app.services.provider_ai import ProviderAIService
 from app.services.warehouse import WarehouseService
 
 
@@ -448,11 +449,13 @@ class ProjectStudioService:
         warehouse: WarehouseService,
         template_registry: TemplateRegistryService,
         agent_runtime: ProjectAgentRuntime,
+        ai_provider_service: ProviderAIService,
     ) -> None:
         self.settings = settings
         self.warehouse = warehouse
         self.template_registry = template_registry
         self.agent_runtime = agent_runtime
+        self.ai_provider_service = ai_provider_service
         self.projects_dir = settings.studio_root_dir / "projects"
         self.projects_dir.mkdir(parents=True, exist_ok=True)
         self._indices: dict[str, WorkspaceIndex] = {}
@@ -477,6 +480,11 @@ class ProjectStudioService:
                     "mode": "local-llm",
                     "supported": bool(self.settings.local_llm_model),
                     "description": "Optional local model mode. Deterministic fallback remains available.",
+                },
+                {
+                    "mode": "provider-ai",
+                    "supported": True,
+                    "description": "Use a saved provider profile from OpenAI, Anthropic, Gemini, Groq, Mistral, Cohere, or xAI.",
                 },
             ],
             "install_modes": [
@@ -512,8 +520,17 @@ class ProjectStudioService:
     def get_system_status(self, startup_status: dict[str, Any] | None = None) -> dict[str, Any]:
         ollama_models = self._fetch_ollama_models()
         tesseract_path = shutil.which("tesseract")
-        release_notes = Path(os.getenv("MLK_RELEASE_NOTES_PATH", self.settings.root_dir / "desktop" / "RELEASE_NOTES.md"))
-        packaged_app = Path(os.getenv("MLK_PACKAGED_APP_PATH", self.settings.root_dir / "desktop" / "release" / "mac-arm64" / "Civic Project Studio.app"))
+        release_notes = Path(
+            os.getenv("EDUCLAWN_RELEASE_NOTES_PATH")
+            or os.getenv("MLK_RELEASE_NOTES_PATH")
+            or self.settings.root_dir / "desktop" / "RELEASE_NOTES.md"
+        )
+        packaged_app = Path(
+            os.getenv("EDUCLAWN_PACKAGED_APP_PATH")
+            or os.getenv("MLK_PACKAGED_APP_PATH")
+            or self.settings.root_dir / "desktop" / "release" / "mac-arm64" / "EduClawn.app"
+        )
+        provider_profiles = self.ai_provider_service.list_profiles()
         return {
             "workspace_root": str(self.settings.studio_root_dir),
             "frontend_dist": str(self.settings.frontend_dist_dir),
@@ -538,13 +555,20 @@ class ProjectStudioService:
                 "ollama_reachable": bool(ollama_models),
                 "available_models": ollama_models,
             },
+            "provider_ai": {
+                "configured_profiles": len(provider_profiles),
+                "managed_profiles": len([profile for profile in provider_profiles if profile["auth_mode"] == "managed-subscription"]),
+                "providers_available": len(self.ai_provider_service.provider_catalog()),
+            },
             "portability": {
                 "backup_export_type": "project_bundle",
                 "import_supported": True,
                 "duplicate_supported": True,
             },
             "release": {
-                "desktop_version": os.getenv("MLK_DESKTOP_VERSION", self._desktop_version()),
+                "desktop_version": os.getenv("EDUCLAWN_DESKTOP_VERSION")
+                or os.getenv("MLK_DESKTOP_VERSION")
+                or self._desktop_version(),
                 "release_notes_path": str(release_notes),
                 "packaged_app_path": str(packaged_app) if packaged_app.exists() else "",
             },
@@ -577,6 +601,7 @@ class ProjectStudioService:
             "template_label": template["label"],
             "project_type": template["project_type"],
             "local_mode": str(payload.get("local_mode") or "no-llm"),
+            "ai_profile_id": self._normalize_ai_profile_id(payload.get("ai_profile_id")),
             "status": "draft",
             "created_at": now,
             "updated_at": now,
@@ -629,10 +654,14 @@ class ProjectStudioService:
 
     def update_project(self, slug: str, payload: dict[str, Any]) -> dict[str, Any]:
         manifest = self._load_manifest(slug)
-        editable_fields = {"title", "summary", "topic", "audience", "goals", "rubric", "local_mode", "theme_tokens"}
+        editable_fields = {"title", "summary", "topic", "audience", "goals", "rubric", "local_mode", "theme_tokens", "ai_profile_id"}
         for field in editable_fields:
             if field in payload:
-                manifest[field] = payload[field]
+                manifest[field] = (
+                    self._normalize_ai_profile_id(payload[field])
+                    if field == "ai_profile_id"
+                    else payload[field]
+                )
         if "sections" in payload:
             manifest["sections"] = payload["sections"]
         if "workflow" in payload:
@@ -1033,6 +1062,7 @@ class ProjectStudioService:
             "template_label": manifest["template_label"],
             "project_type": manifest["project_type"],
             "local_mode": manifest["local_mode"],
+            "ai_profile_id": manifest.get("ai_profile_id", ""),
             "status": manifest["status"],
             "document_count": len(manifest["documents"]),
             "export_count": len(manifest["exports"]),
@@ -1069,7 +1099,15 @@ class ProjectStudioService:
         manifest.setdefault("teacher_comments", [])
         manifest.setdefault("revision_history", [])
         manifest.setdefault("standards_alignment", [])
+        manifest.setdefault("ai_profile_id", "")
         return manifest
+
+    def _normalize_ai_profile_id(self, value: Any) -> str:
+        raw_value = str(value or "").strip()
+        if not raw_value:
+            return ""
+        self.ai_provider_service.get_profile_summary(raw_value)
+        return raw_value
 
     def _record_revision(self, manifest: dict[str, Any], action: str, summary: str, actor: str) -> None:
         revisions = manifest.setdefault("revision_history", [])
@@ -1332,7 +1370,7 @@ class ProjectStudioService:
   <body>
     <main>
       <header>
-        <p>Civic Project Studio export</p>
+        <p>EduClawn export</p>
         <h1>{manifest['title']}</h1>
         <p>{manifest['summary'] or manifest['topic']}</p>
         <div class="meta">
@@ -1411,7 +1449,7 @@ class ProjectStudioService:
             encoding="utf-8",
         )
         (react_dir / "README.md").write_text(
-            f"# {manifest['title']}\n\nGenerated locally by Civic Project Studio.\n",
+            f"# {manifest['title']}\n\nGenerated locally by EduClawn.\n",
             encoding="utf-8",
         )
 

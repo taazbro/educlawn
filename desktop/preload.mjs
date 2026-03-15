@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
-contextBridge.exposeInMainWorld('civicStudioDesktop', {
+contextBridge.exposeInMainWorld('educlawnDesktop', {
   getContext: () => ipcRenderer.invoke('desktop:get-context'),
   chooseWorkspace: () => ipcRenderer.invoke('desktop:choose-workspace'),
   openWorkspace: () => ipcRenderer.invoke('desktop:open-workspace'),

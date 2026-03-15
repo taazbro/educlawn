@@ -47,7 +47,7 @@ if (!gotLock) {
 }
 
 function configDir() {
-  return path.join(app.getPath('appData'), 'Civic Project Studio')
+  return path.join(app.getPath('appData'), 'EduClawn')
 }
 
 function configPath() {
@@ -110,7 +110,7 @@ function saveConfig(partial) {
 }
 
 function defaultWorkspaceRoot() {
-  return path.join(app.getPath('documents'), 'CivicProjectStudioWorkspace')
+  return path.join(app.getPath('documents'), 'EduClawnWorkspace')
 }
 
 function ensureWorkspace(rootPath) {
@@ -122,7 +122,7 @@ function ensureWorkspace(rootPath) {
 
 function workspaceDataPaths(rootPath = workspaceRoot) {
   return {
-    dbPath: path.join(rootPath, 'backend-data', 'civic_project_studio.sqlite3'),
+    dbPath: path.join(rootPath, 'backend-data', 'educlawn.sqlite3'),
     modelCacheDir: path.join(rootPath, 'backend-data', 'model-cache'),
     studioRoot: path.join(rootPath, 'studio_workspace'),
   }
@@ -144,7 +144,7 @@ function bootstrapResourcePath(...segments) {
 
 function primeWorkspace(rootPath) {
   const paths = workspaceDataPaths(rootPath)
-  const bootstrapDbPath = bootstrapResourcePath('civic_project_studio.sqlite3')
+  const bootstrapDbPath = bootstrapResourcePath('educlawn.sqlite3')
   const bootstrapModelCache = bootstrapResourcePath('model-cache')
   const needsBootstrap = !existsSync(paths.dbPath)
 
@@ -166,12 +166,12 @@ function frontendDistPath() {
 }
 
 function backendExecutableName() {
-  return process.platform === 'win32' ? 'civic-project-studio-backend.exe' : 'civic-project-studio-backend'
+  return process.platform === 'win32' ? 'educlawn-backend.exe' : 'educlawn-backend'
 }
 
 function packagedBackendExecutablePath() {
   const executableName = backendExecutableName()
-  const nestedExecutablePath = bundledResourcePath('backend-dist', 'civic-project-studio-backend', executableName)
+  const nestedExecutablePath = bundledResourcePath('backend-dist', 'educlawn-backend', executableName)
   if (existsSync(nestedExecutablePath)) {
     return nestedExecutablePath
   }
@@ -185,20 +185,20 @@ function backendEnvironment() {
     : path.resolve(__dirname)
   return {
     ...process.env,
-    CIVIC_STUDIO_HOST: BACKEND_HOST,
-    CIVIC_STUDIO_PORT: String(BACKEND_PORT),
-    MLK_DB_PATH: paths.dbPath,
-    MLK_STUDIO_ROOT: paths.studioRoot,
-    MLK_STUDIO_TEMPLATE_DIR: bundledResourcePath('studio', 'templates'),
-    MLK_COMMUNITY_ROOT: bundledResourcePath('community'),
-    MLK_LEGACY_HTML_PATH: bundledResourcePath('Legacy_of_Justice.html'),
-    MLK_FRONTEND_DIST_DIR: frontendDistPath(),
-    MLK_MODEL_CACHE_DIR: paths.modelCacheDir,
-    MLK_DESKTOP_VERSION: app.getVersion(),
-    MLK_RELEASE_NOTES_PATH: bundledResourcePath('RELEASE_NOTES.md'),
-    MLK_PACKAGED_APP_PATH: packagedAppPath,
-    MLK_EAGER_MODEL_TRAINING: 'false',
-    MLK_WORKFLOW_SCHEDULER_ENABLED: 'true',
+    EDUCLAWN_HOST: BACKEND_HOST,
+    EDUCLAWN_PORT: String(BACKEND_PORT),
+    EDUCLAWN_DB_PATH: paths.dbPath,
+    EDUCLAWN_STUDIO_ROOT: paths.studioRoot,
+    EDUCLAWN_STUDIO_TEMPLATE_DIR: bundledResourcePath('studio', 'templates'),
+    EDUCLAWN_COMMUNITY_ROOT: bundledResourcePath('community'),
+    EDUCLAWN_LEGACY_HTML_PATH: bundledResourcePath('Legacy_of_Justice.html'),
+    EDUCLAWN_FRONTEND_DIST_DIR: frontendDistPath(),
+    EDUCLAWN_MODEL_CACHE_DIR: paths.modelCacheDir,
+    EDUCLAWN_DESKTOP_VERSION: app.getVersion(),
+    EDUCLAWN_RELEASE_NOTES_PATH: bundledResourcePath('RELEASE_NOTES.md'),
+    EDUCLAWN_PACKAGED_APP_PATH: packagedAppPath,
+    EDUCLAWN_EAGER_MODEL_TRAINING: 'false',
+    EDUCLAWN_WORKFLOW_SCHEDULER_ENABLED: 'true',
   }
 }
 
@@ -208,7 +208,7 @@ function splashUrl(message = 'Preparing your local-first workspace, model cache,
     <head>
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <title>Civic Project Studio</title>
+      <title>EduClawn</title>
       <style>
         body {
           margin: 0;
@@ -272,7 +272,7 @@ function splashUrl(message = 'Preparing your local-first workspace, model cache,
     </head>
     <body>
       <main>
-        <p class="eyebrow">EduClaw Desktop</p>
+        <p class="eyebrow">EduClawn Desktop</p>
         <h1>Opening workspace</h1>
         <p>${message}</p>
         <div class="bar"></div>
@@ -478,7 +478,7 @@ async function startBackend({ restarting = false } = {}) {
     await stopBackend()
   }
 
-  updateSplash(restarting ? 'Recovering the local EduClaw service after an unexpected stop...' : 'Starting the local EduClaw backend and preparing your saved workspace...')
+  updateSplash(restarting ? 'Recovering the local EduClawn service after an unexpected stop...' : 'Starting the local EduClawn backend and preparing your saved workspace...')
   backendProcess = spawnBackend()
   backendProcess.stdout.on('data', (chunk) => {
     process.stdout.write(`[desktop-backend] ${chunk}`)
@@ -502,7 +502,7 @@ async function recoverBackend(code) {
   if (backendRestartAttempts > MAX_BACKEND_RESTARTS) {
     dialog.showErrorBox(
       'Backend Recovery Failed',
-      `The bundled EduClaw backend exited unexpectedly with code ${code ?? 'unknown'} and could not be restarted.`,
+      `The bundled EduClawn backend exited unexpectedly with code ${code ?? 'unknown'} and could not be restarted.`,
     )
     return
   }
@@ -554,7 +554,7 @@ function createMainWindow() {
     minHeight: 760,
     show: false,
     autoHideMenuBar: false,
-    title: 'Civic Project Studio',
+    title: 'EduClawn',
     backgroundColor: '#efe6d6',
     icon: backendIconPath(),
     webPreferences: {
@@ -590,7 +590,7 @@ function createMainWindow() {
       defaultId: 0,
       cancelId: 1,
       title: 'App Not Responding',
-      message: 'EduClaw stopped responding. Reload the desktop shell and restore the last project?',
+      message: 'EduClawn stopped responding. Reload the desktop shell and restore the last project?',
     })
     if (result.response === 0) {
       updateSplash('Reloading the desktop shell and restoring the previous session...')
@@ -622,7 +622,7 @@ async function loadDesktopShell() {
 
 async function chooseWorkspace() {
   const result = await dialog.showOpenDialog({
-    title: 'Choose Civic Project Studio Workspace',
+    title: 'Choose EduClawn Workspace',
     defaultPath: workspaceRoot,
     properties: ['openDirectory', 'createDirectory'],
   })
@@ -650,8 +650,8 @@ async function maybePromptInstallToApplications() {
     buttons: ['Move to Applications', 'Later'],
     defaultId: 0,
     cancelId: 1,
-    title: 'Install EduClaw',
-    message: 'Move Civic Project Studio into Applications so it behaves like a normal installed app?',
+    title: 'Install EduClawn',
+    message: 'Move EduClawn into Applications so it behaves like a normal installed app?',
     detail: 'This reduces Gatekeeper friction and makes future launches feel like regular desktop software.',
   })
   saveConfig({ hasSeenMovePrompt: true })
@@ -667,18 +667,18 @@ async function maybePromptInstallToApplications() {
 
 function updateProtocolRegistration() {
   if (app.isPackaged) {
-    app.setAsDefaultProtocolClient('educlaw')
+    app.setAsDefaultProtocolClient('educlawn')
     return
   }
   if (process.defaultApp) {
-    app.setAsDefaultProtocolClient('educlaw', process.execPath, [path.resolve(process.argv[1] || '.')])
+    app.setAsDefaultProtocolClient('educlawn', process.execPath, [path.resolve(process.argv[1] || '.')])
   }
 }
 
 function parseProjectSlugFromProtocol(target) {
   try {
     const parsed = new URL(target)
-    if (parsed.protocol !== 'educlaw:') {
+    if (parsed.protocol !== 'educlawn:') {
       return ''
     }
     if (parsed.hostname === 'project') {
@@ -721,7 +721,7 @@ async function openExternalTarget(target) {
     return
   }
 
-  if (target.startsWith('educlaw://')) {
+  if (target.startsWith('educlawn://')) {
     const slug = parseProjectSlugFromProtocol(target)
     if (slug) {
       selectProjectSlug(slug)
@@ -787,7 +787,7 @@ function extractOpenTargetsFromArgs(argv) {
       return false
     }
     const normalized = value.toLowerCase()
-    return value.startsWith('educlaw://')
+    return value.startsWith('educlawn://')
       || normalized.endsWith('.cpsbundle')
       || normalized.endsWith('-bundle.zip')
       || normalized.endsWith('project.yaml')
@@ -955,8 +955,8 @@ function setupAutoUpdater() {
       defaultId: 0,
       cancelId: 1,
       title: 'Update Ready',
-      message: `Civic Project Studio ${info.version || ''} has been downloaded.`,
-      detail: 'Install now to relaunch into the latest EduClaw desktop build.',
+      message: `EduClawn ${info.version || ''} has been downloaded.`,
+      detail: 'Install now to relaunch into the latest EduClawn desktop build.',
     })
     if (result.response === 0) {
       autoUpdater.quitAndInstall()
@@ -1018,7 +1018,7 @@ app.on('before-quit', () => {
 
 app.on('activate', async () => {
   if (BrowserWindow.getAllWindows().length === 0) {
-    updateSplash('Reopening EduClaw desktop and reconnecting the local backend...')
+    updateSplash('Reopening EduClawn desktop and reconnecting the local backend...')
     createMainWindow()
     await ensureBackendRunning()
     await loadDesktopShell()

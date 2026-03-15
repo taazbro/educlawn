@@ -27,12 +27,16 @@ await run(
   'uv',
   [
     'run',
+    '--with',
     'pyinstaller',
+    'python',
+    '-m',
+    'PyInstaller',
     '--noconfirm',
     '--clean',
     '--onedir',
     '--name',
-    'civic-project-studio-backend',
+    'educlawn-backend',
     'run_server.py'
   ],
   backendDir

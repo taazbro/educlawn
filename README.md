@@ -1,6 +1,6 @@
-# EduClaw / Civic Project Studio
+# EduClawn
 
-`EduClaw` is a local-first open-source education platform for students and teachers.
+`EduClawn` is a local-first open-source education platform for students and teachers.
 
 It combines:
 
@@ -11,8 +11,8 @@ It combines:
 
 The current product direction is:
 
-- `EduClaw`: the school-safe agent operating system
-- `Civic Project Studio`: the local project engine and studio UI
+- `EduClawn OS`: the school-safe agent operating system
+- `EduClawn Studio`: the local project engine and studio UI
 
 This repo intentionally keeps the original `Legacy_of_Justice.html` as a preserved artifact and first template seed. It is not deleted.
 
@@ -24,13 +24,14 @@ Students and teachers can:
 - upload local documents and classroom evidence
 - extract and search evidence locally
 - generate provenance-backed project artifacts
+- connect preferred cloud AI providers with local encrypted profiles
 - run bounded local agents with approval gates
 - compile projects into multiple export formats
 - use the desktop app without running terminal commands every time
 
 ## Main Product Layers
 
-### 1. EduClaw
+### 1. EduClawn OS
 
 A school-safe, OpenClaw-shaped orchestration layer with:
 
@@ -42,7 +43,7 @@ A school-safe, OpenClaw-shaped orchestration layer with:
 - signed control planes
 - classroom access keys
 
-### 2. Civic Project Studio
+### 2. EduClawn Studio
 
 A local project engine that provides:
 
@@ -89,6 +90,7 @@ A packaged Electron desktop shell that:
 - QA
 - teacher review
 - export support
+- provider-backed research, assignment drafting, review, and classroom assistance through connected AI profiles
 
 ### Education OS
 
@@ -109,11 +111,15 @@ A packaged Electron desktop shell that:
 - approval-required flows for sensitive actions
 - tamper-evident approval and audit chains
 - upload policy enforcement for classroom materials
-- signed EduClaw control-plane attestations
+- signed EduClawn control-plane attestations
 
 ### Desktop Product Features
 
 - first-run onboarding
+- Easy Start Center for teachers, students, families, and advanced builders
+- role-based frontend navigation with separate `Home`, `Projects`, `Classroom`, `Desktop`, and `Advanced` views
+- simple dashboard mode
+- larger text and reduced-motion comfort settings
 - workspace chooser
 - release notes access
 - recent-project restore
@@ -123,18 +129,90 @@ A packaged Electron desktop shell that:
 - macOS move-to-Applications prompt
 - auto-update scaffolding for packaged releases
 
+### Provider AI Control Plane
+
+- local encrypted AI provider profiles stored inside the EduClawn workspace
+- `user-key` mode for bring-your-own API access
+- `managed-subscription` mode for locally managed provider seats that EduClawn agents can use on behalf of the classroom workflow
+- supported providers:
+  - OpenAI
+  - Anthropic
+  - Google Gemini
+  - Groq
+  - Mistral
+  - Cohere
+  - xAI
+- supported provider tasks:
+  - research
+  - assignments
+  - feedback
+  - planning
+  - review
+  - export
+  - classroom
+
+Provider profiles can be used in three places:
+
+- project manifests through `provider-ai` runtime mode
+- classroom assignments through `provider-ai` runtime mode
+- bounded classroom agents through an optional provider override
+
 ## Desktop Use
 
 If you want to use it like normal software, use the packaged desktop app.
 
+Fastest paths:
+
+- macOS packaged app: open `desktop/release/mac-arm64/EduClawn.app`
+- macOS repo copy: double-click `Open-EduClawn.command`
+- Windows repo copy: run `Open-EduClawn.bat`
+- contributor setup: run `scripts/setup-local.sh` or `scripts/setup-local.ps1`
+
 Artifacts produced by the desktop packaging flow include:
 
-- `desktop/release/mac-arm64/Civic Project Studio.app` from `npm run pack`
+- `desktop/release/mac-arm64/EduClawn.app` from `npm run pack`
 - `.dmg` and `.zip` artifacts from `npm run dist:mac`
 - Windows installer artifacts from `npm run dist:win`
 - Linux package artifacts from `npm run dist:linux`
 
 The desktop app starts the bundled backend automatically and serves the studio locally at `/desktop/`. Users do not need to run the backend and frontend manually to use the packaged app.
+
+For local macOS packaging without Apple credentials, the desktop build wrapper automatically disables hardened runtime so the generated `.app` remains usable on the builder machine. Signed release builds still keep the notarization-ready path.
+
+## One-Step Local Setup
+
+If you are running from the repo instead of a packaged installer:
+
+### macOS / Linux
+
+```bash
+./scripts/setup-local.sh
+./scripts/start-desktop.sh
+```
+
+Or double-click:
+
+- `Install-EduClawn.command`
+- `Open-EduClawn.command`
+
+### Windows
+
+Run:
+
+- `Install-EduClawn.bat`
+- `Open-EduClawn.bat`
+
+Or use PowerShell directly:
+
+```powershell
+.\scripts\setup-local.ps1
+.\scripts\start-desktop.ps1
+```
+
+Environment check helpers:
+
+- `scripts/doctor.sh`
+- `scripts/doctor.ps1`
 
 ## Export Formats
 
@@ -150,18 +228,34 @@ Projects can be exported as:
 
 - `no-llm`: deterministic local generation and scoring
 - `local-llm`: optional local model refinement through an Ollama-compatible endpoint
+- `provider-ai`: uses a connected provider profile for cloud-backed research, assignments, feedback, and classroom assistance
 
 If no local LLM is available, the platform falls back to deterministic local behavior.
+
+If `provider-ai` is selected but no provider profile is attached, EduClawn keeps the workflow safe and falls back to deterministic local behavior until a profile is connected.
+
+## AI Provider Setup
+
+Use the `AI` page in the desktop or web UI to:
+
+- add a provider profile
+- choose `user-key` or `managed-subscription`
+- select a default model
+- optionally set a custom base URL when the provider supports it
+- test the connection
+- inspect recent provider-backed usage
+
+The backend stores provider secrets encrypted at rest inside the local workspace using the EduClawn security secret. The raw API keys are not exposed back through the API after profile creation.
 
 ## Repository Structure
 
 - `backend/`: FastAPI backend, agents, security, ingestion, exports, analytics
 - `frontend/`: React + TypeScript studio UI
 - `desktop/`: Electron shell, packaging config, release assets
-- `docs/`: template, plugin, and EduClaw docs
+- `docs/`: template, plugin, and EduClawn docs
 - `community/`: sample projects and community packs
 - `studio/`: starter manifests and template assets
-- `educlaw/`: EduClaw example manifests
+- `educlawn/`: EduClawn example manifests
 - `Legacy_of_Justice.html`: preserved original standalone MLK experience
 
 ## Run In Developer Mode
@@ -192,6 +286,8 @@ npm install
 npm run dev
 ```
 
+If you want the shortest repo path, use `./scripts/start-desktop.sh` or `.\scripts\start-desktop.ps1` instead.
+
 ## Package The Desktop App
 
 ```bash
@@ -220,9 +316,9 @@ Then open:
 - backend API: `http://127.0.0.1:8000`
 - preserved legacy page: `http://127.0.0.1:8000/legacy`
 
-## EduClaw Security Model
+## EduClawn Security Model
 
-EduClaw is intentionally not a general unrestricted agent.
+EduClawn is intentionally not a general unrestricted agent.
 
 It is built as bounded educational orchestration:
 
@@ -232,7 +328,7 @@ It is built as bounded educational orchestration:
 - no hidden destructive filesystem actions
 - no sensitive classroom action without approval and audit coverage
 
-See `docs/EDUCLAW.md` for the detailed contract.
+See `docs/EDUCLAWN.md` for the detailed contract.
 
 ## Templates
 
@@ -287,23 +383,25 @@ Admin surfaces include:
 
 Useful backend overrides:
 
-- `MLK_DATABASE_URL`
-- `MLK_DB_PATH`
-- `MLK_ADMIN_USERNAME`
-- `MLK_ADMIN_PASSWORD`
-- `MLK_AUTH_SECRET`
-- `MLK_WORKFLOW_SCHEDULER_ENABLED`
-- `MLK_ETL_INTERVAL_SECONDS`
-- `MLK_RETRAIN_INTERVAL_SECONDS`
-- `MLK_BENCHMARK_INTERVAL_SECONDS`
-- `MLK_STUDIO_ROOT`
-- `MLK_STUDIO_TEMPLATE_DIR`
-- `MLK_COMMUNITY_ROOT`
-- `MLK_LOCAL_LLM_MODEL`
-- `MLK_LOCAL_LLM_BASE_URL`
-- `MLK_MODEL_CACHE_DIR`
-- `MLK_EDUCLAW_SECURITY_SECRET`
-- `MLK_EDU_MATERIAL_MAX_BYTES`
+- `EDUCLAWN_DATABASE_URL`
+- `EDUCLAWN_DB_PATH`
+- `EDUCLAWN_ADMIN_USERNAME`
+- `EDUCLAWN_ADMIN_PASSWORD`
+- `EDUCLAWN_AUTH_SECRET`
+- `EDUCLAWN_WORKFLOW_SCHEDULER_ENABLED`
+- `EDUCLAWN_ETL_INTERVAL_SECONDS`
+- `EDUCLAWN_RETRAIN_INTERVAL_SECONDS`
+- `EDUCLAWN_BENCHMARK_INTERVAL_SECONDS`
+- `EDUCLAWN_STUDIO_ROOT`
+- `EDUCLAWN_STUDIO_TEMPLATE_DIR`
+- `EDUCLAWN_COMMUNITY_ROOT`
+- `EDUCLAWN_LOCAL_LLM_MODEL`
+- `EDUCLAWN_LOCAL_LLM_BASE_URL`
+- `EDUCLAWN_MODEL_CACHE_DIR`
+- `EDUCLAWN_SECURITY_SECRET`
+- `EDUCLAWN_EDU_MATERIAL_MAX_BYTES`
+
+Legacy `MLK_*` aliases are still accepted for backward compatibility.
 
 ## Packaging, Signing, And Releases
 
@@ -342,7 +440,7 @@ Without those, local builds remain ad-hoc signed and not notarized.
 - `CONTRIBUTING.md`
 - `docs/TEMPLATE_SDK.md`
 - `docs/PLUGIN_SDK.md`
-- `docs/EDUCLAW.md`
+- `docs/EDUCLAWN.md`
 - `desktop/README.md`
 
 ## Verification

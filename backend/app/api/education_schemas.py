@@ -97,7 +97,8 @@ class EducationAssignment(BaseModel):
     rubric: list[str]
     standards: list[str]
     due_date: str
-    local_mode: Literal["no-llm", "local-llm"]
+    local_mode: Literal["no-llm", "local-llm", "provider-ai"]
+    ai_profile_id: str = ""
     status: str
     created_at: str
     updated_at: str
@@ -172,7 +173,8 @@ class EducationAssignmentCreateRequest(BaseModel):
     rubric: list[str] = Field(default_factory=list)
     standards: list[str] = Field(default_factory=list)
     due_date: str = Field(default="", max_length=80)
-    local_mode: Literal["no-llm", "local-llm"] = "no-llm"
+    local_mode: Literal["no-llm", "local-llm", "provider-ai"] = "no-llm"
+    ai_profile_id: str = Field(default="", max_length=120)
     access_key: str = Field(min_length=8, max_length=200)
 
 
@@ -204,6 +206,7 @@ class EducationAgentRunRequest(BaseModel):
     assignment_id: str | None = None
     student_id: str | None = None
     project_slug: str | None = None
+    ai_profile_id: str | None = Field(default=None, max_length=120)
     access_key: str = Field(min_length=8, max_length=200)
     prompt: str = Field(default="", max_length=1600)
 
@@ -253,6 +256,7 @@ class EducationAuditEntry(BaseModel):
     status: str
     prompt_excerpt: str | None = None
     risk_assessment: EducationRiskAssessment | None = None
+    ai_usage: dict[str, Any] | None = None
     prev_hash: str | None = None
     entry_hash: str | None = None
 
@@ -270,6 +274,7 @@ class EducationAgentRunResponse(BaseModel):
     risk_assessment: EducationRiskAssessment
     approval_request: EducationApproval | None = None
     artifacts: dict[str, Any]
+    provider_ai: dict[str, Any] | None = None
     audit_entry: EducationAuditEntry
 
 
@@ -297,3 +302,4 @@ class EducationSafetyStatusResponse(BaseModel):
     audit_chain_valid: bool
     approval_chain_valid: bool
     material_policy: dict[str, Any]
+    provider_ai_profiles: int

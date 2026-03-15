@@ -44,11 +44,11 @@ def _build_fake_openclaw_source(root: Path) -> None:
         (root / "apps" / app).mkdir(parents=True, exist_ok=True)
 
 
-def test_educlaw_import_and_bootstrap(tmp_path):
+def test_educlawn_import_and_bootstrap(tmp_path):
     openclaw_root = tmp_path / "openclaw_source"
     _build_fake_openclaw_source(openclaw_root)
     settings = Settings(
-        db_path=tmp_path / "educlaw.sqlite3",
+        db_path=tmp_path / "educlawn.sqlite3",
         workflow_scheduler_enabled=False,
         admin_password="mlk-admin-demo",
         studio_root_dir=tmp_path / "studio_workspace",
@@ -59,10 +59,10 @@ def test_educlaw_import_and_bootstrap(tmp_path):
     app = create_app(settings)
 
     with TestClient(app) as client:
-        overview = client.get("/api/v1/educlaw/overview")
+        overview = client.get("/api/v1/educlawn/overview")
         assert overview.status_code == 200
         payload = overview.json()
-        assert payload["product_name"] == "EduClaw"
+        assert payload["product_name"] == "EduClawn"
         assert payload["source_summary"]["available"] is True
         assert payload["source_summary"]["package_name"] == "openclaw"
         assert payload["source_summary"]["node_requirement"] == ">=22.12"
@@ -70,7 +70,7 @@ def test_educlaw_import_and_bootstrap(tmp_path):
         assert "gateway" in payload["derived_control_plane"]["denied_tools"]
         assert payload["derived_control_plane"]["attestation"]["algorithm"] == "hmac-sha256"
 
-        source = client.get("/api/v1/educlaw/source")
+        source = client.get("/api/v1/educlawn/source")
         assert source.status_code == 200
         source_payload = source.json()
         assert source_payload["counts"]["skills"] == 4
@@ -78,14 +78,14 @@ def test_educlaw_import_and_bootstrap(tmp_path):
         assert "canvas" in source_payload["skills"]
 
         bootstrap = client.post(
-            "/api/v1/educlaw/bootstrap",
+            "/api/v1/educlawn/bootstrap",
             json={
                 "school_name": "Roosevelt High",
                 "classroom_title": "Civics 2A",
                 "teacher_name": "Ms. Rivera",
                 "subject": "Civics",
                 "grade_band": "Grades 9-10",
-                "description": "EduClaw classroom bootstrap",
+                "description": "EduClawn classroom bootstrap",
                 "default_template_id": "lesson-module",
                 "template_id": "research-portfolio",
                 "assignment_title": "Community Archive Brief",
@@ -107,7 +107,7 @@ def test_educlaw_import_and_bootstrap(tmp_path):
         assert bootstrap_payload["control_plane"]["gateway"]["pairing_policy"] == "required"
         assert "webchat" in bootstrap_payload["control_plane"]["gateway"]["allowed_channels"]
         assert bootstrap_payload["control_plane"]["security"]["signature_algorithm"] == "hmac-sha256"
-        assert bootstrap_payload["control_plane_path"].endswith("educlaw-control-plane.yaml")
-        assert bootstrap_payload["attestation_path"].endswith("educlaw-control-plane.attestation.json")
+        assert bootstrap_payload["control_plane_path"].endswith("educlawn-control-plane.yaml")
+        assert bootstrap_payload["attestation_path"].endswith("educlawn-control-plane.attestation.json")
         assert Path(bootstrap_payload["control_plane_path"]).exists()
         assert Path(bootstrap_payload["attestation_path"]).exists()
